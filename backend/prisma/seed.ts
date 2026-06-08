@@ -30,7 +30,14 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { username },
-    update: {},
+    // Återställ alltid admin till känt läge vid seed (idempotent).
+    update: {
+      passwordHash,
+      displayName,
+      role: 'ADMIN',
+      isActive: true,
+      mustChangePassword: true,
+    },
     create: {
       username,
       passwordHash,
