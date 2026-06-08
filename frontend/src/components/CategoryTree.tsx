@@ -1,0 +1,71 @@
+import { useState } from 'react';
+import type { CategoryNode } from '../types';
+
+interface Props {
+  nodes: CategoryNode[];
+  selectedId: number | null;
+  onSelect: (id: number | null) => void;
+}
+
+function TreeNode({
+  node,
+  selectedId,
+  onSelect,
+  depth,
+}: {
+  node: CategoryNode;
+  selectedId: number | null;
+  onSelect: (id: number) => void;
+  depth: number;
+}) {
+  const [open, setOpen] = useState(depth < 1);
+  const hasChildren = node.children.length > 0;
+
+  return (
+    <div className="tree-node">
+      <div
+        className={`tree-row${selectedId === node.id ? ' active' : ''}`}
+        onClick={() => onSelect(node.id)}
+      >
+        <span
+          className="twisty"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (hasChildren) setOpen((o) => !o);
+          }}
+        >
+          {hasChildren ? (open ? '▾' : '▸') : '•'}
+        </span>
+        <span>{node.name}</span>
+        <span className="count">{node.linkCount}</span>
+      </div>
+      {hasChildren && open && (
+        <div className="tree-children">
+          {node.children.map((c) => (
+            <TreeNode key={c.id} node={c} selectedId={selectedId} onSelect={onSelect} depth={depth + 1} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function CategoryTree({ nodes, selectedId, onSelect }: Props) {
+  return (
+    <div>
+      <div
+        className={`tree-row${selectedId === null ? ' active' : ''}`}
+        onClick={() => onSelect(null)}
+        style={{ fontWeight: 600 }}
+      >
+        <span className="twisty">★</span>
+        <span>Alla länkar</span>
+      </div>
+      <div style={{ marginTop: '0.5rem' }}>
+        {nodes.map((n) => (
+          <TreeNode key={n.id} node={n} selectedId={selectedId} onSelect={onSelect} depth={0} />
+        ))}
+      </div>
+    </div>
+  );
+}

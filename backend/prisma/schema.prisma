@@ -1,0 +1,82 @@
+// LinkPortal – Prisma schema (SQLite)
+// V1 inkl. billiga extras: Tags, Environment, Owner, soft delete, audit-logg.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  username      String     @unique
+  passwordHash  String
+  displayName   String
+  role          String     @default("VIEWER") // ADMIN | EDITOR | VIEWER
+  isActive      Boolean    @default(true)
+  mustChangePassword Boolean    @default(false)
+  createdAt          DateTime   @default(now())
+
+  createdLinks  Link[]     @relation("LinkCreatedBy")
+  modifiedLinks Link[]     @relation("LinkModifiedBy")
+  auditLogs     AuditLog[]
+}
+
+model Category {
+  id        Int        @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  sortOrder Int        @default(0)
+  links     Link[]
+
+  @@unique([parentId, name])
+}
+
+model Link {
+  id             Int         @id @default(autoincrement())
+  name           String
+  url            String
+  manageSoftware String?
+  description    String?
+  environment    String      @default("NA") // PROD | TEST | DEV | NA
+  owningTeam     String?
+  status         String      @default("ACTIVE") // ACTIVE | DEPRECATED
+
+  categoryId     Int
+  category       Category    @relation(fields: [categoryId], references: [id])
+
+  tags           Tag[]       @relation("LinkTags")
+
+  dateAdded      DateTime    @default(now())
+  addedById      Int
+  addedBy        User        @relation("LinkCreatedBy", fields: [addedById], references: [id])
+  dateModified   DateTime    @updatedAt
+  modifiedById   Int?
+  modifiedBy     User?       @relation("LinkModifiedBy", fields: [modifiedById], references: [id])
+
+  isDeleted      Boolean     @default(false)
+  deletedAt      DateTime?
+}
+
+model Tag {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  links Link[] @relation("LinkTags")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  action    String
+  entity    String
+  entityId  Int
+  oldValue  String?
+  newValue  String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+}
