@@ -30,6 +30,27 @@ const changePasswordSchema = z.object({
   newPassword: z.string().min(8, 'Lösenordet måste vara minst 8 tecken.'),
 });
 
+// Färgtema: en uppsättning hex-färger (alla valfria). null/tomt = standardtema.
+const HEX = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+const themeSchema = z
+  .object({
+    primary: z.string().regex(HEX),
+    primaryDark: z.string().regex(HEX),
+    accent: z.string().regex(HEX),
+    bg: z.string().regex(HEX),
+    surface: z.string().regex(HEX),
+    text: z.string().regex(HEX),
+  })
+  .partial();
+
+function safeParseTheme(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 const cookieOptions = {
   httpOnly: true,
   secure: isProd,
@@ -66,6 +87,7 @@ router.post(
         displayName: user.displayName,
         role: user.role,
         mustChangePassword: user.mustChangePassword,
+        theme: user.theme ? safeParseTheme(user.theme) : null,
       },
       // token returneras också så t.ex. Chrome-tillägget (V2) kan använda Bearer.
       token,
@@ -93,6 +115,7 @@ router.get(
       displayName: user.displayName,
       role: user.role,
       mustChangePassword: user.mustChangePassword,
+      theme: user.theme ? safeParseTheme(user.theme) : null,
     });
   })
 );
@@ -118,6 +141,23 @@ router.post(
       data: { passwordHash, mustChangePassword: false },
     });
     res.json({ ok: true });
+  })
+);
+
+// PUT /api/auth/theme – spara inloggad användares färgtema (alla roller)
+router.put(
+  '/theme',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    // body { theme: {...} | null } – null återställer till standard
+    const body = z.object({ theme: themeSchema.nullable() }).parse(req.body);
+    const theme = body.theme && Object.keys(body.theme).length > 0 ? JSON.stringify(body.theme) : null;
+
+    await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { theme },
+    });
+    res.json({ theme: theme ? JSON.parse(theme) : null });
   })
 );
 

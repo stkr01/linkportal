@@ -146,6 +146,9 @@ export default function DashboardPage() {
             <button className="secondary">Användare</button>
           </RouterLink>
         )}
+        <RouterLink to="/settings">
+          <button className="secondary">⚙ Inställningar</button>
+        </RouterLink>
         <span className="user-chip">
           {user?.displayName} <span className="badge">{user?.role}</span>
         </span>

@@ -23,6 +23,7 @@ Se [BLUEPRINT.md](./BLUEPRINT.md) för vision, datamodell och funktionsöversikt
 - 🗑️ Soft delete – endast Admin får radera (posten döljs, kan återställas i DB).
 - 📝 Audit-logg på alla ändringar.
 - 👥 Användarhantering (Admin): skapa konton, byt roll, aktivera/inaktivera, återställ lösenord.
+- ⚙️ Inställningssida: **färgtema per användare** (sparas på kontot) och **kategorihantering** (Admin: skapa/byt namn/flytta/radera).
 - 🔑 Tvingat lösenordsbyte vid första inloggning.
 
 ## Komma igång

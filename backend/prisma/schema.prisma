@@ -18,6 +18,7 @@ model User {
   role          String     @default("VIEWER") // ADMIN | EDITOR | VIEWER
   isActive      Boolean    @default(true)
   mustChangePassword Boolean    @default(false)
+  theme              String?    // JSON med användarens färgtema (null = standard)
   createdAt          DateTime   @default(now())
 
   createdLinks  Link[]     @relation("LinkCreatedBy")

@@ -2,12 +2,16 @@ export type Role = 'ADMIN' | 'EDITOR' | 'VIEWER';
 export type Environment = 'PROD' | 'TEST' | 'DEV' | 'NA';
 export type LinkStatus = 'ACTIVE' | 'DEPRECATED';
 
+export type ThemeKey = 'primary' | 'primaryDark' | 'accent' | 'bg' | 'surface' | 'text';
+export type Theme = Partial<Record<ThemeKey, string>>;
+
 export interface User {
   id: number;
   username: string;
   displayName: string;
   role: Role;
   mustChangePassword: boolean;
+  theme?: Theme | null;
 }
 
 export interface AdminUser extends User {

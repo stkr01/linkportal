@@ -5,6 +5,7 @@ import type {
   LinkInput,
   LinkItem,
   Role,
+  Theme,
   User,
 } from '../types';
 
@@ -30,6 +31,11 @@ export async function getMe(): Promise<User> {
 
 export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
   await api.post('/auth/change-password', { currentPassword, newPassword });
+}
+
+export async function updateTheme(theme: Theme | null): Promise<{ theme: Theme | null }> {
+  const { data } = await api.put('/auth/theme', { theme });
+  return data;
 }
 
 // Categories
