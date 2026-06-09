@@ -38,6 +38,7 @@ export interface LinkItem {
   environment: Environment;
   owningTeam: string | null;
   status: LinkStatus;
+  isFavorite: boolean;
   categoryId: number;
   category: { id: number; name: string; parentId: number | null };
   tags: Tag[];
@@ -56,5 +57,6 @@ export interface LinkInput {
   environment?: Environment;
   owningTeam?: string | null;
   status?: LinkStatus;
+  isFavorite?: boolean;
   tags?: string[];
 }

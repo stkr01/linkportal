@@ -24,6 +24,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   const [environment, setEnvironment] = useState<Environment>(initial?.environment ?? 'NA');
   const [owningTeam, setOwningTeam] = useState(initial?.owningTeam ?? '');
   const [tags, setTags] = useState((initial?.tags ?? []).map((t) => t.name).join(', '));
+  const [isFavorite, setIsFavorite] = useState(initial?.isFavorite ?? false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -48,6 +49,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
         description: description.trim() || null,
         environment,
         owningTeam: owningTeam.trim() || null,
+        isFavorite,
         tags: tags
           .split(',')
           .map((t) => t.trim())
@@ -114,6 +116,16 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
 
         <label htmlFor="lf-desc">Beskrivning</label>
         <textarea id="lf-desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <label className="checkbox-row" htmlFor="lf-fav">
+          <input
+            id="lf-fav"
+            type="checkbox"
+            checked={isFavorite}
+            onChange={(e) => setIsFavorite(e.target.checked)}
+          />
+          <span>★ Favorit (visas högst upp i webbläsartillägget)</span>
+        </label>
 
         {error && <div className="error">{error}</div>}
 

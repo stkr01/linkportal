@@ -7,6 +7,7 @@ interface Props {
   canDelete: boolean;
   onEdit: (l: LinkItem) => void;
   onDelete: (l: LinkItem) => void;
+  onToggleFavorite: (l: LinkItem) => void;
 }
 
 function faviconUrl(url: string): string | null {
@@ -18,7 +19,7 @@ function faviconUrl(url: string): string | null {
   }
 }
 
-export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete }: Props) {
+export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite }: Props) {
   const fav = faviconUrl(link.url);
   const added = new Date(link.dateAdded).toLocaleDateString('sv-SE');
 
@@ -30,6 +31,18 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
     <div className="card link-card">
       <div className="crumb">{path}</div>
       <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {canEdit && (
+          <button
+            type="button"
+            className="fav-toggle"
+            title={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
+            aria-label={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
+            onClick={() => onToggleFavorite(link)}
+          >
+            {link.isFavorite ? '★' : '☆'}
+          </button>
+        )}
+        {!canEdit && link.isFavorite && <span title="Favorit">★</span>}
         {fav && (
           <img
             src={fav}

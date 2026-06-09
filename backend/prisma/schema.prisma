@@ -46,6 +46,7 @@ model Link {
   environment    String      @default("NA") // PROD | TEST | DEV | NA
   owningTeam     String?
   status         String      @default("ACTIVE") // ACTIVE | DEPRECATED
+  isFavorite     Boolean     @default(false)
 
   categoryId     Int
   category       Category    @relation(fields: [categoryId], references: [id])

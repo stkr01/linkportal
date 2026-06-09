@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "LinkPortal",
+  "version": "1.0.0",
+  "description": "IT-Operations länkkatalog – snabbåtkomst till alla verktyg direkt från verktygsfältet.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "LinkPortal",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "options_page": "options.html",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["http://localhost:4000/*"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"]
+}

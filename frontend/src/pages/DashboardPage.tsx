@@ -8,6 +8,7 @@ import {
   createLink,
   updateLink,
   deleteLink,
+  setFavorite,
 } from '../api/client';
 import type { LinkInput, LinkItem } from '../types';
 import { categoryPathMap } from '../utils/categories';
@@ -81,6 +82,10 @@ export default function DashboardPage() {
     mutationFn: (id: number) => deleteLink(id),
     onSuccess: invalidate,
   });
+  const favoriteMut = useMutation({
+    mutationFn: ({ id, isFavorite }: { id: number; isFavorite: boolean }) => setFavorite(id, isFavorite),
+    onSuccess: invalidate,
+  });
 
   const onSubmitForm = async (input: LinkInput) => {
     if (editing) {
@@ -94,6 +99,10 @@ export default function DashboardPage() {
     if (window.confirm(`Radera länken "${l.name}"? Detta kan endast Admin göra.`)) {
       deleteMut.mutate(l.id);
     }
+  };
+
+  const onToggleFavorite = (l: LinkItem) => {
+    favoriteMut.mutate({ id: l.id, isFavorite: !l.isFavorite });
   };
 
   const canEdit = hasRole('EDITOR');
@@ -177,6 +186,7 @@ export default function DashboardPage() {
                     setShowForm(true);
                   }}
                   onDelete={onDelete}
+                  onToggleFavorite={onToggleFavorite}
                 />
               ))}
             </div>

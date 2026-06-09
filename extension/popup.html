@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>LinkPortal</title>
+  </head>
+  <body>
+    <header class="pop-header">
+      <span class="brand">🔗 LinkPortal</span>
+      <span class="spacer"></span>
+      <button id="searchBtn" class="icon-btn" title="Sök">🔍</button>
+      <button id="refreshBtn" class="icon-btn" title="Uppdatera">↻</button>
+      <button id="settingsBtn" class="icon-btn" title="Inställningar">⚙</button>
+    </header>
+
+    <input id="searchBox" class="search-box hidden" type="text" placeholder="Sök länk…" />
+
+    <div id="content" class="content">
+      <div id="status" class="status">Laddar…</div>
+    </div>
+
+    <!-- Inloggningsvy (visas om ej inloggad) -->
+    <div id="loginView" class="login-view hidden">
+      <p class="muted">Logga in för att hämta dina länkar.</p>
+      <label>Server-URL</label>
+      <input id="loginUrl" type="text" placeholder="http://localhost:4000" />
+      <label>Användarnamn</label>
+      <input id="loginUser" type="text" autocomplete="username" />
+      <label>Lösenord</label>
+      <input id="loginPass" type="password" autocomplete="current-password" />
+      <div id="loginError" class="error"></div>
+      <button id="loginBtn" class="primary">Logga in</button>
+    </div>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

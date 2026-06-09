@@ -105,6 +105,7 @@ const upsertSchema = z.object({
   environment: z.nativeEnum(Environment).optional(),
   owningTeam: z.string().max(100).optional().nullable(),
   status: z.nativeEnum(LinkStatus).optional(),
+  isFavorite: z.boolean().optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
 });
 
@@ -122,6 +123,32 @@ async function resolveTags(tagNames: string[]) {
   }
   return connect;
 }
+
+// PATCH /api/links/:id/favorite – Editor+ (lättviktig toggle)
+const favoriteSchema = z.object({ isFavorite: z.boolean() });
+
+router.patch(
+  '/:id/favorite',
+  authenticate,
+  requireRole(Role.EDITOR),
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const { isFavorite } = favoriteSchema.parse(req.body);
+
+    const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
+    if (!existing) {
+      res.status(404).json({ error: 'Länken hittades inte.' });
+      return;
+    }
+
+    const link = await prisma.link.update({
+      where: { id },
+      data: { isFavorite, modifiedById: req.user!.userId },
+      include: linkInclude,
+    });
+    res.json(link);
+  })
+);
 
 // POST /api/links – Editor+
 router.post(
@@ -149,6 +176,7 @@ router.post(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        isFavorite: data.isFavorite ?? false,
         addedById: req.user!.userId,
         tags: { connect: tagConnect },
       },
@@ -201,6 +229,7 @@ router.put(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        isFavorite: data.isFavorite ?? false,
         modifiedById: req.user!.userId,
         // ersätt taggar
         tags: { set: [], connect: tagConnect },

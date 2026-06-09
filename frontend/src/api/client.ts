@@ -73,6 +73,11 @@ export async function deleteLink(id: number): Promise<void> {
   await api.delete(`/links/${id}`);
 }
 
+export async function setFavorite(id: number, isFavorite: boolean): Promise<LinkItem> {
+  const { data } = await api.patch(`/links/${id}/favorite`, { isFavorite });
+  return data;
+}
+
 // Users (admin)
 export async function getUsers(): Promise<AdminUser[]> {
   const { data } = await api.get('/users');

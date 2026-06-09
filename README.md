@@ -19,6 +19,7 @@ Se [BLUEPRINT.md](./BLUEPRINT.md) för vision, datamodell och funktionsöversikt
 - 🌳 Klickbart kategoriträd (skapas/hanteras endast av Admin).
 - 🔗 Länk-CRUD: Name, URL, Kategori, Manage Software, Beskrivning, Miljö, Ägande team, Taggar.
 - 🔎 Sökning + filter, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
+- ⭐ Favoriter – markera länkar som favorit (visas högst upp i webbläsartillägget).
 - 🗑️ Soft delete – endast Admin får radera (posten döljs, kan återställas i DB).
 - 📝 Audit-logg på alla ändringar.
 - 👥 Användarhantering (Admin): skapa konton, byt roll, aktivera/inaktivera, återställ lösenord.
@@ -55,6 +56,22 @@ npm run dev                     # startar webbappen på http://localhost:5173
 - Användarnamn: `admin`
 - Lösenord: `ChangeMe123!` (måste bytas vid första inloggning)
 
+### 3. Webbläsartillägg (Chrome & Edge)
+
+Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge** (Manifest V3). Det kräver ingen byggprocess.
+
+**Installera (ladda som uppackat tillägg):**
+
+1. Se till att backend körs (http://localhost:4000).
+2. Chrome: öppna `chrome://extensions` · Edge: öppna `edge://extensions`.
+3. Slå på **Utvecklarläge** (Developer mode).
+4. Klicka **Läs in uppackat** (Load unpacked) och välj mappen `extension/`.
+5. Klicka på LinkPortal-ikonen i verktygsfältet → ange server-URL + logga in.
+
+**Använda:** Klicka på ikonen → favoriter visas högst upp, därunder kategoriträdet. Klicka på en länk så öppnas den i en ny flik. 🔄 uppdaterar listan, 🔎 söker, ⚙️ öppnar inställningar (server-URL, logga ut).
+
+> Ikonerna i `extension/icons/` genereras av `extension/make-icons.js` (`node make-icons.js`). Vill du peka tillägget mot en annan server än localhost ber det automatiskt om host-behörighet.
+
 ## Projektstruktur
 
 ```
@@ -73,6 +90,13 @@ LinkPortal/
       ├─ components/     CategoryTree, LinkCard, LinkForm, CommandPalette
       ├─ api/            API-klient
       └─ auth/           AuthContext
+
+extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
+├─ manifest.json
+├─ popup.html/.css/.js   Popup med favoriter + kategoriträd
+├─ options.html/.js      Inställningar (server-URL, logga in/ut)
+├─ api.js                Delad API-hjälpare (Bearer-token)
+└─ icons/                Genereras av make-icons.js
 ```
 
 ## Roller (behörigheter)
@@ -95,5 +119,6 @@ LinkPortal/
 
 ## Nästa steg (V2)
 
-- Chrome-tillägg som läser `/api/links` och visar trädet i en popup (se BLUEPRINT avsnitt 11).
-- Bulk-import (CSV/JSON), health-check av länkar, favoriter, SSO via Entra ID.
+- ✅ Chrome/Edge-tillägg som läser `/api/links` och visar trädet i en popup.
+- ✅ Favoriter (visas högst upp i tillägget).
+- Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.

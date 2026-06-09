@@ -95,6 +95,7 @@ async function main() {
           owningTeam: 'IT-Infra',
           categoryId: vmware.id,
           addedById: admin.id,
+          isFavorite: true,
         },
       });
     }

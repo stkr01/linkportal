@@ -244,6 +244,32 @@ label {
 .env.DEV  { background: #e1ecf7; color: #1f5fa8; }
 .env.NA   { background: #eef1ef; color: #6b736e; }
 
+.fav-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: #e0a800;
+  cursor: pointer;
+}
+.fav-toggle:hover {
+  background: transparent;
+  transform: scale(1.15);
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+.checkbox-row input {
+  width: auto;
+}
+
 /* Login */
 .login-wrap {
   display: flex;
