@@ -208,6 +208,75 @@ label {
   font-size: 0.72rem;
   color: var(--text-muted);
 }
+
+/* Bild + rubrik på rad */
+.link-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.link-head h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+.link-head h3 > a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.link-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-decoration: none;
+}
+.link-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.link-thumb .thumb-letter {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--rs-primary);
+}
+.link-thumb.thumb-fallback {
+  background: var(--rs-primary);
+}
+.link-thumb.thumb-fallback .thumb-letter {
+  color: #fff;
+}
+
+/* Bildfält i formuläret */
+.img-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.img-field input {
+  flex: 1;
+}
+.img-preview {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 3px;
+  flex-shrink: 0;
+}
 .link-card .desc {
   font-size: 0.85rem;
   color: var(--text);

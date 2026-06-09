@@ -45,6 +45,7 @@ model Link {
   url            String
   manageSoftware String?
   description    String?
+  imageUrl       String?     // valfri logotyp/bild som visas på kortet
   environment    String      @default("NA") // PROD | TEST | DEV | NA
   owningTeam     String?
   status         String      @default("ACTIVE") // ACTIVE | DEPRECATED

@@ -21,6 +21,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   );
   const [manageSoftware, setManageSoftware] = useState(initial?.manageSoftware ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
+  const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? '');
   const [environment, setEnvironment] = useState<Environment>(initial?.environment ?? 'NA');
   const [owningTeam, setOwningTeam] = useState(initial?.owningTeam ?? '');
   const [tags, setTags] = useState((initial?.tags ?? []).map((t) => t.name).join(', '));
@@ -46,6 +47,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
         categoryId: Number(categoryId),
         manageSoftware: manageSoftware.trim() || null,
         description: description.trim() || null,
+        imageUrl: imageUrl.trim() || null,
         environment,
         owningTeam: owningTeam.trim() || null,
         tags: tags
@@ -114,6 +116,25 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
 
         <label htmlFor="lf-desc">Beskrivning</label>
         <textarea id="lf-desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+
+        <label htmlFor="lf-img">Bild-URL (logotyp/ikon, valfritt)</label>
+        <div className="img-field">
+          <input
+            id="lf-img"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="https://…/logo.png"
+          />
+          {imageUrl.trim() && (
+            <img
+              className="img-preview"
+              src={imageUrl.trim()}
+              alt="Förhandsvisning"
+              onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')}
+              onLoad={(e) => ((e.target as HTMLImageElement).style.visibility = 'visible')}
+            />
+          )}
+        </div>
 
         {error && <div className="error">{error}</div>}
 

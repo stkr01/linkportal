@@ -18,7 +18,7 @@ Se [BLUEPRINT.md](./BLUEPRINT.md) för vision, datamodell och funktionsöversikt
 - 🔐 Inloggning med lokala konton (3 roller: **Admin**, **Editor**, **Viewer**).
 - 🌳 Klickbart kategoriträd (skapas/hanteras endast av Admin).
 - 🔗 Länk-CRUD: Name, URL, Kategori, Manage Software, Beskrivning, Miljö, Ägande team, Taggar.
-- 🔎 Sökning + filter, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
+- 🖼️ Valfri bild/logotyp per länk (visas som miniatyr på kortet; faller tillbaka på favicon eller begynnelsebokstav).- 🔎 Sökning + filter, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
 - ⭐ Favoriter – **personliga per användare**; var och en markerar sina egna länkar (★). Visas högst upp i både webappen och webbläsartillägget.
 - 🗑️ Soft delete – endast Admin får radera (posten döljs, kan återställas i DB).
 - 📝 Audit-logg på alla ändringar.

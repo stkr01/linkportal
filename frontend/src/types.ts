@@ -39,6 +39,7 @@ export interface LinkItem {
   url: string;
   manageSoftware: string | null;
   description: string | null;
+  imageUrl: string | null;
   environment: Environment;
   owningTeam: string | null;
   status: LinkStatus;
@@ -58,6 +59,7 @@ export interface LinkInput {
   categoryId: number;
   manageSoftware?: string | null;
   description?: string | null;
+  imageUrl?: string | null;
   environment?: Environment;
   owningTeam?: string | null;
   status?: LinkStatus;

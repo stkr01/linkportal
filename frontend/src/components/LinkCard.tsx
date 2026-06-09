@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { LinkItem } from '../types';
 
 interface Props {
@@ -23,6 +24,11 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
   const fav = faviconUrl(link.url);
   const added = new Date(link.dateAdded).toLocaleDateString('sv-SE');
 
+  // Försök i tur och ordning: angiven bild → favicon → bokstavs-fallback.
+  const sources = [link.imageUrl, fav].filter(Boolean) as string[];
+  const [srcIndex, setSrcIndex] = useState(0);
+  const currentSrc = sources[srcIndex];
+
   const copy = () => {
     navigator.clipboard.writeText(link.url);
   };
@@ -30,34 +36,40 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
   return (
     <div className="card link-card">
       <div className="crumb">{path}</div>
-      <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        {canEdit && (
-          <button
-            type="button"
-            className="fav-toggle"
-            title={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
-            aria-label={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
-            onClick={() => onToggleFavorite(link)}
-          >
-            {link.isFavorite ? '★' : '☆'}
-          </button>
-        )}
-        {!canEdit && link.isFavorite && <span title="Favorit">★</span>}
-        {fav && (
-          <img
-            src={fav}
-            alt=""
-            width={16}
-            height={16}
-            onError={(e) => ((e.target as HTMLImageElement).style.display = 'none')}
-          />
-        )}
-        <a href={link.url} target="_blank" rel="noopener noreferrer">
-          {link.name}
+      <div className="link-head">
+        <a
+          className={`link-thumb${currentSrc ? '' : ' thumb-fallback'}`}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`Öppna ${link.name}`}
+        >
+          {currentSrc ? (
+            <img src={currentSrc} alt="" onError={() => setSrcIndex((i) => i + 1)} />
+          ) : (
+            <span className="thumb-letter">{link.name.charAt(0).toUpperCase()}</span>
+          )}
         </a>
-        <span className={`env ${link.environment}`}>{link.environment}</span>
-        {link.status === 'DEPRECATED' && <span className="env PROD">UTFASAD</span>}
-      </h3>
+        <h3>
+          {canEdit && (
+            <button
+              type="button"
+              className="fav-toggle"
+              title={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
+              aria-label={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
+              onClick={() => onToggleFavorite(link)}
+            >
+              {link.isFavorite ? '★' : '☆'}
+            </button>
+          )}
+          {!canEdit && link.isFavorite && <span title="Favorit">★</span>}
+          <a href={link.url} target="_blank" rel="noopener noreferrer">
+            {link.name}
+          </a>
+          <span className={`env ${link.environment}`}>{link.environment}</span>
+          {link.status === 'DEPRECATED' && <span className="env PROD">UTFASAD</span>}
+        </h3>
+      </div>
 
       {link.description && <p className="desc">{link.description}</p>}
 
