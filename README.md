@@ -124,3 +124,59 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 - ✅ Favoriter, personliga per användare (visas högst upp).
 - ✅ Snabbspara aktuell flik från tillägget (kategori eller 📥 Inkorg).
 - Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.
+
+## Flytta / synka projektet till en annan dator
+
+### Alternativ A – via Git (rekommenderas för koden)
+
+```powershell
+git clone https://github.com/stkr01/linkportal.git   # första gången
+# eller, om du redan har repot:
+git pull origin main
+```
+
+Installera sedan beroenden och sätt upp databasen på den nya datorn:
+
+```powershell
+# Backend
+cd backend
+npm install
+copy .env.example .env        # om .env saknas
+npx prisma migrate dev        # skapar/uppdaterar SQLite-databasen
+npm run seed                  # admin + exempeldata
+npm run dev
+
+# Frontend (ny terminal)
+cd frontend
+npm install
+npm run dev
+```
+
+> Databasen (`backend/prisma/linkportal.db`) och `.env` ligger **inte** i Git. Via Git får
+> hemmamaskinen alltså en färsk databas (admin / `ChangeMe123!`) – ditt bytta lösenord,
+> dina favoriter och egna länkar följer **inte** med.
+
+### Alternativ B – kopiera hela mappen (t.ex. på USB-sticka)
+
+Kopierar du hela mappen följer **allt** med, även det Git utelämnar:
+
+- ✅ Databasen `backend/prisma/linkportal.db` (användare, bytt lösenord, favoriter, länkar, bilder)
+- ✅ `.env` med `JWT_SECRET` och seed-inställningar
+- ✅ All källkod, migrationer, tillägget, README
+
+**Tänk på:**
+
+1. **Stäng dev-servrarna först.** Stoppa `npm run dev` (backend + frontend) innan du kopierar –
+   annars kan SQLite-filen vara låst/halvskriven och bli korrupt.
+2. **Hoppa över `node_modules`.** De är stora och plattformsspecifika. Kör hellre `npm install`
+   på den nya datorn (i både `backend/` och `frontend/`).
+3. **OneDrive-sökväg:** se till att filerna är fullt nedladdade (inte moln-platshållare) innan du kopierar.
+
+### Alternativ C – Git för koden + kopiera bara din data
+
+Smidigast om du vill ha med ditt innehåll utan att släpa med tunga `node_modules`:
+
+1. Synka koden hemma med `git pull origin main`.
+2. Kopiera **bara** `backend/prisma/linkportal.db` och `backend/.env` via stickan.
+3. Kör `npm install` i `backend/` och `frontend/`.
+
