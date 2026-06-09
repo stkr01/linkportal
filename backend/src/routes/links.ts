@@ -9,12 +9,21 @@ import { writeAudit } from '../services/audit';
 
 const router = Router();
 
-const linkInclude = {
-  category: { select: { id: true, name: true, parentId: true } },
-  tags: { select: { id: true, name: true } },
-  addedBy: { select: { id: true, displayName: true, username: true } },
-  modifiedBy: { select: { id: true, displayName: true, username: true } },
-} satisfies Prisma.LinkInclude;
+function linkIncludeFor(userId: number) {
+  return {
+    category: { select: { id: true, name: true, parentId: true } },
+    tags: { select: { id: true, name: true } },
+    addedBy: { select: { id: true, displayName: true, username: true } },
+    modifiedBy: { select: { id: true, displayName: true, username: true } },
+    favoritedBy: { where: { userId }, select: { userId: true } },
+  } satisfies Prisma.LinkInclude;
+}
+
+// Plana ut den per-användare-beräknade favoritmarkeringen till ett boolean-fält.
+function serializeLink<T extends { favoritedBy: unknown[] }>(link: T) {
+  const { favoritedBy, ...rest } = link;
+  return { ...rest, isFavorite: favoritedBy.length > 0 };
+}
 
 // Hämta alla descendant-kategori-id (för att inkludera underkategoriers länkar).
 async function getCategoryAndDescendants(categoryId: number): Promise<number[]> {
@@ -71,10 +80,10 @@ router.get(
 
     const links = await prisma.link.findMany({
       where,
-      include: linkInclude,
+      include: linkIncludeFor(req.user!.userId),
       orderBy: { name: 'asc' },
     });
-    res.json(links);
+    res.json(links.map(serializeLink));
   })
 );
 
@@ -86,13 +95,13 @@ router.get(
     const id = Number(req.params.id);
     const link = await prisma.link.findFirst({
       where: { id, isDeleted: false },
-      include: linkInclude,
+      include: linkIncludeFor(req.user!.userId),
     });
     if (!link) {
       res.status(404).json({ error: 'Länken hittades inte.' });
       return;
     }
-    res.json(link);
+    res.json(serializeLink(link));
   })
 );
 
@@ -105,7 +114,6 @@ const upsertSchema = z.object({
   environment: z.nativeEnum(Environment).optional(),
   owningTeam: z.string().max(100).optional().nullable(),
   status: z.nativeEnum(LinkStatus).optional(),
-  isFavorite: z.boolean().optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
 });
 
@@ -124,16 +132,16 @@ async function resolveTags(tagNames: string[]) {
   return connect;
 }
 
-// PATCH /api/links/:id/favorite – Editor+ (lättviktig toggle)
+// PATCH /api/links/:id/favorite – personlig favorit för inloggad användare (alla roller)
 const favoriteSchema = z.object({ isFavorite: z.boolean() });
 
 router.patch(
   '/:id/favorite',
   authenticate,
-  requireRole(Role.EDITOR),
   asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const { isFavorite } = favoriteSchema.parse(req.body);
+    const userId = req.user!.userId;
 
     const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
     if (!existing) {
@@ -141,12 +149,21 @@ router.patch(
       return;
     }
 
-    const link = await prisma.link.update({
+    if (isFavorite) {
+      await prisma.userFavorite.upsert({
+        where: { userId_linkId: { userId, linkId: id } },
+        update: {},
+        create: { userId, linkId: id },
+      });
+    } else {
+      await prisma.userFavorite.deleteMany({ where: { userId, linkId: id } });
+    }
+
+    const link = await prisma.link.findFirst({
       where: { id },
-      data: { isFavorite, modifiedById: req.user!.userId },
-      include: linkInclude,
+      include: linkIncludeFor(userId),
     });
-    res.json(link);
+    res.json(serializeLink(link!));
   })
 );
 
@@ -176,11 +193,10 @@ router.post(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
-        isFavorite: data.isFavorite ?? false,
         addedById: req.user!.userId,
         tags: { connect: tagConnect },
       },
-      include: linkInclude,
+      include: linkIncludeFor(req.user!.userId),
     });
 
     await writeAudit({
@@ -191,7 +207,7 @@ router.post(
       newValue: { name: link.name, url: link.url, categoryId: link.categoryId },
     });
 
-    res.status(201).json(link);
+    res.status(201).json(serializeLink(link));
   })
 );
 
@@ -229,12 +245,11 @@ router.put(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
-        isFavorite: data.isFavorite ?? false,
         modifiedById: req.user!.userId,
         // ersätt taggar
         tags: { set: [], connect: tagConnect },
       },
-      include: linkInclude,
+      include: linkIncludeFor(req.user!.userId),
     });
 
     await writeAudit({
@@ -246,7 +261,7 @@ router.put(
       newValue: { name: link.name, url: link.url, categoryId: link.categoryId },
     });
 
-    res.json(link);
+    res.json(serializeLink(link));
   })
 );
 

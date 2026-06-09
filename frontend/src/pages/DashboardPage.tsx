@@ -22,6 +22,7 @@ export default function DashboardPage() {
   const queryClient = useQueryClient();
 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [favoritesView, setFavoritesView] = useState(false);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -109,6 +110,26 @@ export default function DashboardPage() {
   const canDelete = hasRole('ADMIN');
   const links = linksQuery.data ?? [];
 
+  // Favoriter – platt lista, oberoende av valt kategori-filter.
+  const favorites = useMemo(
+    () =>
+      (allLinksQuery.data ?? [])
+        .filter((l) => l.isFavorite)
+        .sort((a, b) => a.name.localeCompare(b.name, 'sv')),
+    [allLinksQuery.data]
+  );
+
+  const selectFavorites = () => {
+    setFavoritesView(true);
+    setSelectedCategory(null);
+  };
+  const selectCategory = (id: number | null) => {
+    setFavoritesView(false);
+    setSelectedCategory(id);
+  };
+
+  const displayLinks = favoritesView ? favorites : links;
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -141,7 +162,10 @@ export default function DashboardPage() {
             <CategoryTree
               nodes={categoriesQuery.data ?? []}
               selectedId={selectedCategory}
-              onSelect={setSelectedCategory}
+              onSelect={selectCategory}
+              favoritesActive={favoritesView}
+              favoritesCount={favorites.length}
+              onSelectFavorites={selectFavorites}
             />
           )}
         </aside>
@@ -149,9 +173,13 @@ export default function DashboardPage() {
         <main className="content">
           <div className="content-header">
             <h2>
-              {selectedCategory ? pathMap.get(selectedCategory) ?? 'Kategori' : 'Alla länkar'}
+              {favoritesView
+                ? '★ Favoriter'
+                : selectedCategory
+                ? pathMap.get(selectedCategory) ?? 'Kategori'
+                : 'Alla länkar'}
             </h2>
-            <span className="muted">({links.length})</span>
+            <span className="muted">({displayLinks.length})</span>
             <span className="spacer" />
             {canEdit && (
               <button
@@ -167,14 +195,16 @@ export default function DashboardPage() {
 
           {linksQuery.isLoading ? (
             <div className="empty">Laddar länkar…</div>
-          ) : links.length === 0 ? (
+          ) : displayLinks.length === 0 ? (
             <div className="empty">
-              Inga länkar här ännu.
-              {canEdit && ' Klicka på "+ Ny länk" för att lägga till en.'}
+              {favoritesView
+                ? 'Inga favoriter ännu. Markera en länk med ★ för att lägga till den här.'
+                : 'Inga länkar här ännu.'}
+              {!favoritesView && canEdit && ' Klicka på "+ Ny länk" för att lägga till en.'}
             </div>
           ) : (
             <div className="link-grid">
-              {links.map((l) => (
+              {displayLinks.map((l) => (
                 <LinkCard
                   key={l.id}
                   link={l}

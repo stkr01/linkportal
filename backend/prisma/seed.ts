@@ -84,8 +84,9 @@ async function main() {
 
   if (vmware) {
     const exists = await prisma.link.findFirst({ where: { name: 'vCenter', categoryId: vmware.id } });
-    if (!exists) {
-      await prisma.link.create({
+    const vcenter =
+      exists ??
+      (await prisma.link.create({
         data: {
           name: 'vCenter',
           url: 'https://vcenter.example.local',
@@ -95,10 +96,14 @@ async function main() {
           owningTeam: 'IT-Infra',
           categoryId: vmware.id,
           addedById: admin.id,
-          isFavorite: true,
         },
-      });
-    }
+      }));
+    // Exempel: markera vCenter som personlig favorit för admin (idempotent).
+    await prisma.userFavorite.upsert({
+      where: { userId_linkId: { userId: admin.id, linkId: vcenter.id } },
+      update: {},
+      create: { userId: admin.id, linkId: vcenter.id },
+    });
   }
 
   if (firewall) {

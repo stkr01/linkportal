@@ -5,6 +5,9 @@ interface Props {
   nodes: CategoryNode[];
   selectedId: number | null;
   onSelect: (id: number | null) => void;
+  favoritesActive?: boolean;
+  favoritesCount?: number;
+  onSelectFavorites?: () => void;
 }
 
 function TreeNode({
@@ -50,15 +53,33 @@ function TreeNode({
   );
 }
 
-export default function CategoryTree({ nodes, selectedId, onSelect }: Props) {
+export default function CategoryTree({
+  nodes,
+  selectedId,
+  onSelect,
+  favoritesActive,
+  favoritesCount,
+  onSelectFavorites,
+}: Props) {
   return (
     <div>
+      {onSelectFavorites && (
+        <div
+          className={`tree-row${favoritesActive ? ' active' : ''}`}
+          onClick={onSelectFavorites}
+          style={{ fontWeight: 600 }}
+        >
+          <span className="twisty" style={{ color: '#e0a800' }}>★</span>
+          <span>Favoriter</span>
+          <span className="count">{favoritesCount ?? 0}</span>
+        </div>
+      )}
       <div
-        className={`tree-row${selectedId === null ? ' active' : ''}`}
+        className={`tree-row${!favoritesActive && selectedId === null ? ' active' : ''}`}
         onClick={() => onSelect(null)}
         style={{ fontWeight: 600 }}
       >
-        <span className="twisty">★</span>
+        <span className="twisty">•</span>
         <span>Alla länkar</span>
       </div>
       <div style={{ marginTop: '0.5rem' }}>

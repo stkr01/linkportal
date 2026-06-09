@@ -57,6 +57,5 @@ export interface LinkInput {
   environment?: Environment;
   owningTeam?: string | null;
   status?: LinkStatus;
-  isFavorite?: boolean;
   tags?: string[];
 }

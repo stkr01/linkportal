@@ -19,7 +19,7 @@ Se [BLUEPRINT.md](./BLUEPRINT.md) för vision, datamodell och funktionsöversikt
 - 🌳 Klickbart kategoriträd (skapas/hanteras endast av Admin).
 - 🔗 Länk-CRUD: Name, URL, Kategori, Manage Software, Beskrivning, Miljö, Ägande team, Taggar.
 - 🔎 Sökning + filter, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
-- ⭐ Favoriter – markera länkar som favorit (visas högst upp i webbläsartillägget).
+- ⭐ Favoriter – **personliga per användare**; var och en markerar sina egna länkar (★). Visas högst upp i både webappen och webbläsartillägget.
 - 🗑️ Soft delete – endast Admin får radera (posten döljs, kan återställas i DB).
 - 📝 Audit-logg på alla ändringar.
 - 👥 Användarhantering (Admin): skapa konton, byt roll, aktivera/inaktivera, återställ lösenord.
@@ -120,5 +120,5 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 ## Nästa steg (V2)
 
 - ✅ Chrome/Edge-tillägg som läser `/api/links` och visar trädet i en popup.
-- ✅ Favoriter (visas högst upp i tillägget).
+- ✅ Favoriter, personliga per användare (visas högst upp).
 - Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.

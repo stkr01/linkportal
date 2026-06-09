@@ -353,6 +353,22 @@ label {
 .content-header .spacer {
   flex: 1;
 }
+.favorites-section {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.favorites-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.favorites-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #e0a800;
+}
 .muted {
   color: var(--text-muted);
 }
