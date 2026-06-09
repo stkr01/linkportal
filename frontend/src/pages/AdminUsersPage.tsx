@@ -3,10 +3,12 @@ import { Link as RouterLink } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { createUser, getUsers, updateUser } from '../api/client';
 import type { Role } from '../types';
+import { useTranslation } from '../i18n';
 
 const roles: Role[] = ['VIEWER', 'EDITOR', 'ADMIN'];
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const usersQuery = useQuery({ queryKey: ['users'], queryFn: getUsers });
 
@@ -31,7 +33,7 @@ export default function AdminUsersPage() {
     onError: (err: unknown) => {
       setError(
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-          'Kunde inte skapa användare.'
+          t('adminUsers.createFailed')
       );
     },
   });
@@ -46,18 +48,18 @@ export default function AdminUsersPage() {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
-      setError('Lösenordet måste vara minst 8 tecken.');
+      setError(t('adminUsers.passwordTooShort'));
       return;
     }
     createMut.mutate();
   };
 
   const resetPassword = (id: number) => {
-    const pw = window.prompt('Nytt lösenord (minst 8 tecken):');
+    const pw = window.prompt(t('adminUsers.resetPrompt'));
     if (pw && pw.length >= 8) {
       updateMut.mutate({ id, data: { newPassword: pw } });
     } else if (pw) {
-      alert('Lösenordet måste vara minst 8 tecken.');
+      alert(t('adminUsers.passwordTooShort'));
     }
   };
 
@@ -67,33 +69,33 @@ export default function AdminUsersPage() {
         <span className="brand">🔗 LinkPortal</span>
         <span className="spacer" />
         <RouterLink to="/">
-          <button className="secondary">← Tillbaka</button>
+          <button className="secondary">{t('common.back')}</button>
         </RouterLink>
       </header>
 
       <div className="content" style={{ overflowY: 'auto', maxWidth: 1000, margin: '0 auto', width: '100%' }}>
-        <h2>Användarhantering</h2>
+        <h2>{t('adminUsers.title')}</h2>
 
         <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
-          <h3 style={{ marginTop: 0 }}>Ny användare</h3>
+          <h3 style={{ marginTop: 0 }}>{t('adminUsers.newUser')}</h3>
           <form onSubmit={onCreate}>
             <div className="row">
               <div>
-                <label>Användarnamn</label>
+                <label>{t('adminUsers.username')}</label>
                 <input value={username} onChange={(e) => setUsername(e.target.value)} />
               </div>
               <div>
-                <label>Visningsnamn</label>
+                <label>{t('adminUsers.displayName')}</label>
                 <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
               </div>
             </div>
             <div className="row">
               <div>
-                <label>Tillfälligt lösenord</label>
+                <label>{t('adminUsers.tempPassword')}</label>
                 <input type="text" value={password} onChange={(e) => setPassword(e.target.value)} />
               </div>
               <div>
-                <label>Roll</label>
+                <label>{t('adminUsers.role')}</label>
                 <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
                   {roles.map((r) => (
                     <option key={r} value={r}>
@@ -106,28 +108,28 @@ export default function AdminUsersPage() {
             {error && <div className="error">{error}</div>}
             <div style={{ marginTop: '1rem' }}>
               <button type="submit" disabled={createMut.isPending}>
-                Skapa användare
+                {t('adminUsers.createUser')}
               </button>
               <span className="muted" style={{ marginLeft: '0.75rem', fontSize: '0.8rem' }}>
-                Användaren tvingas byta lösenord vid första inloggning.
+                {t('adminUsers.createHint')}
               </span>
             </div>
           </form>
         </div>
 
         <div className="card" style={{ padding: '1.25rem' }}>
-          <h3 style={{ marginTop: 0 }}>Användare</h3>
+          <h3 style={{ marginTop: 0 }}>{t('adminUsers.users')}</h3>
           {usersQuery.isLoading ? (
-            <div className="muted">Laddar…</div>
+            <div className="muted">{t('common.loading')}</div>
           ) : (
             <table>
               <thead>
                 <tr>
-                  <th>Användarnamn</th>
-                  <th>Namn</th>
-                  <th>Roll</th>
-                  <th>Status</th>
-                  <th>Åtgärder</th>
+                  <th>{t('adminUsers.username')}</th>
+                  <th>{t('adminUsers.colName')}</th>
+                  <th>{t('adminUsers.role')}</th>
+                  <th>{t('adminUsers.colStatus')}</th>
+                  <th>{t('adminUsers.colActions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -147,16 +149,16 @@ export default function AdminUsersPage() {
                         ))}
                       </select>
                     </td>
-                    <td>{u.isActive ? 'Aktiv' : 'Inaktiv'}</td>
+                    <td>{u.isActive ? t('adminUsers.active') : t('adminUsers.inactive')}</td>
                     <td style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
                       <button
                         className="secondary"
                         onClick={() => updateMut.mutate({ id: u.id, data: { isActive: !u.isActive } })}
                       >
-                        {u.isActive ? 'Inaktivera' : 'Aktivera'}
+                        {u.isActive ? t('adminUsers.deactivate') : t('adminUsers.activate')}
                       </button>
                       <button className="secondary" onClick={() => resetPassword(u.id)}>
-                        Återställ lösen
+                        {t('adminUsers.resetPassword')}
                       </button>
                     </td>
                   </tr>

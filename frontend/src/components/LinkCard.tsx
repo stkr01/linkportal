@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { LinkItem } from '../types';
+import { useTranslation } from '../i18n';
 
 interface Props {
   link: LinkItem;
@@ -21,8 +22,9 @@ function faviconUrl(url: string): string | null {
 }
 
 export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite }: Props) {
+  const { t } = useTranslation();
   const fav = faviconUrl(link.url);
-  const added = new Date(link.dateAdded).toLocaleDateString('sv-SE');
+  const added = new Date(link.dateAdded).toLocaleDateString('en-GB');
 
   // Försök i tur och ordning: angiven bild → favicon → bokstavs-fallback.
   const sources = [link.imageUrl, fav].filter(Boolean) as string[];
@@ -42,7 +44,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          title={`Öppna ${link.name}`}
+          title={t('card.openTitle', { name: link.name })}
         >
           {currentSrc ? (
             <img src={currentSrc} alt="" onError={() => setSrcIndex((i) => i + 1)} />
@@ -55,19 +57,19 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
             <button
               type="button"
               className="fav-toggle"
-              title={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
-              aria-label={link.isFavorite ? 'Ta bort favorit' : 'Markera som favorit'}
+              title={link.isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
+              aria-label={link.isFavorite ? t('card.removeFavorite') : t('card.addFavorite')}
               onClick={() => onToggleFavorite(link)}
             >
               {link.isFavorite ? '★' : '☆'}
             </button>
           )}
-          {!canEdit && link.isFavorite && <span title="Favorit">★</span>}
+          {!canEdit && link.isFavorite && <span title={t('card.favorite')}>★</span>}
           <a href={link.url} target="_blank" rel="noopener noreferrer">
             {link.name}
           </a>
           <span className={`env ${link.environment}`}>{link.environment}</span>
-          {link.status === 'DEPRECATED' && <span className="env PROD">UTFASAD</span>}
+          {link.status === 'DEPRECATED' && <span className="env PROD">{t('card.deprecated')}</span>}
         </h3>
       </div>
 
@@ -86,8 +88,9 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
             <br />
           </>
         )}
-        Tillagd {added}
-        {link.addedBy ? ` av ${link.addedBy.displayName}` : ''}
+        {link.addedBy
+          ? t('card.addedBy', { date: added, name: link.addedBy.displayName })
+          : t('card.added', { date: added })}
       </div>
 
       {link.tags.length > 0 && (
@@ -102,19 +105,19 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
 
       <div className="actions">
         <button className="secondary" onClick={copy}>
-          Kopiera
+          {t('card.copy')}
         </button>
         <a href={link.url} target="_blank" rel="noopener noreferrer">
-          <button className="secondary">Öppna ↗</button>
+          <button className="secondary">{t('card.open')}</button>
         </a>
         {canEdit && (
           <button className="secondary" onClick={() => onEdit(link)}>
-            Redigera
+            {t('common.edit')}
           </button>
         )}
         {canDelete && (
           <button className="danger" onClick={() => onDelete(link)}>
-            Radera
+            {t('common.delete')}
           </button>
         )}
       </div>

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="popup.css" />
@@ -9,45 +9,45 @@
     <header class="pop-header">
       <span class="brand">🔗 LinkPortal</span>
       <span class="spacer"></span>
-      <button id="saveBtn" class="icon-btn hidden" title="Spara denna sida">➕</button>
-      <button id="searchBtn" class="icon-btn" title="Sök">🔍</button>
-      <button id="refreshBtn" class="icon-btn" title="Uppdatera">↻</button>
-      <button id="settingsBtn" class="icon-btn" title="Inställningar">⚙</button>
+      <button id="saveBtn" class="icon-btn hidden" title="Save this page">➕</button>
+      <button id="searchBtn" class="icon-btn" title="Search">🔍</button>
+      <button id="refreshBtn" class="icon-btn" title="Refresh">↻</button>
+      <button id="settingsBtn" class="icon-btn" title="Settings">⚙</button>
     </header>
 
-    <input id="searchBox" class="search-box hidden" type="text" placeholder="Sök länk…" />
+    <input id="searchBox" class="search-box hidden" type="text" placeholder="Search link…" />
 
-    <!-- Spara-vy (visas när man klickar på ➕) -->
+    <!-- Save view (shown when clicking ➕) -->
     <div id="saveView" class="save-view hidden">
-      <div class="save-title">➕ Spara denna sida</div>
-      <label>Namn</label>
+      <div class="save-title">➕ Save this page</div>
+      <label>Name</label>
       <input id="saveName" type="text" />
       <label>URL</label>
       <input id="saveUrl" type="text" readonly />
-      <label>Kategori</label>
+      <label>Category</label>
       <select id="saveCategory"></select>
       <div id="saveError" class="error"></div>
       <div class="save-actions">
-        <button id="saveCancelBtn" class="ghost">Avbryt</button>
-        <button id="saveConfirmBtn" class="primary save-confirm">Spara</button>
+        <button id="saveCancelBtn" class="ghost">Cancel</button>
+        <button id="saveConfirmBtn" class="primary save-confirm">Save</button>
       </div>
     </div>
 
     <div id="content" class="content">
-      <div id="status" class="status">Laddar…</div>
+      <div id="status" class="status">Loading…</div>
     </div>
 
-    <!-- Inloggningsvy (visas om ej inloggad) -->
+    <!-- Login view (shown when not signed in) -->
     <div id="loginView" class="login-view hidden">
-      <p class="muted">Logga in för att hämta dina länkar.</p>
-      <label>Server-URL</label>
+      <p class="muted">Sign in to load your links.</p>
+      <label>Server URL</label>
       <input id="loginUrl" type="text" placeholder="http://localhost:4000" />
-      <label>Användarnamn</label>
+      <label>Username</label>
       <input id="loginUser" type="text" autocomplete="username" />
-      <label>Lösenord</label>
+      <label>Password</label>
       <input id="loginPass" type="password" autocomplete="current-password" />
       <div id="loginError" class="error"></div>
-      <button id="loginBtn" class="primary">Logga in</button>
+      <button id="loginBtn" class="primary">Sign in</button>
     </div>
 
     <script type="module" src="popup.js"></script>

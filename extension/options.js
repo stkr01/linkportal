@@ -1,4 +1,4 @@
-// Inställningssida: konfigurera server-URL och logga in/ut.
+// Settings page: configure the server URL and sign in/out.
 import { getSettings, saveSettings, login, clearToken, apiFetch } from './api.js';
 
 const els = {
@@ -17,7 +17,7 @@ function showError(text) {
   els.msg.textContent = text || '';
 }
 
-// Be om host-behörighet för en URL som inte är localhost.
+// Request host permission for a non-localhost URL.
 async function ensurePermission(baseUrl) {
   try {
     const origin = new URL(baseUrl).origin + '/*';
@@ -33,12 +33,12 @@ async function refresh() {
   const { baseUrl, token } = await getSettings();
   els.baseUrl.value = baseUrl;
   if (token) {
-    // Verifiera token genom att hämta nuvarande användare.
+    // Verify the token by fetching the current user.
     try {
       const me = await apiFetch('/api/auth/me');
       els.loggedIn.classList.remove('hidden');
       els.loggedOut.classList.add('hidden');
-      els.loggedInMsg.textContent = `Inloggad som ${me.displayName || me.username} (${me.role}).`;
+      els.loggedInMsg.textContent = `Signed in as ${me.displayName || me.username} (${me.role}).`;
       return;
     } catch {
       await clearToken();
@@ -51,23 +51,23 @@ async function refresh() {
 els.loginBtn.addEventListener('click', async () => {
   showError('');
   const baseUrl = els.baseUrl.value.trim().replace(/\/+$/, '');
-  if (!baseUrl) return showError('Ange en server-URL.');
+  if (!baseUrl) return showError('Enter a server URL.');
   await saveSettings({ baseUrl });
 
   const granted = await ensurePermission(baseUrl);
-  if (!granted) return showError('Behörighet till servern nekades.');
+  if (!granted) return showError('Permission to the server was denied.');
 
   els.loginBtn.disabled = true;
-  els.loginBtn.textContent = 'Loggar in…';
+  els.loginBtn.textContent = 'Signing in…';
   try {
     await login(els.user.value.trim(), els.pass.value);
     els.pass.value = '';
     await refresh();
   } catch (e) {
-    showError(e.message || 'Inloggning misslyckades.');
+    showError(e.message || 'Sign-in failed.');
   } finally {
     els.loginBtn.disabled = false;
-    els.loginBtn.textContent = 'Logga in';
+    els.loginBtn.textContent = 'Sign in';
   }
 });
 

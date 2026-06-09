@@ -7,10 +7,12 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import SettingsPage from './pages/SettingsPage';
 import type { Role } from './types';
 import { ReactNode } from 'react';
+import { useTranslation } from './i18n';
 
 function Protected({ children, minRole }: { children: ReactNode; minRole?: Role }) {
   const { user, loading, hasRole } = useAuth();
-  if (loading) return <div className="empty">Laddar…</div>;
+  const { t } = useTranslation();
+  if (loading) return <div className="empty">{t('common.loading')}</div>;
   if (!user) return <Navigate to="/login" replace />;
   if (user.mustChangePassword) return <Navigate to="/change-password" replace />;
   if (minRole && !hasRole(minRole)) return <Navigate to="/" replace />;
@@ -19,12 +21,13 @@ function Protected({ children, minRole }: { children: ReactNode; minRole?: Role 
 
 export default function App() {
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <Routes>
       <Route
         path="/login"
-        element={loading ? <div className="empty">Laddar…</div> : user ? <Navigate to="/" replace /> : <LoginPage />}
+        element={loading ? <div className="empty">{t('common.loading')}</div> : user ? <Navigate to="/" replace /> : <LoginPage />}
       />
       <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route

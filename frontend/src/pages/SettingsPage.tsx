@@ -10,10 +10,23 @@ import {
 } from '../api/client';
 import type { Theme, ThemeKey } from '../types';
 import { flattenCategories } from '../utils/categories';
-import { DEFAULT_THEME, THEME_KEYS, THEME_LABELS, applyTheme, resolveTheme } from '../utils/theme';
+import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
+import { useTranslation } from '../i18n';
+import type { TranslationKey } from '../i18n/en';
+
+// Maps each theme color to its translation key.
+const THEME_LABEL_KEYS: Record<ThemeKey, TranslationKey> = {
+  primary: 'theme.primary',
+  primaryDark: 'theme.primaryDark',
+  accent: 'theme.accent',
+  bg: 'theme.bg',
+  surface: 'theme.surface',
+  text: 'theme.text',
+};
 
 export default function SettingsPage() {
   const { user, hasRole, setTheme } = useAuth();
+  const { t } = useTranslation();
   const isAdmin = hasRole('ADMIN');
 
   return (
@@ -22,12 +35,12 @@ export default function SettingsPage() {
         <span className="brand">🔗 LinkPortal</span>
         <span className="spacer" />
         <RouterLink to="/">
-          <button className="secondary">← Tillbaka</button>
+          <button className="secondary">{t('common.back')}</button>
         </RouterLink>
       </header>
 
       <div className="content" style={{ overflowY: 'auto', maxWidth: 900, margin: '0 auto', width: '100%' }}>
-        <h2>Inställningar</h2>
+        <h2>{t('settings.title')}</h2>
 
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
 
@@ -46,6 +59,7 @@ function ThemeSection({
   initial: Theme | null;
   onSave: (theme: Theme | null) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [draft, setDraft] = useState<Record<ThemeKey, string>>(resolveTheme(initial));
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
@@ -69,9 +83,9 @@ function ThemeSection({
         }
       }
       await onSave(Object.keys(overrides).length ? overrides : null);
-      setStatus('Tema sparat.');
+      setStatus(t('settings.themeSaved'));
     } catch {
-      setStatus('Kunde inte spara temat.');
+      setStatus(t('settings.themeSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -84,9 +98,9 @@ function ThemeSection({
     setStatus('');
     try {
       await onSave(null);
-      setStatus('Återställt till standardtema.');
+      setStatus(t('settings.themeReset'));
     } catch {
-      setStatus('Kunde inte återställa.');
+      setStatus(t('settings.themeResetFailed'));
     } finally {
       setSaving(false);
     }
@@ -94,9 +108,9 @@ function ThemeSection({
 
   return (
     <form className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }} onSubmit={onSubmit}>
-      <h3 style={{ marginTop: 0 }}>Färgtema</h3>
+      <h3 style={{ marginTop: 0 }}>{t('settings.theme')}</h3>
       <p className="muted" style={{ marginTop: 0 }}>
-        Temat sparas på ditt konto och följer dig oavsett enhet. Ändringar förhandsvisas direkt.
+        {t('settings.themeHint')}
       </p>
 
       <div className="theme-grid">
@@ -106,10 +120,10 @@ function ThemeSection({
               type="color"
               value={draft[key]}
               onChange={(e) => setColor(key, e.target.value)}
-              aria-label={THEME_LABELS[key]}
+              aria-label={t(THEME_LABEL_KEYS[key])}
             />
             <div className="theme-meta">
-              <span>{THEME_LABELS[key]}</span>
+              <span>{t(THEME_LABEL_KEYS[key])}</span>
               <code>{draft[key]}</code>
             </div>
           </div>
@@ -119,10 +133,10 @@ function ThemeSection({
       <div className="modal-actions" style={{ marginTop: '1rem' }}>
         {status && <span className="muted" style={{ marginRight: 'auto' }}>{status}</span>}
         <button type="button" className="secondary" onClick={reset} disabled={saving}>
-          Återställ standard
+          {t('settings.resetDefault')}
         </button>
         <button type="submit" disabled={saving}>
-          {saving ? 'Sparar…' : 'Spara tema'}
+          {saving ? t('common.saving') : t('settings.saveTheme')}
         </button>
       </div>
     </form>
@@ -132,6 +146,7 @@ function ThemeSection({
 /* ---------- Kategorihantering (endast Admin) ---------- */
 
 function CategorySection() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories });
   const flat = flattenCategories(categoriesQuery.data ?? []);
@@ -146,7 +161,7 @@ function CategorySection() {
   const onError = (err: unknown) =>
     setError(
       (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        'Något gick fel.'
+        t('settings.somethingWrong')
     );
 
   const createMut = useMutation({
@@ -183,7 +198,7 @@ function CategorySection() {
   const onCreate = (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Ange ett namn.');
+    if (!name.trim()) return setError(t('settings.enterName'));
     createMut.mutate();
   };
 
@@ -202,25 +217,25 @@ function CategorySection() {
   };
 
   const onDelete = (id: number, label: string) => {
-    if (window.confirm(`Radera kategorin "${label}"? Den måste vara tom (inga underkategorier eller länkar).`)) {
+    if (window.confirm(t('settings.deleteCategoryConfirm', { name: label }))) {
       deleteMut.mutate(id);
     }
   };
 
   return (
     <div className="card" style={{ padding: '1.25rem' }}>
-      <h3 style={{ marginTop: 0 }}>Kategorier</h3>
+      <h3 style={{ marginTop: 0 }}>{t('settings.categories')}</h3>
 
       <form onSubmit={onCreate} style={{ marginBottom: '1rem' }}>
         <div className="row">
           <div>
-            <label>Ny kategori</label>
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Namn" />
+            <label>{t('settings.newCategory')}</label>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('settings.namePlaceholder')} />
           </div>
           <div>
-            <label>Förälder</label>
+            <label>{t('settings.parent')}</label>
             <select value={parentId} onChange={(e) => setParentId(e.target.value === '' ? '' : Number(e.target.value))}>
-              <option value="">— Toppnivå —</option>
+              <option value="">{t('common.topLevel')}</option>
               {flat.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.path}
@@ -230,21 +245,21 @@ function CategorySection() {
           </div>
         </div>
         <button type="submit" disabled={createMut.isPending} style={{ marginTop: '0.5rem' }}>
-          + Lägg till kategori
+          {t('settings.addCategory')}
         </button>
       </form>
 
       {error && <div className="error" style={{ marginBottom: '0.75rem' }}>{error}</div>}
 
       {categoriesQuery.isLoading ? (
-        <div className="muted">Laddar…</div>
+        <div className="muted">{t('common.loading')}</div>
       ) : (
         <table className="cat-table">
           <thead>
             <tr>
-              <th>Kategori</th>
-              <th>Länkar</th>
-              <th>Flytta till</th>
+              <th>{t('list.category')}</th>
+              <th>{t('settings.colLinks')}</th>
+              <th>{t('settings.colMoveTo')}</th>
               <th></th>
             </tr>
           </thead>
@@ -272,7 +287,7 @@ function CategorySection() {
                       value={node?.parentId ?? ''}
                       onChange={(e) => moveTo(c.id, e.target.value === '' ? '' : Number(e.target.value))}
                     >
-                      <option value="">— Toppnivå —</option>
+                      <option value="">{t('common.topLevel')}</option>
                       {flat
                         .filter((o) => o.id !== c.id && !blocked.has(o.id))
                         .map((o) => (
@@ -286,19 +301,19 @@ function CategorySection() {
                     {editingId === c.id ? (
                       <>
                         <button className="secondary" onClick={() => saveEdit(c.id)}>
-                          Spara
+                          {t('common.save')}
                         </button>
                         <button className="secondary" onClick={() => setEditingId(null)}>
-                          Avbryt
+                          {t('common.cancel')}
                         </button>
                       </>
                     ) : (
                       <>
                         <button className="secondary" onClick={() => startEdit(c.id, c.name)}>
-                          Byt namn
+                          {t('common.rename')}
                         </button>
                         <button className="danger" onClick={() => onDelete(c.id, c.name)}>
-                          Radera
+                          {t('common.delete')}
                         </button>
                       </>
                     )}

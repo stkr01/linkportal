@@ -12,13 +12,18 @@ import {
 } from '../api/client';
 import type { LinkInput, LinkItem } from '../types';
 import { categoryPathMap } from '../utils/categories';
+import { useTranslation } from '../i18n';
 import CategoryTree from '../components/CategoryTree';
 import LinkCard from '../components/LinkCard';
+import LinkList from '../components/LinkList';
 import LinkForm from '../components/LinkForm';
 import CommandPalette from '../components/CommandPalette';
 
+type ViewMode = 'card' | 'list';
+
 export default function DashboardPage() {
   const { user, logout, hasRole } = useAuth();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
@@ -28,6 +33,14 @@ export default function DashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<LinkItem | null>(null);
   const [showPalette, setShowPalette] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>(() =>
+    localStorage.getItem('linkportal.viewMode') === 'list' ? 'list' : 'card'
+  );
+
+  const changeView = (mode: ViewMode) => {
+    localStorage.setItem('linkportal.viewMode', mode);
+    setViewMode(mode);
+  };
 
   // Debounce sökning
   useEffect(() => {
@@ -97,7 +110,7 @@ export default function DashboardPage() {
   };
 
   const onDelete = (l: LinkItem) => {
-    if (window.confirm(`Radera länken "${l.name}"? Detta kan endast Admin göra.`)) {
+    if (window.confirm(t('dashboard.deleteConfirm', { name: l.name }))) {
       deleteMut.mutate(l.id);
     }
   };
@@ -115,7 +128,7 @@ export default function DashboardPage() {
     () =>
       (allLinksQuery.data ?? [])
         .filter((l) => l.isFavorite)
-        .sort((a, b) => a.name.localeCompare(b.name, 'sv')),
+        .sort((a, b) => a.name.localeCompare(b.name, 'en')),
     [allLinksQuery.data]
   );
 
@@ -136,31 +149,31 @@ export default function DashboardPage() {
         <span className="brand">🔗 LinkPortal</span>
         <input
           className="search"
-          placeholder="Sök… (eller tryck Ctrl+K)"
+          placeholder={t('dashboard.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <span className="spacer" />
         {hasRole('ADMIN') && (
           <RouterLink to="/admin/users">
-            <button className="secondary">Användare</button>
+            <button className="secondary">{t('dashboard.users')}</button>
           </RouterLink>
         )}
         <RouterLink to="/settings">
-          <button className="secondary">⚙ Inställningar</button>
+          <button className="secondary">{t('dashboard.settings')}</button>
         </RouterLink>
         <span className="user-chip">
           {user?.displayName} <span className="badge">{user?.role}</span>
         </span>
         <button className="secondary" onClick={() => logout()}>
-          Logga ut
+          {t('dashboard.logout')}
         </button>
       </header>
 
       <div className="main">
         <aside className="sidebar">
           {categoriesQuery.isLoading ? (
-            <div className="muted">Laddar kategorier…</div>
+            <div className="muted">{t('dashboard.loadingCategories')}</div>
           ) : (
             <CategoryTree
               nodes={categoriesQuery.data ?? []}
@@ -177,13 +190,31 @@ export default function DashboardPage() {
           <div className="content-header">
             <h2>
               {favoritesView
-                ? '★ Favoriter'
+                ? t('dashboard.favorites')
                 : selectedCategory
-                ? pathMap.get(selectedCategory) ?? 'Kategori'
-                : 'Alla länkar'}
+                ? pathMap.get(selectedCategory) ?? t('dashboard.category')
+                : t('dashboard.allLinks')}
             </h2>
             <span className="muted">({displayLinks.length})</span>
             <span className="spacer" />
+            <div className="view-toggle" role="group" aria-label={t('dashboard.viewModeLabel')}>
+              <button
+                type="button"
+                className={`secondary${viewMode === 'card' ? ' active' : ''}`}
+                aria-pressed={viewMode === 'card'}
+                onClick={() => changeView('card')}
+              >
+                ▦ {t('dashboard.viewCard')}
+              </button>
+              <button
+                type="button"
+                className={`secondary${viewMode === 'list' ? ' active' : ''}`}
+                aria-pressed={viewMode === 'list'}
+                onClick={() => changeView('list')}
+              >
+                ☰ {t('dashboard.viewDetail')}
+              </button>
+            </div>
             {canEdit && (
               <button
                 onClick={() => {
@@ -191,20 +222,31 @@ export default function DashboardPage() {
                   setShowForm(true);
                 }}
               >
-                + Ny länk
+                {t('dashboard.newLink')}
               </button>
             )}
           </div>
 
           {linksQuery.isLoading ? (
-            <div className="empty">Laddar länkar…</div>
+            <div className="empty">{t('dashboard.loadingLinks')}</div>
           ) : displayLinks.length === 0 ? (
             <div className="empty">
-              {favoritesView
-                ? 'Inga favoriter ännu. Markera en länk med ★ för att lägga till den här.'
-                : 'Inga länkar här ännu.'}
-              {!favoritesView && canEdit && ' Klicka på "+ Ny länk" för att lägga till en.'}
+              {favoritesView ? t('dashboard.noFavorites') : t('dashboard.noLinks')}
+              {!favoritesView && canEdit && t('dashboard.noLinksHint')}
             </div>
+          ) : viewMode === 'list' ? (
+            <LinkList
+              links={displayLinks}
+              pathMap={pathMap}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onEdit={(link) => {
+                setEditing(link);
+                setShowForm(true);
+              }}
+              onDelete={onDelete}
+              onToggleFavorite={onToggleFavorite}
+            />
           ) : (
             <div className="link-grid">
               {displayLinks.map((l) => (

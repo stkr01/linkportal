@@ -70,7 +70,7 @@ Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge**
 5. Klicka på LinkPortal-ikonen i verktygsfältet → ange server-URL + logga in.
 
 **Använda:** Klicka på ikonen → favoriter visas högst upp, därunder kategoriträdet. Klicka på en länk så öppnas den i en ny flik. 🔄 uppdaterar listan, 🔎 söker, ⚙️ öppnar inställningar (server-URL, logga ut).
-**Spara aktuell sida:** Editor/Admin ser en ➕-knapp i tillägget. Klicka på den för att spara fliken du har öppen – namn och URL fylls i automatiskt. Välj kategori, eller lämna den som **📥 Inkorg (osorterat)** för att sortera in den senare i webappen.
+**Spara aktuell sida:** Editor/Admin ser en ➕-knapp i tillägget. Klicka på den för att spara fliken du har öppen – namn och URL fylls i automatiskt. Välj kategori, eller lämna den som **📥 Inbox (unsorted)** för att sortera in den senare i webappen.
 > Ikonerna i `extension/icons/` genereras av `extension/make-icons.js` (`node make-icons.js`). Vill du peka tillägget mot en annan server än localhost ber det automatiskt om host-behörighet.
 
 ## Projektstruktur
@@ -88,7 +88,8 @@ LinkPortal/
 └─ frontend/             React + Vite
    └─ src/
       ├─ pages/          Login, Dashboard, ChangePassword, AdminUsers
-      ├─ components/     CategoryTree, LinkCard, LinkForm, CommandPalette
+      ├─ components/     CategoryTree, LinkCard, LinkList, LinkForm, CommandPalette
+      ├─ i18n/           en.ts (språkordbok) + index.tsx (provider + useTranslation)
       ├─ api/            API-klient
       └─ auth/           AuthContext
 
@@ -99,6 +100,68 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 ├─ api.js                Delad API-hjälpare (Bearer-token)
 └─ icons/                Genereras av make-icons.js
 ```
+
+## Språk & översättning (i18n)
+
+Webbappens gränssnitt är **engelskt**, men byggt på en lättviktig i18n-grund så att fler språk kan läggas till utan att röra komponenterna. All synlig text hämtas via funktionen `t('nyckel')` i stället för hårdkodade strängar.
+
+### Var språkfilerna ligger
+
+| Fil | Roll |
+|-----|------|
+| `frontend/src/i18n/en.ts` | **Språkordbok** – ett platt objekt med all text, med punktade nycklar (t.ex. `'login.signIn'`). Exporterar även typen `TranslationKey`. |
+| `frontend/src/i18n/index.tsx` | Motorn: `LanguageProvider`, hooken `useTranslation()`, själva `t()`-funktionen, platshållar-interpolation och val av aktivt språk (sparas i `localStorage` under nyckeln `linkportal.lang`). |
+
+> Backend och webbläsartillägget har **ingen** i18n-motor – där ligger texterna direkt på engelska (backend returnerar engelska felmeddelanden, tillägget har engelsk UI). Endast React-webappen använder ordböckerna.
+
+### Hur ordboken ser ut
+
+Varje rad är en **nyckel → text**. Nyckeln är typad, så TypeScript varnar direkt om du stavar fel eller använder en nyckel som inte finns.
+
+```ts
+// frontend/src/i18n/en.ts
+export const en = {
+  'common.save': 'Save',
+  'login.signIn': 'Sign in',
+  'dashboard.deleteConfirm': 'Delete the link "{{name}}"? Only an admin can do this.',
+  // …fler nycklar
+} as const;
+
+export type TranslationKey = keyof typeof en;
+```
+
+### Använda text i en komponent
+
+```tsx
+import { useTranslation } from '../i18n';
+
+function SaveButton() {
+  const { t } = useTranslation();
+  return <button>{t('common.save')}</button>;
+}
+```
+
+**Platshållare** skrivs som `{{namn}}` i ordboken och fylls i med ett andra argument:
+
+```tsx
+t('dashboard.deleteConfirm', { name: link.name })
+// → Delete the link "vCenter"? Only an admin can do this.
+```
+
+Saknas en nyckel i det valda språket faller `t()` tillbaka på engelska, och i sista hand på själva nyckeln – appen kraschar alltså aldrig av en glömd översättning.
+
+### Lägga till ett nytt språk (exempel: svenska)
+
+1. **Kopiera ordboken:** `frontend/src/i18n/en.ts` → `sv.ts`. Behåll **alla nycklar** exakt, översätt bara **värdena**.
+2. **Registrera språket** i `frontend/src/i18n/index.tsx`:
+   ```ts
+   import { sv } from './sv';
+   export type Lang = 'en' | 'sv';                                  // lägg till koden
+   const dictionaries: Record<Lang, Record<TranslationKey, string>> = { en, sv };
+   ```
+3. **Lägg till en språkväljare** i UI:t (t.ex. på inställningssidan) som anropar `setLang('sv')` från `useTranslation()`. Det valda språket sparas automatiskt i `localStorage` och gäller vid nästa besök.
+
+Standardspråket styrs av `DEFAULT_LANG` i `index.tsx` (just nu `'en'`). En ny ordbok måste innehålla **samtliga** nycklar från `en.ts`, annars klagar TypeScript – det är med flit, så inget glöms bort.
 
 ## Roller (behörigheter)
 
@@ -122,7 +185,7 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 
 - ✅ Chrome/Edge-tillägg som läser `/api/links` och visar trädet i en popup.
 - ✅ Favoriter, personliga per användare (visas högst upp).
-- ✅ Snabbspara aktuell flik från tillägget (kategori eller 📥 Inkorg).
+- ✅ Snabbspara aktuell flik från tillägget (kategori eller 📥 Inbox).
 - Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.
 
 ## Flytta / synka projektet till en annan dator

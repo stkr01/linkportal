@@ -98,7 +98,7 @@ router.get(
       include: linkIncludeFor(req.user!.userId),
     });
     if (!link) {
-      res.status(404).json({ error: 'Länken hittades inte.' });
+      res.status(404).json({ error: 'Link not found.' });
       return;
     }
     res.json(serializeLink(link));
@@ -107,11 +107,11 @@ router.get(
 
 const upsertSchema = z.object({
   name: z.string().min(1).max(200),
-  url: z.string().url('Ogiltig URL (måste börja med http:// eller https://).'),
+  url: z.string().url('Invalid URL (must start with http:// or https://).'),
   categoryId: z.number().int(),
   manageSoftware: z.string().max(200).optional().nullable(),
   description: z.string().max(2000).optional().nullable(),
-  imageUrl: z.string().url('Ogiltig bild-URL.').max(2000).optional().nullable().or(z.literal('')),
+  imageUrl: z.string().url('Invalid image URL.').max(2000).optional().nullable().or(z.literal('')),
   environment: z.nativeEnum(Environment).optional(),
   owningTeam: z.string().max(100).optional().nullable(),
   status: z.nativeEnum(LinkStatus).optional(),
@@ -146,7 +146,7 @@ router.patch(
 
     const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
     if (!existing) {
-      res.status(404).json({ error: 'Länken hittades inte.' });
+      res.status(404).json({ error: 'Link not found.' });
       return;
     }
 
@@ -170,12 +170,13 @@ router.patch(
 
 // POST /api/links/quick-save – snabbspara aktuell flik från tillägget (Editor+)
 const quickSaveSchema = z.object({
-  url: z.string().url('Ogiltig URL.'),
+  url: z.string().url('Invalid URL.'),
   name: z.string().max(200).optional().nullable(),
   categoryId: z.number().int().optional().nullable(),
 });
 
-const INBOX_NAME = '📥 Inkorg';
+const INBOX_NAME = '📥 Inbox';
+const LEGACY_INBOX_NAME = '📥 Inkorg';
 
 router.post(
   '/quick-save',
@@ -188,13 +189,19 @@ router.post(
     if (categoryId) {
       const cat = await prisma.category.findUnique({ where: { id: categoryId } });
       if (!cat) {
-        res.status(400).json({ error: 'Vald kategori finns inte.' });
+        res.status(400).json({ error: 'The selected category does not exist.' });
         return;
       }
     } else {
-      // Hitta eller skapa systemkategorin "Inkorg" (toppnivå).
-      let inbox = await prisma.category.findFirst({ where: { name: INBOX_NAME, parentId: null } });
-      if (!inbox) inbox = await prisma.category.create({ data: { name: INBOX_NAME, sortOrder: 999 } });
+      // Find or create the system "Inbox" category (top level), migrating the legacy Swedish name if present.
+      let inbox = await prisma.category.findFirst({
+        where: { name: { in: [INBOX_NAME, LEGACY_INBOX_NAME] }, parentId: null },
+      });
+      if (!inbox) {
+        inbox = await prisma.category.create({ data: { name: INBOX_NAME, sortOrder: 999 } });
+      } else if (inbox.name === LEGACY_INBOX_NAME) {
+        inbox = await prisma.category.update({ where: { id: inbox.id }, data: { name: INBOX_NAME } });
+      }
       categoryId = inbox.id;
     }
 
@@ -240,7 +247,7 @@ router.post(
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
     if (!category) {
-      res.status(400).json({ error: 'Vald kategori finns inte.' });
+      res.status(400).json({ error: 'The selected category does not exist.' });
       return;
     }
 
@@ -286,13 +293,13 @@ router.put(
 
     const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
     if (!existing) {
-      res.status(404).json({ error: 'Länken hittades inte.' });
+      res.status(404).json({ error: 'Link not found.' });
       return;
     }
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
     if (!category) {
-      res.status(400).json({ error: 'Vald kategori finns inte.' });
+      res.status(400).json({ error: 'The selected category does not exist.' });
       return;
     }
 
@@ -339,7 +346,7 @@ router.delete(
     const id = Number(req.params.id);
     const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
     if (!existing) {
-      res.status(404).json({ error: 'Länken hittades inte.' });
+      res.status(404).json({ error: 'Link not found.' });
       return;
     }
 

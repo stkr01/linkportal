@@ -1,5 +1,5 @@
-// Delad logik för popup och options.
-// Hämtar/sparar inställningar och anropar LinkPortal-API:t med Bearer-token.
+// Shared logic for popup and options.
+// Reads/saves settings and calls the LinkPortal API with a Bearer token.
 
 const DEFAULTS = { baseUrl: 'http://localhost:4000', token: '' };
 
@@ -19,7 +19,7 @@ export async function clearToken() {
   await chrome.storage.local.remove('token');
 }
 
-// Anropa API. Kastar { status, message } vid fel.
+// Call the API. Throws { status, message } on error.
 export async function apiFetch(path, { method = 'GET', body, auth = true } = {}) {
   const { baseUrl, token } = await getSettings();
   const headers = { 'Content-Type': 'application/json' };
@@ -33,11 +33,11 @@ export async function apiFetch(path, { method = 'GET', body, auth = true } = {})
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (e) {
-    throw { status: 0, message: `Kunde inte nå servern (${baseUrl}). Kontrollera URL och behörighet.` };
+    throw { status: 0, message: `Could not reach the server (${baseUrl}). Check the URL and permissions.` };
   }
 
   if (!res.ok) {
-    let message = `Fel ${res.status}`;
+    let message = `Error ${res.status}`;
     try {
       const data = await res.json();
       if (data?.error) message = data.error;

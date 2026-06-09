@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LinkPortal",
   "version": "1.0.0",
-  "description": "IT-Operations länkkatalog – snabbåtkomst till alla verktyg direkt från verktygsfältet.",
+  "description": "IT-Operations link catalog – quick access to all your tools directly from the toolbar.",
   "action": {
     "default_popup": "popup.html",
     "default_title": "LinkPortal",

@@ -17,7 +17,7 @@ const loginLimiter = rateLimit({
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'För många inloggningsförsök. Försök igen senare.' },
+  message: { error: 'Too many login attempts. Please try again later.' },
 });
 
 const loginSchema = z.object({
@@ -27,7 +27,7 @@ const loginSchema = z.object({
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1),
-  newPassword: z.string().min(8, 'Lösenordet måste vara minst 8 tecken.'),
+  newPassword: z.string().min(8, 'The password must be at least 8 characters.'),
 });
 
 // Färgtema: en uppsättning hex-färger (alla valfria). null/tomt = standardtema.
@@ -67,13 +67,13 @@ router.post(
     const user = await prisma.user.findUnique({ where: { username } });
     // Generiskt felmeddelande – avslöja inte om användarnamnet finns.
     if (!user || !user.isActive) {
-      res.status(401).json({ error: 'Felaktigt användarnamn eller lösenord.' });
+      res.status(401).json({ error: 'Incorrect username or password.' });
       return;
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      res.status(401).json({ error: 'Felaktigt användarnamn eller lösenord.' });
+      res.status(401).json({ error: 'Incorrect username or password.' });
       return;
     }
 
@@ -106,7 +106,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
     if (!user || !user.isActive) {
-      res.status(401).json({ error: 'Ej inloggad.' });
+      res.status(401).json({ error: 'Not signed in.' });
       return;
     }
     res.json({
@@ -127,12 +127,12 @@ router.post(
     const { currentPassword, newPassword } = changePasswordSchema.parse(req.body);
     const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
     if (!user) {
-      res.status(401).json({ error: 'Ej inloggad.' });
+      res.status(401).json({ error: 'Not signed in.' });
       return;
     }
     const ok = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!ok) {
-      res.status(400).json({ error: 'Nuvarande lösenord stämmer inte.' });
+      res.status(400).json({ error: 'Current password is incorrect.' });
       return;
     }
     const passwordHash = await bcrypt.hash(newPassword, 12);

@@ -570,3 +570,81 @@ th {
   font-size: 0.8rem;
 }
 
+/* View toggle (Cards / Details) */
+.view-toggle {
+  display: inline-flex;
+}
+.view-toggle button {
+  border-radius: 0;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.view-toggle button:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.view-toggle button:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+  border-left: none;
+}
+.view-toggle button.active {
+  background: var(--rs-accent);
+  color: #1f2421;
+  border-color: var(--rs-accent);
+  font-weight: 600;
+}
+
+/* Detail view (table) */
+.link-table-wrap {
+  padding: 0;
+  overflow-x: auto;
+}
+.link-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.link-table th,
+.link-table td {
+  text-align: left;
+  padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+.link-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.link-table tbody tr:hover {
+  background: #f7f9f8;
+}
+.link-table th {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.link-table td a {
+  font-weight: 600;
+}
+.link-table .col-fav {
+  width: 2rem;
+  text-align: center;
+}
+.link-table .col-actions {
+  text-align: right;
+}
+.row-actions {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+.row-actions a {
+  display: inline-flex;
+}
+.row-actions button {
+  padding: 0.28rem 0.5rem;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+

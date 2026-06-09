@@ -6,22 +6,22 @@ dotenv.config();
 
 const prisma = new PrismaClient();
 
-// Exempel-kategoriträd från blueprintens Appendix C.
+// Example category tree from the blueprint Appendix C.
 const categoryTree: Record<string, string[]> = {
   'IT-Network': ['Firewall', 'Wifi', 'Load Balancing', 'DNS / DHCP'],
   'IT-Infra': ['Server', 'Storage', 'Backup', 'SQL'],
-  'IT-Security': ['Endpoint / EDR', 'Identity / IAM', 'Certifikat'],
-  'IT-Cloud': ['Azure', 'Microsoft 365', 'Övriga SaaS'],
+  'IT-Security': ['Endpoint / EDR', 'Identity / IAM', 'Certificates'],
+  'IT-Cloud': ['Azure', 'Microsoft 365', 'Other SaaS'],
   'IT-Monitoring': ['Dashboards', 'Alerting'],
 };
 
-// Underkategorier till "Server" (extra djup nivå).
+// Subcategories of "Server" (an extra-deep level).
 const serverChildren = ['VMware', 'Hyper-V', 'Physical / iLO-iDRAC'];
 
 async function main() {
   console.log('Seeding LinkPortal...');
 
-  // 1. Admin-användare
+  // 1. Admin user
   const username = process.env.SEED_ADMIN_USERNAME || 'admin';
   const password = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe123!';
   const displayName = process.env.SEED_ADMIN_DISPLAYNAME || 'IT-Operations Admin';
@@ -30,7 +30,7 @@ async function main() {
 
   const admin = await prisma.user.upsert({
     where: { username },
-    // Återställ alltid admin till känt läge vid seed (idempotent).
+    // Always reset admin to a known state on seed (idempotent).
     update: {
       passwordHash,
       displayName,
@@ -46,16 +46,16 @@ async function main() {
       mustChangePassword: true,
     },
   });
-  console.log(`Admin-användare klar: ${admin.username}`);
+  console.log(`Admin user ready: ${admin.username}`);
 
-  // 2. Kategoriträd
+  // 2. Category tree
   for (const [parentName, children] of Object.entries(categoryTree)) {
     const parent = await prisma.category.upsert({
       where: { parentId_name: { parentId: null as unknown as number, name: parentName } },
       update: {},
       create: { name: parentName },
     }).catch(async () => {
-      // Fallback om unique-upsert med null parentId krånglar
+      // Fallback if the unique upsert with a null parentId misbehaves.
       const existing = await prisma.category.findFirst({ where: { name: parentName, parentId: null } });
       if (existing) return existing;
       return prisma.category.create({ data: { name: parentName } });
@@ -65,7 +65,7 @@ async function main() {
       const child = await prisma.category.findFirst({ where: { name: childName, parentId: parent.id } });
       const created = child ?? (await prisma.category.create({ data: { name: childName, parentId: parent.id } }));
 
-      // Lägg till djupare nivå under "Server"
+      // Add a deeper level under "Server"
       if (childName === 'Server') {
         for (const grandChildName of serverChildren) {
           const existingGc = await prisma.category.findFirst({ where: { name: grandChildName, parentId: created.id } });
@@ -76,9 +76,9 @@ async function main() {
       }
     }
   }
-  console.log('Kategoriträd klart.');
+  console.log('Category tree ready.');
 
-  // 3. Ett par exempel-länkar
+  // 3. A couple of example links
   const vmware = await prisma.category.findFirst({ where: { name: 'VMware' } });
   const firewall = await prisma.category.findFirst({ where: { name: 'Firewall' } });
 
@@ -91,14 +91,14 @@ async function main() {
           name: 'vCenter',
           url: 'https://vcenter.example.local',
           manageSoftware: 'VMware vSphere Client',
-          description: 'Hantering av VMware-kluster och virtuella maskiner.',
+          description: 'Management of VMware clusters and virtual machines.',
           environment: 'PROD',
           owningTeam: 'IT-Infra',
           categoryId: vmware.id,
           addedById: admin.id,
         },
       }));
-    // Exempel: markera vCenter som personlig favorit för admin (idempotent).
+    // Example: mark vCenter as a personal favorite for admin (idempotent).
     await prisma.userFavorite.upsert({
       where: { userId_linkId: { userId: admin.id, linkId: vcenter.id } },
       update: {},
@@ -114,7 +114,7 @@ async function main() {
           name: 'FortiManager',
           url: 'https://fortimanager.example.local',
           manageSoftware: 'Fortinet FortiManager',
-          description: 'Central hantering av brandväggar.',
+          description: 'Central management of firewalls.',
           environment: 'PROD',
           owningTeam: 'IT-Network',
           categoryId: firewall.id,
@@ -124,8 +124,8 @@ async function main() {
     }
   }
 
-  console.log('Exempel-länkar klara.');
-  console.log('Seed färdig!');
+  console.log('Example links ready.');
+  console.log('Seed complete!');
 }
 
 main()

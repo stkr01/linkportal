@@ -10,17 +10,7 @@ export const DEFAULT_THEME: Record<ThemeKey, string> = {
   text: '#1f2421',
 };
 
-// Etiketter för UI:t.
-export const THEME_LABELS: Record<ThemeKey, string> = {
-  primary: 'Primärfärg (knappar, accenter)',
-  primaryDark: 'Mörk primärfärg (hover, länkar)',
-  accent: 'Accentfärg',
-  bg: 'Bakgrund',
-  surface: 'Kort / ytor',
-  text: 'Text',
-};
-
-// Koppling temanyckel -> CSS-variabel i styles.css.
+// Maps a theme key -> CSS variable in styles.css.
 const CSS_VAR: Record<ThemeKey, string> = {
   primary: '--rs-primary',
   primaryDark: '--rs-primary-dark',

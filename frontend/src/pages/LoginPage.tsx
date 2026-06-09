@@ -1,9 +1,11 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { useTranslation } from '../i18n';
 
 export default function LoginPage() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -20,7 +22,7 @@ export default function LoginPage() {
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        'Inloggning misslyckades.';
+        t('login.failed');
       setError(msg);
     } finally {
       setBusy(false);
@@ -31,8 +33,8 @@ export default function LoginPage() {
     <div className="login-wrap">
       <form className="card login-card" onSubmit={onSubmit}>
         <h1>LinkPortal</h1>
-        <div className="sub">IT-Operations – intern länkkatalog</div>
-        <label htmlFor="username">Användarnamn</label>
+        <div className="sub">{t('login.subtitle')}</div>
+        <label htmlFor="username">{t('login.username')}</label>
         <input
           id="username"
           value={username}
@@ -40,7 +42,7 @@ export default function LoginPage() {
           autoFocus
           autoComplete="username"
         />
-        <label htmlFor="password">Lösenord</label>
+        <label htmlFor="password">{t('login.password')}</label>
         <input
           id="password"
           type="password"
@@ -51,7 +53,7 @@ export default function LoginPage() {
         {error && <div className="error">{error}</div>}
         <div style={{ marginTop: '1.25rem' }}>
           <button type="submit" disabled={busy} style={{ width: '100%' }}>
-            {busy ? 'Loggar in…' : 'Logga in'}
+            {busy ? t('login.signingIn') : t('login.signIn')}
           </button>
         </div>
       </form>

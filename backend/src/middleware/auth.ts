@@ -30,14 +30,14 @@ function extractToken(req: Request): string | undefined {
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
   const token = extractToken(req);
   if (!token) {
-    res.status(401).json({ error: 'Ej inloggad.' });
+    res.status(401).json({ error: 'Not signed in.' });
     return;
   }
   try {
     req.user = verifyToken(token);
     next();
   } catch {
-    res.status(401).json({ error: 'Ogiltig eller utgången session.' });
+    res.status(401).json({ error: 'Invalid or expired session.' });
   }
 }
 
@@ -45,11 +45,11 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 export function requireRole(minRole: Role) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
-      res.status(401).json({ error: 'Ej inloggad.' });
+      res.status(401).json({ error: 'Not signed in.' });
       return;
     }
     if (roleRank[req.user.role] < roleRank[minRole]) {
-      res.status(403).json({ error: 'Otillräcklig behörighet.' });
+      res.status(403).json({ error: 'Insufficient permissions.' });
       return;
     }
     next();

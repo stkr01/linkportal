@@ -38,7 +38,7 @@ function buildTree(
   }
 
   const sortRec = (nodes: CategoryNode[]) => {
-    nodes.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'sv'));
+    nodes.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name, 'en'));
     nodes.forEach((n) => sortRec(n.children));
   };
   sortRec(roots);
@@ -91,7 +91,7 @@ router.post(
     if (data.parentId) {
       const parent = await prisma.category.findUnique({ where: { id: data.parentId } });
       if (!parent) {
-        res.status(400).json({ error: 'Förälderkategorin finns inte.' });
+        res.status(400).json({ error: 'The parent category does not exist.' });
         return;
       }
     }
@@ -131,13 +131,13 @@ router.put(
 
     const existing = await prisma.category.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ error: 'Kategorin hittades inte.' });
+      res.status(404).json({ error: 'Category not found.' });
       return;
     }
 
     // Förhindra att en kategori blir sin egen förälder.
     if (data.parentId === id) {
-      res.status(400).json({ error: 'En kategori kan inte vara sin egen förälder.' });
+      res.status(400).json({ error: 'A category cannot be its own parent.' });
       return;
     }
 
@@ -171,18 +171,18 @@ router.delete(
 
     const childCount = await prisma.category.count({ where: { parentId: id } });
     if (childCount > 0) {
-      res.status(409).json({ error: 'Kategorin har underkategorier. Flytta eller ta bort dem först.' });
+      res.status(409).json({ error: 'The category has subcategories. Move or remove them first.' });
       return;
     }
     const linkCount = await prisma.link.count({ where: { categoryId: id, isDeleted: false } });
     if (linkCount > 0) {
-      res.status(409).json({ error: 'Kategorin innehåller länkar. Flytta eller ta bort dem först.' });
+      res.status(409).json({ error: 'The category contains links. Move or remove them first.' });
       return;
     }
 
     const existing = await prisma.category.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ error: 'Kategorin hittades inte.' });
+      res.status(404).json({ error: 'Category not found.' });
       return;
     }
 

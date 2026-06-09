@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { CategoryNode } from '../types';
+import { useTranslation } from '../i18n';
 
 interface Props {
   nodes: CategoryNode[];
@@ -61,6 +62,7 @@ export default function CategoryTree({
   favoritesCount,
   onSelectFavorites,
 }: Props) {
+  const { t } = useTranslation();
   return (
     <div>
       {onSelectFavorites && (
@@ -70,7 +72,7 @@ export default function CategoryTree({
           style={{ fontWeight: 600 }}
         >
           <span className="twisty" style={{ color: '#e0a800' }}>★</span>
-          <span>Favoriter</span>
+          <span>{t('tree.favorites')}</span>
           <span className="count">{favoritesCount ?? 0}</span>
         </div>
       )}
@@ -80,7 +82,7 @@ export default function CategoryTree({
         style={{ fontWeight: 600 }}
       >
         <span className="twisty">•</span>
-        <span>Alla länkar</span>
+        <span>{t('tree.allLinks')}</span>
       </div>
       <div style={{ marginTop: '0.5rem' }}>
         {nodes.map((n) => (

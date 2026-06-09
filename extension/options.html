@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="sv">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="popup.css" />
@@ -8,27 +8,27 @@
       h1 { font-size: 16px; color: var(--rs-primary-dark); margin: 0 0 4px; }
       .ok { color: var(--rs-primary-dark); font-size: 12px; }
     </style>
-    <title>LinkPortal – Inställningar</title>
+    <title>LinkPortal – Settings</title>
   </head>
   <body>
-    <h1>🔗 LinkPortal – Inställningar</h1>
-    <p class="muted">Anslut tillägget till din LinkPortal-server.</p>
+    <h1>🔗 LinkPortal – Settings</h1>
+    <p class="muted">Connect the extension to your LinkPortal server.</p>
 
     <div class="login-view" style="padding: 0;">
-      <label>Server-URL</label>
+      <label>Server URL</label>
       <input id="baseUrl" type="text" placeholder="http://localhost:4000" />
 
       <div id="loggedOut">
-        <label>Användarnamn</label>
+        <label>Username</label>
         <input id="user" type="text" autocomplete="username" />
-        <label>Lösenord</label>
+        <label>Password</label>
         <input id="pass" type="password" autocomplete="current-password" />
-        <button id="loginBtn" class="primary">Logga in</button>
+        <button id="loginBtn" class="primary">Sign in</button>
       </div>
 
       <div id="loggedIn" class="hidden">
         <p class="ok" id="loggedInMsg"></p>
-        <button id="logoutBtn" class="primary" style="background: var(--danger);">Logga ut</button>
+        <button id="logoutBtn" class="primary" style="background: var(--danger);">Sign out</button>
       </div>
 
       <div id="msg" class="error"></div>

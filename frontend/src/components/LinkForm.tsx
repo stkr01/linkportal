@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import type { CategoryNode, Environment, LinkItem, LinkInput } from '../types';
 import { flattenCategories } from '../utils/categories';
+import { useTranslation } from '../i18n';
 
 interface Props {
   categories: CategoryNode[];
@@ -13,6 +14,7 @@ interface Props {
 const environments: Environment[] = ['NA', 'PROD', 'TEST', 'DEV'];
 
 export default function LinkForm({ categories, initial, defaultCategoryId, onSubmit, onClose }: Props) {
+  const { t } = useTranslation();
   const flat = flattenCategories(categories);
   const [name, setName] = useState(initial?.name ?? '');
   const [url, setUrl] = useState(initial?.url ?? '');
@@ -31,13 +33,13 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!name.trim()) return setError('Namn krävs.');
-    if (!categoryId) return setError('Välj en kategori.');
+    if (!name.trim()) return setError(t('form.nameRequired'));
+    if (!categoryId) return setError(t('form.selectCategory'));
     try {
       // eslint-disable-next-line no-new
       new URL(url);
     } catch {
-      return setError('Ogiltig URL (måste börja med http:// eller https://).');
+      return setError(t('form.invalidUrl'));
     }
     setBusy(true);
     try {
@@ -59,7 +61,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { error?: string } } })?.response?.data?.error ||
-        'Kunde inte spara länken.';
+        t('form.saveFailed');
       setError(msg);
     } finally {
       setBusy(false);
@@ -69,15 +71,15 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <form className="card modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <h2>{initial ? 'Redigera länk' : 'Ny länk'}</h2>
+        <h2>{initial ? t('form.editTitle') : t('form.newTitle')}</h2>
 
-        <label htmlFor="lf-name">Namn *</label>
+        <label htmlFor="lf-name">{t('form.name')}</label>
         <input id="lf-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />
 
         <label htmlFor="lf-url">URL *</label>
         <input id="lf-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
 
-        <label htmlFor="lf-cat">Kategori *</label>
+        <label htmlFor="lf-cat">{t('form.category')}</label>
         <select id="lf-cat" value={categoryId} onChange={(e) => setCategoryId(Number(e.target.value))}>
           {flat.map((c) => (
             <option key={c.id} value={c.id}>
@@ -88,18 +90,18 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
 
         <div className="row">
           <div>
-            <label htmlFor="lf-sw">Manage Software</label>
+            <label htmlFor="lf-sw">{t('form.manageSoftware')}</label>
             <input id="lf-sw" value={manageSoftware} onChange={(e) => setManageSoftware(e.target.value)} />
           </div>
           <div>
-            <label htmlFor="lf-team">Ägande team</label>
+            <label htmlFor="lf-team">{t('form.owningTeam')}</label>
             <input id="lf-team" value={owningTeam} onChange={(e) => setOwningTeam(e.target.value)} />
           </div>
         </div>
 
         <div className="row">
           <div>
-            <label htmlFor="lf-env">Miljö</label>
+            <label htmlFor="lf-env">{t('form.environment')}</label>
             <select id="lf-env" value={environment} onChange={(e) => setEnvironment(e.target.value as Environment)}>
               {environments.map((env) => (
                 <option key={env} value={env}>
@@ -109,15 +111,15 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
             </select>
           </div>
           <div>
-            <label htmlFor="lf-tags">Taggar (kommaseparerade)</label>
-            <input id="lf-tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="prod, kritisk" />
+            <label htmlFor="lf-tags">{t('form.tags')}</label>
+            <input id="lf-tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder={t('form.tagsPlaceholder')} />
           </div>
         </div>
 
-        <label htmlFor="lf-desc">Beskrivning</label>
+        <label htmlFor="lf-desc">{t('form.description')}</label>
         <textarea id="lf-desc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
 
-        <label htmlFor="lf-img">Bild-URL (logotyp/ikon, valfritt)</label>
+        <label htmlFor="lf-img">{t('form.imageUrl')}</label>
         <div className="img-field">
           <input
             id="lf-img"
@@ -129,7 +131,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
             <img
               className="img-preview"
               src={imageUrl.trim()}
-              alt="Förhandsvisning"
+              alt={t('form.imagePreviewAlt')}
               onError={(e) => ((e.target as HTMLImageElement).style.visibility = 'hidden')}
               onLoad={(e) => ((e.target as HTMLImageElement).style.visibility = 'visible')}
             />
@@ -140,10 +142,10 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
 
         <div className="modal-actions">
           <button type="button" className="secondary" onClick={onClose}>
-            Avbryt
+            {t('common.cancel')}
           </button>
           <button type="submit" disabled={busy}>
-            {busy ? 'Sparar…' : 'Spara'}
+            {busy ? t('common.saving') : t('common.save')}
           </button>
         </div>
       </form>

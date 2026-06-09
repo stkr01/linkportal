@@ -48,7 +48,7 @@ function openLink(url) {
   window.close();
 }
 
-// Bygg en map categoryId -> full sökväg (för sökresultat).
+// Build a map of categoryId -> full path (for search results).
 function buildPathMap(nodes, parent = '') {
   for (const n of nodes) {
     const path = parent ? `${parent} › ${n.name}` : n.name;
@@ -57,7 +57,7 @@ function buildPathMap(nodes, parent = '') {
   }
 }
 
-// Platta ut trädet till { id, path } för kategori-dropdownen.
+// Flatten the tree into { id, path } for the category dropdown.
 function flattenCats(nodes, prefix = '', out = []) {
   for (const n of nodes) {
     const path = prefix ? `${prefix} › ${n.name}` : n.name;
@@ -131,11 +131,11 @@ function categoryNode(node, linksByCat) {
   const childWrap = document.createElement('div');
   childWrap.className = 'cat-children hidden';
 
-  // Direkta länkar i kategorin
+  // Direct links in the category
   const directLinks = linksByCat.get(node.id) || [];
   directLinks.forEach((l) => childWrap.appendChild(linkRow(l)));
 
-  // Underkategorier
+  // Subcategories
   (node.children || []).forEach((c) => childWrap.appendChild(categoryNode(c, linksByCat)));
 
   row.addEventListener('click', () => {
@@ -159,31 +159,31 @@ function render() {
     linksByCat.set(l.categoryId, arr);
   }
 
-  // Favoriter högst upp
+  // Favorites at the top
   const favorites = allLinks.filter((l) => l.isFavorite);
   if (favorites.length) {
     const title = document.createElement('div');
     title.className = 'section-title';
-    title.textContent = '★ Favoriter';
+    title.textContent = '★ Favorites';
     els.content.appendChild(title);
 
     const favBox = document.createElement('div');
     favBox.className = 'favorites';
     favorites
-      .sort((a, b) => a.name.localeCompare(b.name, 'sv'))
+      .sort((a, b) => a.name.localeCompare(b.name, 'en'))
       .forEach((l) => favBox.appendChild(linkRow(l)));
     els.content.appendChild(favBox);
   }
 
   const treeTitle = document.createElement('div');
   treeTitle.className = 'section-title';
-  treeTitle.textContent = 'Kategorier';
+  treeTitle.textContent = 'Categories';
   els.content.appendChild(treeTitle);
 
   tree.forEach((n) => els.content.appendChild(categoryNode(n, linksByCat)));
 
   if (!allLinks.length) {
-    setStatus('Inga länkar ännu.');
+    setStatus('No links yet.');
   }
 }
 
@@ -198,7 +198,7 @@ function renderSearch(query) {
   if (!matches.length) {
     const d = document.createElement('div');
     d.className = 'status';
-    d.textContent = 'Inga träffar';
+    d.textContent = 'No matches';
     els.content.appendChild(d);
     return;
   }
@@ -209,7 +209,7 @@ function renderSearch(query) {
 }
 
 async function loadData() {
-  setStatus('Laddar…');
+  setStatus('Loading…');
   els.loginView.classList.add('hidden');
   els.content.classList.remove('hidden');
   try {
@@ -230,7 +230,7 @@ async function loadData() {
       await clearToken();
       showLogin();
     } else {
-      setStatus(err.message || 'Kunde inte hämta data.');
+      setStatus(err.message || 'Could not fetch data.');
     }
   }
 }
@@ -252,22 +252,22 @@ async function doLogin() {
   const username = els.loginUser.value.trim();
   const password = els.loginPass.value;
   if (!baseUrl || !username || !password) {
-    els.loginError.textContent = 'Fyll i alla fält.';
+    els.loginError.textContent = 'Fill in all fields.';
     return;
   }
   els.loginBtn.disabled = true;
   try {
-    // Be om host-behörighet för servern (krävs för fetch mot egen URL).
+    // Request host permission for the server (required for fetch against a custom URL).
     try {
       await chrome.permissions.request({ origins: [`${baseUrl}/*`] });
     } catch {
-      /* localhost täcks redan av manifestet */
+      /* localhost is already covered by the manifest */
     }
     await chrome.storage.local.set({ baseUrl });
     await login(username, password);
     await loadData();
   } catch (err) {
-    els.loginError.textContent = err.message || 'Inloggning misslyckades.';
+    els.loginError.textContent = err.message || 'Sign-in failed.';
   } finally {
     els.loginBtn.disabled = false;
   }
@@ -275,7 +275,7 @@ async function doLogin() {
 
 async function openSaveView() {
   els.saveError.textContent = '';
-  // Läs aktuell flik.
+  // Read the current tab.
   let tab = null;
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -285,16 +285,16 @@ async function openSaveView() {
   }
   const url = tab?.url || '';
   if (!url || !/^https?:/i.test(url)) {
-    els.saveError.textContent = 'Den här fliken kan inte sparas (ingen webbadress).';
+    els.saveError.textContent = 'This tab cannot be saved (no web address).';
   }
   els.saveName.value = tab?.title || '';
   els.saveUrl.value = url;
 
-  // Fyll kategori-dropdown: Inkorg först (tomt värde), sedan hela trädet.
+  // Fill the category dropdown: Inbox first (empty value), then the whole tree.
   els.saveCategory.innerHTML = '';
   const inbox = document.createElement('option');
   inbox.value = '';
-  inbox.textContent = '📥 Inkorg (osorterat)';
+  inbox.textContent = '📥 Inbox (unsorted)';
   els.saveCategory.appendChild(inbox);
   for (const c of flattenCats(tree)) {
     const opt = document.createElement('option');
@@ -321,7 +321,7 @@ async function doQuickSave() {
   const name = els.saveName.value.trim();
   const catVal = els.saveCategory.value;
   if (!url || !/^https?:/i.test(url)) {
-    els.saveError.textContent = 'Ogiltig webbadress.';
+    els.saveError.textContent = 'Invalid web address.';
     return;
   }
   els.saveConfirmBtn.disabled = true;
@@ -329,9 +329,9 @@ async function doQuickSave() {
     await quickSave({ url, name, categoryId: catVal ? Number(catVal) : null });
     closeSaveView();
     await loadData();
-    showToast('✔ Sidan sparades.');
+    showToast('✔ Page saved.');
   } catch (err) {
-    els.saveError.textContent = err.message || 'Kunde inte spara sidan.';
+    els.saveError.textContent = err.message || 'Could not save the page.';
   } finally {
     els.saveConfirmBtn.disabled = false;
   }

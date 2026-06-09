@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { LinkItem } from '../types';
+import { useTranslation } from '../i18n';
 
 interface Props {
   links: LinkItem[];
@@ -26,6 +27,7 @@ function fuzzyScore(query: string, text: string): number {
 }
 
 export default function CommandPalette({ links, pathMap, onClose }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
 
@@ -56,7 +58,7 @@ export default function CommandPalette({ links, pathMap, onClose }: Props) {
       <div className="card palette" onClick={(e) => e.stopPropagation()}>
         <input
           autoFocus
-          placeholder="Sök länk… (Esc för att stänga)"
+          placeholder={t('palette.placeholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
@@ -73,7 +75,7 @@ export default function CommandPalette({ links, pathMap, onClose }: Props) {
           }}
         />
         <div className="palette-results">
-          {results.length === 0 && <div className="palette-item muted">Inga träffar</div>}
+          {results.length === 0 && <div className="palette-item muted">{t('palette.noMatches')}</div>}
           {results.map((l, i) => (
             <div
               key={l.id}

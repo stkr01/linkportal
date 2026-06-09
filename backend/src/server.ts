@@ -31,5 +31,5 @@ app.use('/api/users', userRoutes);
 app.use(errorHandler);
 
 app.listen(config.port, () => {
-  console.log(`LinkPortal backend kör på http://localhost:${config.port}`);
+  console.log(`LinkPortal backend running on http://localhost:${config.port}`);
 });

@@ -34,7 +34,7 @@ router.get(
 const createSchema = z.object({
   username: z.string().min(1).max(100),
   displayName: z.string().min(1).max(150),
-  password: z.string().min(8, 'Lösenordet måste vara minst 8 tecken.'),
+  password: z.string().min(8, 'The password must be at least 8 characters.'),
   role: z.nativeEnum(Role),
 });
 
@@ -81,18 +81,18 @@ router.put(
 
     const existing = await prisma.user.findUnique({ where: { id } });
     if (!existing) {
-      res.status(404).json({ error: 'Användaren hittades inte.' });
+      res.status(404).json({ error: 'User not found.' });
       return;
     }
 
     // Skydd: hindra att man tar bort sin egen admin-roll eller inaktiverar sig själv.
     if (id === req.user!.userId) {
       if (data.role && data.role !== Role.ADMIN) {
-        res.status(400).json({ error: 'Du kan inte nedgradera ditt eget admin-konto.' });
+        res.status(400).json({ error: 'You cannot downgrade your own admin account.' });
         return;
       }
       if (data.isActive === false) {
-        res.status(400).json({ error: 'Du kan inte inaktivera ditt eget konto.' });
+        res.status(400).json({ error: 'You cannot deactivate your own account.' });
         return;
       }
     }
