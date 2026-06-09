@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import { formatDate } from '../utils/date';
 
 interface Props {
   link: LinkItem;
@@ -24,7 +25,7 @@ function faviconUrl(url: string): string | null {
 export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite }: Props) {
   const { t } = useTranslation();
   const fav = faviconUrl(link.url);
-  const added = new Date(link.dateAdded).toLocaleDateString('en-GB');
+  const lastEdited = formatDate(link.dateModified);
 
   // Försök i tur och ordning: angiven bild → favicon → bokstavs-fallback.
   const sources = [link.imageUrl, fav].filter(Boolean) as string[];
@@ -88,9 +89,9 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
             <br />
           </>
         )}
-        {link.addedBy
-          ? t('card.addedBy', { date: added, name: link.addedBy.displayName })
-          : t('card.added', { date: added })}
+        {link.modifiedBy
+          ? t('card.lastEditedBy', { date: lastEdited, name: link.modifiedBy.displayName })
+          : t('card.lastEdited', { date: lastEdited })}
       </div>
 
       {link.tags.length > 0 && (

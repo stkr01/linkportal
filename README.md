@@ -163,6 +163,106 @@ Saknas en nyckel i det valda språket faller `t()` tillbaka på engelska, och i 
 
 Standardspråket styrs av `DEFAULT_LANG` i `index.tsx` (just nu `'en'`). En ny ordbok måste innehålla **samtliga** nycklar från `en.ts`, annars klagar TypeScript – det är med flit, så inget glöms bort.
 
+## RDP-länkar (Remote Desktop) & andra scheman
+
+Portalen lagrar **bara en URL-sträng** per länk – ingen fil. Valideringen kräver att URL:en har ett **schema**, men begränsar det inte till `http`/`https`. Därför går det bra att spara t.ex.:
+
+| Exempel | Funkar att spara |
+|---------|:----------------:|
+| `https://vcenter.intern` | ✅ |
+| `rdp://10.0.0.5` eller `rdp://server01` | ✅ |
+| `rdp://10.0.0.5:3390` (med port) | ✅ |
+| `ssh://host` · `vnc://1.2.3.4` | ✅ |
+| `server01` / `10.0.0.5` (utan schema) | ❌ – schema krävs |
+
+> Webappen renderar länken som en vanlig `<a href="rdp://…">`, så klicket skickas vidare till operativsystemets protokollhanterare.
+
+### Detta måste göras på klient-PC:n för att `rdp://` ska starta Fjärrskrivbord
+
+Windows har **ingen `rdp://`-hanterare som standard** – ett klick gör därför ingenting förrän ett protokoll-schema registreras på datorn. Det är en **engångsåtgärd per PC** (eller utrullat via GPO/Intune för hela organisationen).
+
+Kör följande i PowerShell. Det registrerar `rdp://` **per användare (kräver ingen admin)** och skapar en liten wrapper som plockar bort `rdp://` och startar `mstsc`:
+
+```powershell
+# --- Installera rdp:// -> mstsc handler (per användare, ingen admin) ---
+$dir     = Join-Path $env:LOCALAPPDATA 'LinkPortal'
+$wrapper = Join-Path $dir 'rdp-launch.cmd'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+# Wrapper som strippar "rdp://" + ev. avslutande "/" och startar mstsc
+@'
+@echo off
+set "h=%~1"
+set "h=%h:rdp://=%"
+set "h=%h:/=%"
+start "" mstsc.exe /v:"%h%"
+'@ | Set-Content -Path $wrapper -Encoding ASCII
+
+# Registrera schemat i HKCU (ingen admin behövs)
+New-Item -Path 'HKCU:\Software\Classes\rdp' -Force | Out-Null
+Set-ItemProperty -Path 'HKCU:\Software\Classes\rdp' -Name '(default)'    -Value 'URL:RDP Protocol'
+Set-ItemProperty -Path 'HKCU:\Software\Classes\rdp' -Name 'URL Protocol' -Value ''
+New-Item -Path 'HKCU:\Software\Classes\rdp\shell\open\command' -Force | Out-Null
+Set-ItemProperty -Path 'HKCU:\Software\Classes\rdp\shell\open\command' -Name '(default)' -Value ('"' + $wrapper + '" "%1"')
+
+Write-Host "Klart! rdp:// -> $wrapper" -ForegroundColor Green
+```
+
+**Testa:** spara en länk som `rdp://10.0.0.5` (eller `rdp://server01`) och klicka på den → webbläsaren frågar *"Öppna Anslutning till fjärrskrivbord?"* → `mstsc` startar mot rätt host.
+
+**Ta bort igen:**
+
+```powershell
+Remove-Item -Path 'HKCU:\Software\Classes\rdp' -Recurse -Force
+```
+
+### Samma sak för `ssh://` (SSH-klient)
+
+Exakt samma princip, med en skillnad: `ssh` är ett **konsolprogram** och behöver ett terminalfönster (till skillnad från `mstsc` som har eget GUI). Windows inbyggda OpenSSH-`ssh` förstår dessutom URI-formen `ssh://[user@]host[:port]` direkt, så wrappern blir enkel:
+
+```powershell
+# --- Installera ssh:// -> ssh-klient (per användare, ingen admin) ---
+$dir     = Join-Path $env:LOCALAPPDATA 'LinkPortal'
+$wrapper = Join-Path $dir 'ssh-launch.cmd'
+New-Item -ItemType Directory -Force -Path $dir | Out-Null
+
+# Wrapper: ta bort ev. avslutande "/" och öppna ssh i ett fönster som stannar kvar
+@'
+@echo off
+set "u=%~1"
+if "%u:~-1%"=="/" set "u=%u:~0,-1%"
+start "" cmd /k ssh "%u%"
+'@ | Set-Content -Path $wrapper -Encoding ASCII
+
+# Registrera schemat i HKCU (ingen admin behövs)
+New-Item -Path 'HKCU:\Software\Classes\ssh' -Force | Out-Null
+Set-ItemProperty -Path 'HKCU:\Software\Classes\ssh' -Name '(default)'    -Value 'URL:SSH Protocol'
+Set-ItemProperty -Path 'HKCU:\Software\Classes\ssh' -Name 'URL Protocol' -Value ''
+New-Item -Path 'HKCU:\Software\Classes\ssh\shell\open\command' -Force | Out-Null
+Set-ItemProperty -Path 'HKCU:\Software\Classes\ssh\shell\open\command' -Name '(default)' -Value ('"' + $wrapper + '" "%1"')
+
+Write-Host "Klart! ssh:// -> $wrapper" -ForegroundColor Green
+```
+
+Då funkar `ssh://server01`, `ssh://admin@10.0.0.5` och `ssh://admin@10.0.0.5:2222` (ssh tolkar user/host/port själv).
+
+**Krav:** OpenSSH-klienten (`ssh.exe`) måste finnas. På Win10/11 är den oftast redan på – annars: *Inställningar → Appar → Valfria funktioner → OpenSSH Client*. Vill du hellre använda **PuTTY**, byt sista wrapper-raden mot `start "" putty.exe "%u%"` (PuTTY öppnar eget fönster och förstår `ssh://`-URI:er).
+
+**Ta bort igen:**
+
+```powershell
+Remove-Item -Path 'HKCU:\Software\Classes\ssh' -Recurse -Force
+```
+
+### Utrullning i hela organisationen
+
+- Lägg samma nycklar under `HKLM:\Software\Classes\rdp` (och `HKLM:\Software\Classes\ssh`) (kräver admin) eller rulla ut via **GPO/Intune**.
+- Slipp klick-prompten i Edge/Chrome med policyn **`AutoLaunchProtocolsFromOrigins`** (tillåt schemana `rdp` och `ssh` från portalens URL).
+
+### Säkerhet
+
+Hostnamnet skickas citerat till `mstsc /v:"…"` och alla `/` strippas, så en länk kan inte injicera extra växlar. Aktivera ändå bara detta för **betrodda interna länkar** – vem som helst som kan skapa en `rdp://`-länk kan annars få klienten att försöka ansluta någonstans. Samma princip gäller om du registrerar hanterare för `ssh://`, `vnc://` m.fl.
+
 ## Roller (behörigheter)
 
 | Åtgärd | Viewer | Editor | Admin |

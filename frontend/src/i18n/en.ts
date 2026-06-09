@@ -50,6 +50,7 @@ export const en = {
   'dashboard.deleteConfirm': 'Delete the link "{{name}}"? Only an admin can do this.',
   'dashboard.viewCard': 'Cards',
   'dashboard.viewDetail': 'Details',
+  'dashboard.viewEdited': 'Last edited',
   'dashboard.viewModeLabel': 'View mode',
 
   // Link card
@@ -58,8 +59,8 @@ export const en = {
   'card.addFavorite': 'Mark as favorite',
   'card.favorite': 'Favorite',
   'card.deprecated': 'DEPRECATED',
-  'card.added': 'Added {{date}}',
-  'card.addedBy': 'Added {{date}} by {{name}}',
+  'card.lastEdited': 'Last edited {{date}}',
+  'card.lastEditedBy': 'Last edited {{date}} by {{name}}',
   'card.copy': 'Copy',
   'card.open': 'Open ↗',
 
@@ -70,6 +71,9 @@ export const en = {
   'list.manageSoftware': 'Manage Software',
   'list.team': 'Team',
   'list.added': 'Added',
+  'list.tags': 'Tags',
+  'list.lastEdit': 'Last Edit',
+  'list.editedBy': 'Edited by',
   'list.actions': 'Actions',
 
   // Category tree
@@ -86,7 +90,8 @@ export const en = {
   'form.name': 'Name *',
   'form.nameRequired': 'Name is required.',
   'form.selectCategory': 'Select a category.',
-  'form.invalidUrl': 'Invalid URL (must start with http:// or https://).',
+  'form.invalidUrl': 'Invalid URL. Include a scheme, e.g. https://, rdp:// or ssh:// (a scheme is required).',
+  'form.urlHint': 'Also supports schemes like rdp:// and ssh:// — e.g. rdp://10.0.0.5 or rdp://server01. A scheme is required (a bare hostname will not work).',
   'form.saveFailed': 'Could not save the link.',
   'form.category': 'Category *',
   'form.manageSoftware': 'Manage Software',

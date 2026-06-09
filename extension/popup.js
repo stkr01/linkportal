@@ -10,7 +10,6 @@ const els = {
   loginBtn: document.getElementById('loginBtn'),
   loginError: document.getElementById('loginError'),
   searchBox: document.getElementById('searchBox'),
-  searchBtn: document.getElementById('searchBtn'),
   refreshBtn: document.getElementById('refreshBtn'),
   settingsBtn: document.getElementById('settingsBtn'),
   saveBtn: document.getElementById('saveBtn'),
@@ -212,6 +211,7 @@ async function loadData() {
   setStatus('Loading…');
   els.loginView.classList.add('hidden');
   els.content.classList.remove('hidden');
+  els.searchBox.classList.remove('hidden');
   try {
     const [cats, links, me] = await Promise.all([
       apiFetch('/api/categories'),
@@ -224,7 +224,9 @@ async function loadData() {
     buildPathMap(tree);
     canEdit = me ? roleRank[me.role] >= roleRank.EDITOR : false;
     els.saveBtn.classList.toggle('hidden', !canEdit);
-    render();
+    const q = els.searchBox.value.trim();
+    if (q) renderSearch(q);
+    else render();
   } catch (err) {
     if (err.status === 401) {
       await clearToken();
@@ -313,6 +315,7 @@ async function openSaveView() {
 function closeSaveView() {
   els.saveView.classList.add('hidden');
   els.content.classList.remove('hidden');
+  els.searchBox.classList.remove('hidden');
 }
 
 async function doQuickSave() {
@@ -352,15 +355,6 @@ els.loginPass.addEventListener('keydown', (e) => {
 });
 els.refreshBtn.addEventListener('click', loadData);
 els.settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
-els.searchBtn.addEventListener('click', () => {
-  els.searchBox.classList.toggle('hidden');
-  if (!els.searchBox.classList.contains('hidden')) {
-    els.searchBox.focus();
-  } else {
-    els.searchBox.value = '';
-    render();
-  }
-});
 els.searchBox.addEventListener('input', () => {
   const q = els.searchBox.value.trim();
   if (q) renderSearch(q);

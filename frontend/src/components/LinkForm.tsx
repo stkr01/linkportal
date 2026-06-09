@@ -78,6 +78,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
 
         <label htmlFor="lf-url">URL *</label>
         <input id="lf-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+        <small className="field-hint">{t('form.urlHint')}</small>
 
         <label htmlFor="lf-cat">{t('form.category')}</label>
         <select id="lf-cat" value={categoryId} onChange={(e) => setCategoryId(Number(e.target.value))}>

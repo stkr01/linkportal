@@ -16,10 +16,11 @@ import { useTranslation } from '../i18n';
 import CategoryTree from '../components/CategoryTree';
 import LinkCard from '../components/LinkCard';
 import LinkList from '../components/LinkList';
+import LinkListEdited from '../components/LinkListEdited';
 import LinkForm from '../components/LinkForm';
 import CommandPalette from '../components/CommandPalette';
 
-type ViewMode = 'card' | 'list';
+type ViewMode = 'card' | 'list' | 'edited';
 
 export default function DashboardPage() {
   const { user, logout, hasRole } = useAuth();
@@ -33,9 +34,10 @@ export default function DashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<LinkItem | null>(null);
   const [showPalette, setShowPalette] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    localStorage.getItem('linkportal.viewMode') === 'list' ? 'list' : 'card'
-  );
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem('linkportal.viewMode');
+    return saved === 'list' || saved === 'edited' ? saved : 'card';
+  });
 
   const changeView = (mode: ViewMode) => {
     localStorage.setItem('linkportal.viewMode', mode);
@@ -214,6 +216,14 @@ export default function DashboardPage() {
               >
                 ☰ {t('dashboard.viewDetail')}
               </button>
+              <button
+                type="button"
+                className={`secondary${viewMode === 'edited' ? ' active' : ''}`}
+                aria-pressed={viewMode === 'edited'}
+                onClick={() => changeView('edited')}
+              >
+                🕓 {t('dashboard.viewEdited')}
+              </button>
             </div>
             {canEdit && (
               <button
@@ -236,6 +246,19 @@ export default function DashboardPage() {
             </div>
           ) : viewMode === 'list' ? (
             <LinkList
+              links={displayLinks}
+              pathMap={pathMap}
+              canEdit={canEdit}
+              canDelete={canDelete}
+              onEdit={(link) => {
+                setEditing(link);
+                setShowForm(true);
+              }}
+              onDelete={onDelete}
+              onToggleFavorite={onToggleFavorite}
+            />
+          ) : viewMode === 'edited' ? (
+            <LinkListEdited
               links={displayLinks}
               pathMap={pathMap}
               canEdit={canEdit}

@@ -1,5 +1,6 @@
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import { formatDate } from '../utils/date';
 
 interface Props {
   links: LinkItem[];
@@ -11,8 +12,8 @@ interface Props {
   onToggleFavorite: (l: LinkItem) => void;
 }
 
-// Compact, image-free detail view (alternative to the card grid).
-export default function LinkList({
+// Detail view variant that shows audit info (Last Edit / Edited by) instead of Tags.
+export default function LinkListEdited({
   links,
   pathMap,
   canEdit,
@@ -35,7 +36,8 @@ export default function LinkList({
             <th>{t('list.environment')}</th>
             <th>{t('list.manageSoftware')}</th>
             <th>{t('list.team')}</th>
-            <th>{t('list.tags')}</th>
+            <th>{t('list.lastEdit')}</th>
+            <th>{t('list.editedBy')}</th>
             <th className="col-actions">{t('list.actions')}</th>
           </tr>
         </thead>
@@ -73,19 +75,8 @@ export default function LinkList({
                 </td>
                 <td>{l.manageSoftware || '—'}</td>
                 <td>{l.owningTeam || '—'}</td>
-                <td>
-                  {l.tags.length > 0 ? (
-                    <div className="row-tags">
-                      {l.tags.map((tag) => (
-                        <span key={tag.id} className="tag">
-                          {tag.name}
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    '—'
-                  )}
-                </td>
+                <td className="muted">{formatDate(l.dateModified)}</td>
+                <td className="muted">{l.modifiedBy?.displayName ?? '—'}</td>
                 <td className="col-actions">
                   <div className="row-actions">
                     <button className="secondary" onClick={() => copy(l.url)}>

@@ -107,7 +107,7 @@ router.get(
 
 const upsertSchema = z.object({
   name: z.string().min(1).max(200),
-  url: z.string().url('Invalid URL (must start with http:// or https://).'),
+  url: z.string().url('Invalid URL. Include a scheme such as https://, rdp:// or ssh:// (e.g. rdp://10.0.0.5).'),
   categoryId: z.number().int(),
   manageSoftware: z.string().max(200).optional().nullable(),
   description: z.string().max(2000).optional().nullable(),

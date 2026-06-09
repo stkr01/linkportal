@@ -22,7 +22,7 @@ function TreeNode({
   onSelect: (id: number) => void;
   depth: number;
 }) {
-  const [open, setOpen] = useState(depth < 1);
+  const [open, setOpen] = useState(false);
   const hasChildren = node.children.length > 0;
 
   return (
