@@ -69,7 +69,7 @@ Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge**
 5. Klicka på LinkPortal-ikonen i verktygsfältet → ange server-URL + logga in.
 
 **Använda:** Klicka på ikonen → favoriter visas högst upp, därunder kategoriträdet. Klicka på en länk så öppnas den i en ny flik. 🔄 uppdaterar listan, 🔎 söker, ⚙️ öppnar inställningar (server-URL, logga ut).
-
+**Spara aktuell sida:** Editor/Admin ser en ➕-knapp i tillägget. Klicka på den för att spara fliken du har öppen – namn och URL fylls i automatiskt. Välj kategori, eller lämna den som **📥 Inkorg (osorterat)** för att sortera in den senare i webappen.
 > Ikonerna i `extension/icons/` genereras av `extension/make-icons.js` (`node make-icons.js`). Vill du peka tillägget mot en annan server än localhost ber det automatiskt om host-behörighet.
 
 ## Projektstruktur
@@ -121,4 +121,5 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 
 - ✅ Chrome/Edge-tillägg som läser `/api/links` och visar trädet i en popup.
 - ✅ Favoriter, personliga per användare (visas högst upp).
+- ✅ Snabbspara aktuell flik från tillägget (kategori eller 📥 Inkorg).
 - Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.

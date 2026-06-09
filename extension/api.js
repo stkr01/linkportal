@@ -60,3 +60,14 @@ export async function login(username, password) {
   await saveSettings({ token: data.token });
   return data.user;
 }
+
+export async function getMe() {
+  return apiFetch('/api/auth/me');
+}
+
+export async function quickSave({ url, name, categoryId }) {
+  return apiFetch('/api/links/quick-save', {
+    method: 'POST',
+    body: { url, name, categoryId: categoryId ?? null },
+  });
+}

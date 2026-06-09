@@ -167,6 +167,68 @@ router.patch(
   })
 );
 
+// POST /api/links/quick-save – snabbspara aktuell flik från tillägget (Editor+)
+const quickSaveSchema = z.object({
+  url: z.string().url('Ogiltig URL.'),
+  name: z.string().max(200).optional().nullable(),
+  categoryId: z.number().int().optional().nullable(),
+});
+
+const INBOX_NAME = '📥 Inkorg';
+
+router.post(
+  '/quick-save',
+  authenticate,
+  requireRole(Role.EDITOR),
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = quickSaveSchema.parse(req.body);
+
+    let categoryId = data.categoryId ?? null;
+    if (categoryId) {
+      const cat = await prisma.category.findUnique({ where: { id: categoryId } });
+      if (!cat) {
+        res.status(400).json({ error: 'Vald kategori finns inte.' });
+        return;
+      }
+    } else {
+      // Hitta eller skapa systemkategorin "Inkorg" (toppnivå).
+      let inbox = await prisma.category.findFirst({ where: { name: INBOX_NAME, parentId: null } });
+      if (!inbox) inbox = await prisma.category.create({ data: { name: INBOX_NAME, sortOrder: 999 } });
+      categoryId = inbox.id;
+    }
+
+    // Namn: angivet, annars värdnamnet från URL:en.
+    let name = (data.name ?? '').trim();
+    if (!name) {
+      try {
+        name = new URL(data.url).hostname;
+      } catch {
+        name = data.url;
+      }
+    }
+
+    const link = await prisma.link.create({
+      data: {
+        name: name.slice(0, 200),
+        url: data.url,
+        categoryId,
+        addedById: req.user!.userId,
+      },
+      include: linkIncludeFor(req.user!.userId),
+    });
+
+    await writeAudit({
+      action: 'QUICK_SAVE_LINK',
+      entity: 'Link',
+      entityId: link.id,
+      userId: req.user!.userId,
+      newValue: { name: link.name, url: link.url, categoryId },
+    });
+
+    res.status(201).json(serializeLink(link));
+  })
+);
+
 // POST /api/links – Editor+
 router.post(
   '/',

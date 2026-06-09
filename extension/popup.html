@@ -9,12 +9,29 @@
     <header class="pop-header">
       <span class="brand">🔗 LinkPortal</span>
       <span class="spacer"></span>
+      <button id="saveBtn" class="icon-btn hidden" title="Spara denna sida">➕</button>
       <button id="searchBtn" class="icon-btn" title="Sök">🔍</button>
       <button id="refreshBtn" class="icon-btn" title="Uppdatera">↻</button>
       <button id="settingsBtn" class="icon-btn" title="Inställningar">⚙</button>
     </header>
 
     <input id="searchBox" class="search-box hidden" type="text" placeholder="Sök länk…" />
+
+    <!-- Spara-vy (visas när man klickar på ➕) -->
+    <div id="saveView" class="save-view hidden">
+      <div class="save-title">➕ Spara denna sida</div>
+      <label>Namn</label>
+      <input id="saveName" type="text" />
+      <label>URL</label>
+      <input id="saveUrl" type="text" readonly />
+      <label>Kategori</label>
+      <select id="saveCategory"></select>
+      <div id="saveError" class="error"></div>
+      <div class="save-actions">
+        <button id="saveCancelBtn" class="ghost">Avbryt</button>
+        <button id="saveConfirmBtn" class="primary save-confirm">Spara</button>
+      </div>
+    </div>
 
     <div id="content" class="content">
       <div id="status" class="status">Laddar…</div>

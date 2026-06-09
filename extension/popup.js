@@ -1,4 +1,4 @@
-import { apiFetch, getSettings, login, clearToken } from './api.js';
+import { apiFetch, getSettings, login, clearToken, getMe, quickSave } from './api.js';
 
 const els = {
   content: document.getElementById('content'),
@@ -13,11 +13,22 @@ const els = {
   searchBtn: document.getElementById('searchBtn'),
   refreshBtn: document.getElementById('refreshBtn'),
   settingsBtn: document.getElementById('settingsBtn'),
+  saveBtn: document.getElementById('saveBtn'),
+  saveView: document.getElementById('saveView'),
+  saveName: document.getElementById('saveName'),
+  saveUrl: document.getElementById('saveUrl'),
+  saveCategory: document.getElementById('saveCategory'),
+  saveError: document.getElementById('saveError'),
+  saveCancelBtn: document.getElementById('saveCancelBtn'),
+  saveConfirmBtn: document.getElementById('saveConfirmBtn'),
 };
 
 let allLinks = [];
 let tree = [];
 let pathMap = new Map();
+let canEdit = false;
+
+const roleRank = { VIEWER: 0, EDITOR: 1, ADMIN: 2 };
 
 function setStatus(msg) {
   els.status.textContent = msg;
@@ -44,6 +55,16 @@ function buildPathMap(nodes, parent = '') {
     pathMap.set(n.id, path);
     if (n.children?.length) buildPathMap(n.children, path);
   }
+}
+
+// Platta ut trädet till { id, path } för kategori-dropdownen.
+function flattenCats(nodes, prefix = '', out = []) {
+  for (const n of nodes) {
+    const path = prefix ? `${prefix} › ${n.name}` : n.name;
+    out.push({ id: n.id, path });
+    if (n.children?.length) flattenCats(n.children, path, out);
+  }
+  return out;
 }
 
 function linkRow(link) {
@@ -192,14 +213,17 @@ async function loadData() {
   els.loginView.classList.add('hidden');
   els.content.classList.remove('hidden');
   try {
-    const [cats, links] = await Promise.all([
+    const [cats, links, me] = await Promise.all([
       apiFetch('/api/categories'),
       apiFetch('/api/links'),
+      getMe().catch(() => null),
     ]);
     tree = cats;
     allLinks = links;
     pathMap = new Map();
     buildPathMap(tree);
+    canEdit = me ? roleRank[me.role] >= roleRank.EDITOR : false;
+    els.saveBtn.classList.toggle('hidden', !canEdit);
     render();
   } catch (err) {
     if (err.status === 401) {
@@ -214,6 +238,8 @@ async function loadData() {
 function showLogin() {
   els.content.classList.add('hidden');
   els.searchBox.classList.add('hidden');
+  els.saveBtn.classList.add('hidden');
+  els.saveView.classList.add('hidden');
   els.loginView.classList.remove('hidden');
   getSettings().then((s) => {
     els.loginUrl.value = s.baseUrl;
@@ -247,6 +273,78 @@ async function doLogin() {
   }
 }
 
+async function openSaveView() {
+  els.saveError.textContent = '';
+  // Läs aktuell flik.
+  let tab = null;
+  try {
+    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    tab = tabs[0];
+  } catch {
+    /* ignore */
+  }
+  const url = tab?.url || '';
+  if (!url || !/^https?:/i.test(url)) {
+    els.saveError.textContent = 'Den här fliken kan inte sparas (ingen webbadress).';
+  }
+  els.saveName.value = tab?.title || '';
+  els.saveUrl.value = url;
+
+  // Fyll kategori-dropdown: Inkorg först (tomt värde), sedan hela trädet.
+  els.saveCategory.innerHTML = '';
+  const inbox = document.createElement('option');
+  inbox.value = '';
+  inbox.textContent = '📥 Inkorg (osorterat)';
+  els.saveCategory.appendChild(inbox);
+  for (const c of flattenCats(tree)) {
+    const opt = document.createElement('option');
+    opt.value = String(c.id);
+    opt.textContent = c.path;
+    els.saveCategory.appendChild(opt);
+  }
+
+  els.content.classList.add('hidden');
+  els.searchBox.classList.add('hidden');
+  els.saveView.classList.remove('hidden');
+  els.saveName.focus();
+  els.saveName.select();
+}
+
+function closeSaveView() {
+  els.saveView.classList.add('hidden');
+  els.content.classList.remove('hidden');
+}
+
+async function doQuickSave() {
+  els.saveError.textContent = '';
+  const url = els.saveUrl.value.trim();
+  const name = els.saveName.value.trim();
+  const catVal = els.saveCategory.value;
+  if (!url || !/^https?:/i.test(url)) {
+    els.saveError.textContent = 'Ogiltig webbadress.';
+    return;
+  }
+  els.saveConfirmBtn.disabled = true;
+  try {
+    await quickSave({ url, name, categoryId: catVal ? Number(catVal) : null });
+    closeSaveView();
+    await loadData();
+    showToast('✔ Sidan sparades.');
+  } catch (err) {
+    els.saveError.textContent = err.message || 'Kunde inte spara sidan.';
+  } finally {
+    els.saveConfirmBtn.disabled = false;
+  }
+}
+
+function showToast(text) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  els.content.prepend(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
 // Events
 els.loginBtn.addEventListener('click', doLogin);
 els.loginPass.addEventListener('keydown', (e) => {
@@ -268,6 +366,9 @@ els.searchBox.addEventListener('input', () => {
   if (q) renderSearch(q);
   else render();
 });
+els.saveBtn.addEventListener('click', openSaveView);
+els.saveCancelBtn.addEventListener('click', closeSaveView);
+els.saveConfirmBtn.addEventListener('click', doQuickSave);
 
 // Init
 (async () => {
