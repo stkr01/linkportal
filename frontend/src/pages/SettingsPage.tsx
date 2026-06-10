@@ -7,8 +7,10 @@ import {
   deleteCategory,
   getCategories,
   updateCategory,
+  getSettings,
+  updateSettings,
 } from '../api/client';
-import type { Theme, ThemeKey } from '../types';
+import type { AppSettings, Theme, ThemeKey } from '../types';
 import { flattenCategories } from '../utils/categories';
 import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
 import { useTranslation } from '../i18n';
@@ -43,6 +45,8 @@ export default function SettingsPage() {
         <h2>{t('settings.title')}</h2>
 
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
+
+        {isAdmin && <HealthCheckSection />}
 
         {isAdmin && <CategorySection />}
       </div>
@@ -137,6 +141,111 @@ function ThemeSection({
         </button>
         <button type="submit" disabled={saving}>
           {saving ? t('common.saving') : t('settings.saveTheme')}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/* ---------- Health-check (endast Admin) ---------- */
+
+function HealthCheckSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: getSettings });
+  const [draft, setDraft] = useState<AppSettings | null>(null);
+  const [status, setStatus] = useState('');
+
+  const current = draft ?? settingsQuery.data ?? null;
+
+  const saveMut = useMutation({
+    mutationFn: (input: Partial<AppSettings>) => updateSettings(input),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['settings'], data);
+      setDraft(null);
+      setStatus(t('settings.health.saved'));
+    },
+    onError: () => setStatus(t('settings.somethingWrong')),
+  });
+
+  if (!current) {
+    return (
+      <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+        <h3 style={{ marginTop: 0 }}>{t('settings.health.title')}</h3>
+        <p className="muted">{t('common.loading')}</p>
+      </div>
+    );
+  }
+
+  const set = (patch: Partial<AppSettings>) => setDraft({ ...current, ...patch });
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setStatus('');
+    saveMut.mutate({
+      healthCheckEnabled: current.healthCheckEnabled,
+      healthCheckIntervalHours: current.healthCheckIntervalHours,
+      healthCheckTimeoutSec: current.healthCheckTimeoutSec,
+      healthRetentionDays: current.healthRetentionDays,
+    });
+  };
+
+  return (
+    <form className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }} onSubmit={onSubmit}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.health.title')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {t('settings.health.hint')}
+      </p>
+
+      <label htmlFor="hc-enabled" className="checkbox-row">
+        <input
+          id="hc-enabled"
+          type="checkbox"
+          checked={current.healthCheckEnabled}
+          onChange={(e) => set({ healthCheckEnabled: e.target.checked })}
+        />
+        <span>{t('settings.health.enabled')}</span>
+      </label>
+
+      <div className="row">
+        <div>
+          <label htmlFor="hc-interval">{t('settings.health.intervalHours')}</label>
+          <input
+            id="hc-interval"
+            type="number"
+            min={1}
+            max={168}
+            value={current.healthCheckIntervalHours}
+            onChange={(e) => set({ healthCheckIntervalHours: Number(e.target.value) })}
+          />
+        </div>
+        <div>
+          <label htmlFor="hc-timeout">{t('settings.health.timeoutSec')}</label>
+          <input
+            id="hc-timeout"
+            type="number"
+            min={1}
+            max={60}
+            value={current.healthCheckTimeoutSec}
+            onChange={(e) => set({ healthCheckTimeoutSec: Number(e.target.value) })}
+          />
+        </div>
+      </div>
+
+      <label htmlFor="hc-retention">{t('settings.health.retentionDays')}</label>
+      <input
+        id="hc-retention"
+        type="number"
+        min={0}
+        max={3650}
+        value={current.healthRetentionDays}
+        onChange={(e) => set({ healthRetentionDays: Number(e.target.value) })}
+      />
+
+      <div className="modal-actions" style={{ marginTop: '1rem' }}>
+        {status && <span className="muted" style={{ marginRight: 'auto' }}>{status}</span>}
+        <button type="submit" disabled={saveMut.isPending}>
+          {saveMut.isPending ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </form>

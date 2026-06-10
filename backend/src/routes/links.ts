@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { Prisma } from '@prisma/client';
-import { Role, Environment, LinkStatus } from '../constants';
+import { Role, Environment, ENVIRONMENTS, LinkStatus } from '../constants';
 import { prisma } from '../db';
 import { asyncHandler } from '../middleware/error';
 import { authenticate, requireRole } from '../middleware/auth';
 import { writeAudit } from '../services/audit';
+import { runCheck, runChecks } from '../services/healthcheck';
+import { getSettings } from '../services/settings';
 
 const router = Router();
 
@@ -56,6 +58,20 @@ router.get(
     const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
     const includeDescendants = req.query.includeDescendants !== 'false';
 
+    // Filter: environment (komma-separerad lista av giltiga miljöer)
+    const envParam = typeof req.query.environment === 'string' ? req.query.environment : '';
+    const environments = envParam
+      .split(',')
+      .map((e) => e.trim())
+      .filter((e): e is Environment => (ENVIRONMENTS as readonly string[]).includes(e));
+
+    // Filter: taggar (komma-separerad lista av tag-id)
+    const tagsParam = typeof req.query.tags === 'string' ? req.query.tags : '';
+    const tagIds = tagsParam
+      .split(',')
+      .map((t) => Number(t.trim()))
+      .filter((n) => Number.isInteger(n) && n > 0);
+
     const where: Prisma.LinkWhereInput = { isDeleted: false };
 
     if (categoryId) {
@@ -65,6 +81,14 @@ router.get(
       } else {
         where.categoryId = categoryId;
       }
+    }
+
+    if (environments.length) {
+      where.environment = { in: environments };
+    }
+
+    if (tagIds.length) {
+      where.tags = { some: { id: { in: tagIds } } };
     }
 
     if (q) {
@@ -116,6 +140,8 @@ const upsertSchema = z.object({
   owningTeam: z.string().max(100).optional().nullable(),
   status: z.nativeEnum(LinkStatus).optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
+  extraMonitor: z.boolean().optional(),
+  extraMonitorMinutes: z.number().int().min(1).max(1440).optional().nullable(),
 });
 
 // Koppla taggar (skapa de som saknas) och returnera connect-array.
@@ -264,6 +290,8 @@ router.post(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        extraMonitor: data.extraMonitor ?? false,
+        extraMonitorMinutes: data.extraMonitor ? data.extraMonitorMinutes ?? null : null,
         addedById: req.user!.userId,
         tags: { connect: tagConnect },
       },
@@ -317,6 +345,8 @@ router.put(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        extraMonitor: data.extraMonitor ?? false,
+        extraMonitorMinutes: data.extraMonitor ? data.extraMonitorMinutes ?? null : null,
         modifiedById: req.user!.userId,
         // ersätt taggar
         tags: { set: [], connect: tagConnect },
@@ -364,6 +394,53 @@ router.delete(
     });
 
     res.json({ ok: true });
+  })
+);
+
+// POST /api/links/test-all – kör health-check på länkar nu (Editor+)
+// Body { ids?: number[] } – om ids anges testas bara dessa, annars alla länkar.
+const testAllSchema = z.object({ ids: z.array(z.number().int()).optional() });
+
+router.post(
+  '/test-all',
+  authenticate,
+  requireRole(Role.EDITOR),
+  asyncHandler(async (req: Request, res: Response) => {
+    const { ids } = testAllSchema.parse(req.body ?? {});
+    const settings = await getSettings();
+    const links = await prisma.link.findMany({
+      where: { isDeleted: false, ...(ids && ids.length ? { id: { in: ids } } : {}) },
+      select: { id: true, url: true },
+    });
+    await runChecks(links, settings.healthCheckTimeoutSec);
+    res.json({ ok: true, tested: links.length });
+  })
+);
+
+// POST /api/links/:id/test – testa en länk omedelbart (Editor+)
+router.post(
+  '/:id/test',
+  authenticate,
+  requireRole(Role.EDITOR),
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.link.findFirst({
+      where: { id, isDeleted: false },
+      select: { id: true, url: true },
+    });
+    if (!existing) {
+      res.status(404).json({ error: 'Link not found.' });
+      return;
+    }
+
+    const settings = await getSettings();
+    await runCheck(existing, settings.healthCheckTimeoutSec);
+
+    const link = await prisma.link.findFirst({
+      where: { id },
+      include: linkIncludeFor(req.user!.userId),
+    });
+    res.json(serializeLink(link!));
   })
 );
 

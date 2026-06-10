@@ -56,6 +56,16 @@ model Link {
   tags           Tag[]       @relation("LinkTags")
   favoritedBy    UserFavorite[]
 
+  // Health-check (se BLUEPRINT avsnitt 14)
+  healthStatus        String        @default("UNKNOWN") // UP | DOWN | UNKNOWN
+  lastCheckedAt       DateTime?
+  lastStatusCode      Int?
+  lastLatencyMs       Int?
+  extraMonitor        Boolean       @default(false)
+  extraMonitorMinutes Int?
+  alertActive         Boolean       @default(false) // true när status gått UP -> DOWN, nollas vid UP igen
+  checks              HealthCheck[]
+
   dateAdded      DateTime    @default(now())
   addedById      Int
   addedBy        User        @relation("LinkCreatedBy", fields: [addedById], references: [id])
@@ -71,6 +81,29 @@ model Tag {
   id    Int    @id @default(autoincrement())
   name  String @unique
   links Link[] @relation("LinkTags")
+}
+
+// Health-check historik – egen tabell då raderna kan bli många (retention städar).
+model HealthCheck {
+  id         Int      @id @default(autoincrement())
+  linkId     Int
+  link       Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  status     String   // UP | DOWN
+  statusCode Int?
+  latencyMs  Int?
+  checkedAt  DateTime @default(now())
+
+  @@index([linkId, checkedAt])
+}
+
+// Global app-konfiguration – en enda rad (id = 1).
+model Settings {
+  id                      Int      @id @default(1)
+  healthCheckEnabled      Boolean  @default(true)
+  healthCheckIntervalHours Int     @default(4)
+  healthCheckTimeoutSec   Int      @default(5)
+  healthRetentionDays     Int      @default(30)
+  updatedAt               DateTime @updatedAt
 }
 
 // Personliga favoriter – unika per användare.

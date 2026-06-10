@@ -1,5 +1,6 @@
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import HealthDot from './HealthDot';
 
 interface Props {
   links: LinkItem[];
@@ -9,6 +10,7 @@ interface Props {
   onEdit: (l: LinkItem) => void;
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
+  onTest?: (l: LinkItem) => void;
 }
 
 // Compact, image-free detail view (alternative to the card grid).
@@ -20,6 +22,7 @@ export default function LinkList({
   onEdit,
   onDelete,
   onToggleFavorite,
+  onTest,
 }: Props) {
   const { t } = useTranslation();
   const copy = (url: string) => navigator.clipboard.writeText(url);
@@ -58,6 +61,7 @@ export default function LinkList({
                   ) : null}
                 </td>
                 <td>
+                  <HealthDot link={l} />{' '}
                   <a href={l.url} target="_blank" rel="noopener noreferrer">
                     {l.name}
                   </a>
@@ -97,6 +101,11 @@ export default function LinkList({
                     {canEdit && (
                       <button className="secondary" onClick={() => onEdit(l)}>
                         {t('common.edit')}
+                      </button>
+                    )}
+                    {canEdit && onTest && (
+                      <button className="secondary" onClick={() => onTest(l)}>
+                        {t('health.test')}
                       </button>
                     )}
                     {canDelete && (

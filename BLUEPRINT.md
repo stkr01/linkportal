@@ -446,7 +446,128 @@ Allt annat (Chrome-tillägg, health-check, bulk-import, SSO, dark mode-polish) =
 
 ---
 
+## 13. Backlog V3 (kandidater för nästa iteration)
+
+> Idéer som mognat fram efter att V1/V2 byggts (inloggning, kategoriträd, länk-CRUD, favoriter, per-användartema, i18n och Chrome/Edge-tillägget är redan på plats). Listan är prioriterad i tre block. Inget är beslutat – plocka det som ger mest nytta härnäst.
+
+### 13.1 Topprioritet (störst nytta för IT-Ops)
+- **Health-check / länkstatus** – Bakgrundsjobb som periodiskt pingar varje URL och visar 🟢 lever / 🔴 svarar inte / ⚪ ej testad. Dashboard-widget "X länkar svarar inte". Obs: interna länkar bakom brandvägg måste testas från en server innanför nätet. **Byggd – se avsnitt 14 för design.**
+- **Taggar utöver kategori** – Many-to-many-lager ovanpå trädet för korsfiltrering (t.ex. "produktion" + "firewall"). Schemat i Appendix A har redan `Tag`-modellen förberedd. **Byggd (korsfiltrering med tagg-/miljödropdowns).**
+- **SSO / Entra ID** – Ersätter lokala lösenord, automatisk roll-mappning från AD-grupper. Störst men högst värde för en intern Ragn-Sells-app (öppen fråga #7).
+
+### 13.2 Organisation, sök & data
+- **Klickstatistik / "mest använda"** – Räkna klick per länk och visa en datadriven topplista (utöver personliga favoriter).
+- **"Senast tillagda / senast ändrade"-vy** – Kronologisk vy (bygger på `LinkListEdited.tsx` + ISO-datum som redan finns).
+- **Sparade filter / smarta vyer** – "Mina team-länkar", "Allt i Produktion" (bygger på taggar + ägande team).
+- **Senast besökta** – Personlig recent-lista, frikopplad från favoriter.
+- **Dubblett-detektion** – Varna vid skapande om samma URL redan finns.
+- **Import/Export (CSV/JSON)** – Suga in befintliga Excel/OneNote-listor och ta backup.
+- **Versionshistorik per länk** – Diff-historik per post ovanpå audit-loggen ("vem ändrade URL:en?").
+
+### 13.3 Drift, integration & polish
+- **Trasig länk-notifieringar** – Maila/Teams-pinga ägande team när deras länk dör (bygger på health-check).
+- **Bulk-åtgärder** – Markera flera länkar → flytta kategori / massradera (Admin).
+- **Drag-and-drop i kategoriträdet** (Admin) – Omorganisera visuellt istället för via formulär.
+- **Context-meny "Spara till LinkPortal"** – Högerklick på valfri länk på en sida → spara direkt via tillägget.
+- **Teams/Slack-kommando** – `/linkportal vcenter` returnerar länken i chatten.
+- **Kopiera som Markdown/HTML** – Kopiera `[Namn](url)` för inklistring i wiki/Teams.
+- **Dark mode** – Mörkt tema ovanpå det befintliga per-användartemat.
+- **Auto-favicon vid skapande** – Hämta verktygets ikon automatiskt.
+- **QR-kod per länk** – Dela en intern länk snabbt till mobil/skärm.
+- **Raderade flyttas till en egen kategori och visas inte på andra urval. En vy som visar de som är raderade, knapp för radera hårt, knapp för att återställa dit den låg tidigare.
+
+
+---
+
 *Detta är ett levande dokument. Kommentera/ändra direkt i filen så uppdaterar vi blueprinten innan vi börjar koda.*
+
+---
+
+## 14. Health-check / länkstatus – design (beslutad)
+
+> Bestämd design för health-check-funktionen i Backlog V3 (avsnitt 13.1). Detta avsnitt är beslutsunderlaget vi bygger efter.
+
+### 14.1 Förutsättningar (beslut)
+- **Placering:** Backend körs på en webbserver i **Management-WLAN** som når alla interna hostar → ingen brandväggsbegränsning, alla länkar är testbara.
+- **Syfte:** Inte ett fullskaligt övervakningsverktyg, utan en enkel "lever länken?"-indikator som hjälper till att hålla katalogen ren.
+
+### 14.2 Hur ett test går till (per protokoll)
+Porten härleds från URL-schemat (explicit port i URL:en vinner alltid):
+
+| Schema | Test | Default-port | Tolkning |
+|--------|------|-------------|----------|
+| `https://` | HTTP HEAD/GET, kort timeout, följ **ej** redirects | 443 | Alla svar (även 401/403/500) = 🟢 UP. Endast timeout/DNS-fel/connection refused = 🔴 DOWN. |
+| `http://` | HTTP HEAD/GET | 80 | Som ovan. |
+| `rdp://` | **TCP-portkoll** (`net.connect`) | 3389 | Porten öppen = 🟢, annars 🔴. |
+| `ssh://` | **TCP-portkoll** | 22 | Som ovan. |
+| annat/okänt | hoppa över | — | ⚪ UNKNOWN (ej testbar). |
+
+> TCP-kollen i Node motsvarar `Test-NetConnection -ComputerName <host> -Port <port>`: anslut med kort timeout (t.ex. 3 s), lyckas = UP. RDP/SSH är de man oftast vill testa, och de testas just via portkoll.
+
+### 14.3 Två oberoende jobb-loopar
+- **Bas-loop:** kör **alla** länkar med ett globalt intervall (Settings, **default 4 h**).
+- **Extra Monitor-loop:** kör **bara** länkar som har `extraMonitor = true`, var och en på sitt **egna intervall (minuter)**. Tanken: starta tät bevakning på en specifik host man arbetar med – t.ex. var 1:a minut – utan att dra igång hela katalogen och störa nätet. Bocka ur när man är klar.
+
+Dessutom manuella triggers:
+- **"Testa alla nu"** – global knapp (Editor+), kör bas-svepet direkt.
+- **"Test Connection"** – knapp på varje kort/rad (Editor+), testar bara den länken omedelbart.
+
+### 14.4 Datamodell (utbyggnad av `Link` + egen historiktabell)
+```prisma
+model Link {
+  // ...befintliga fält...
+  healthStatus        String    @default("UNKNOWN")  // UP / DOWN / UNKNOWN
+  lastCheckedAt       DateTime?
+  lastStatusCode      Int?       // HTTP-kod (null för TCP-test)
+  lastLatencyMs       Int?       // svarstid i ms
+  extraMonitor        Boolean   @default(false)
+  extraMonitorMinutes Int?       // eget intervall i minuter när extraMonitor = true
+  checks              HealthCheck[]
+}
+
+model HealthCheck {
+  id         Int      @id @default(autoincrement())
+  linkId     Int
+  link       Link     @relation(fields: [linkId], references: [id])
+  status     String   // UP / DOWN
+  statusCode Int?
+  latencyMs  Int?
+  checkedAt  DateTime @default(now())
+
+  @@index([linkId, checkedAt])
+}
+```
+
+### 14.5 Historik & retention
+- Varje körning skrivs till `HealthCheck` (egen tabell – kan bli många rader).
+- **Settings: retention i dagar** – ett städjobb tar bort rader äldre än X dagar (default t.ex. 30).
+- Indexet `[linkId, checkedAt]` gör både historik-uppslag och städning effektiva.
+
+### 14.6 Settings (nya fält)
+- **Health-check-intervall** (timmar, default 4) – bas-loopen.
+- **Test-timeout** (sekunder, default 3–5).
+- **Historik-retention** (dagar, default 30).
+- **Av/på** för hela health-check-jobbet.
+- (Per länk, inte global: `extraMonitor` + `extraMonitorMinutes`.)
+
+### 14.7 Behörigheter
+| Åtgärd | Viewer | Editor | Admin |
+|--------|:------:|:------:|:-----:|
+| Se status (🟢/🔴/⚪) | ✅ | ✅ | ✅ |
+| "Test Connection" / "Testa alla nu" | ❌ | ✅ | ✅ |
+| Sätta `extraMonitor` + minuter på en länk | ❌ | ✅ | ✅ |
+| Ändra intervall-/retention-settings | ❌ | ❌ | ✅ |
+
+### 14.8 Säkerhet (SSRF-skydd, inbyggt från start)
+- Kort timeout, **följ inte redirects**, läs **inte** svarsbody, skicka **aldrig** cookies/credentials.
+- HTTP-test gör bara HEAD/GET och bryr sig bara om att *något* svar kom (statuskod), inte innehållet.
+- Metadata-IP (`169.254.169.254`) och loopback hålls i en dokumenterad spärrlista; i övrigt tillåts interna IP medvetet (backend *ska* nå Management-nätet).
+
+### 14.9 UI
+- Liten statusprick (🟢/🔴/⚪) på varje kort och i listvyn, med tooltip: senaste kontroll + svarstid/statuskod.
+- Dashboard-widget: **"X länkar svarar inte"** som länkar till ett filtrerat urval av 🔴.
+- I länkformuläret (Editor+): kryssruta **Extra Monitor** + fält för minuter.
+- I Settings (Admin): bas-intervall, timeout, retention, av/på.
 
 ---
 
@@ -657,4 +778,7 @@ IT-Monitoring
 | 2026-06-08 | 0.1 | Första utkast: vision, datamodell, features, arkitektur, API, UX, öppna frågor. |
 | 2026-06-08 | 0.2 | Beslut: Node.js + Express + Prisma, SQLite, endast Admin hanterar kategorier. Chrome-tillägg tillagt i scope (V2). |
 | 2026-06-08 | 0.3 | Lagt till avsnitt 11 (Chrome-tillägg i detalj), avsnitt 12 (brainstorm), samt appendix A–D (Prisma-schema, ER-diagram, seed-data). |
+| 2026-06-10 | 0.4 | Lagt till avsnitt 13 (Backlog V3): prioriterade funktionsidéer – health-check, taggar, SSO, klickstatistik, import/export, bulk-åtgärder, dark mode m.fl. |
+| 2026-06-10 | 0.5 | Byggt korsfiltrering (tagg-/miljödropdowns). Lagt till avsnitt 14 (Health-check – beslutad design: per-protokoll-test, bas-loop 4h + per-länk Extra Monitor, HealthCheck-historiktabell med retention, behörigheter, SSRF-skydd). Städat skräprad i 13.1. |
+| 2026-06-10 | 0.6 | Byggt health-check enligt avsnitt 14: Prisma-modeller (HealthCheck, Settings) + Link-fält, HTTP-/TCP-test med SSRF-skydd, schemaläggare (bas-loop + per-länk Extra Monitor + retention-städning), API (`/settings`, `/links/:id/test`, `/links/test-all`), statusprickar i kort-/listvyer, Extra Monitor i länkformuläret och health-check-inställningar för Admin. |
 

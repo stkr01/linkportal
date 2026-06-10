@@ -5,12 +5,15 @@ import { useAuth } from '../auth/AuthContext';
 import {
   getCategories,
   getLinks,
+  getTags,
   createLink,
   updateLink,
   deleteLink,
   setFavorite,
+  testLink,
+  testAllLinks,
 } from '../api/client';
-import type { LinkInput, LinkItem } from '../types';
+import type { Environment, LinkInput, LinkItem } from '../types';
 import { categoryPathMap } from '../utils/categories';
 import { useTranslation } from '../i18n';
 import CategoryTree from '../components/CategoryTree';
@@ -19,8 +22,21 @@ import LinkList from '../components/LinkList';
 import LinkListEdited from '../components/LinkListEdited';
 import LinkForm from '../components/LinkForm';
 import CommandPalette from '../components/CommandPalette';
+import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
 type ViewMode = 'card' | 'list' | 'edited';
+
+const ENVIRONMENTS: Environment[] = ['PROD', 'TEST', 'DEV', 'NA'];
+
+function readStoredList(key: string): string[] {
+  try {
+    const saved = localStorage.getItem(key);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
 
 export default function DashboardPage() {
   const { user, logout, hasRole } = useAuth();
@@ -29,6 +45,7 @@ export default function DashboardPage() {
 
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [favoritesView, setFavoritesView] = useState(false);
+  const [alertsView, setAlertsView] = useState(false);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -42,6 +59,27 @@ export default function DashboardPage() {
   const changeView = (mode: ViewMode) => {
     localStorage.setItem('linkportal.viewMode', mode);
     setViewMode(mode);
+  };
+
+  // Korsfiltrering: taggar + miljö. Behålls i localStorage och över kategoribyten.
+  const [selectedTags, setSelectedTags] = useState<string[]>(() =>
+    readStoredList('linkportal.filterTags')
+  );
+  const [selectedEnvironments, setSelectedEnvironments] = useState<string[]>(() =>
+    readStoredList('linkportal.filterEnvironments')
+  );
+
+  useEffect(() => {
+    localStorage.setItem('linkportal.filterTags', JSON.stringify(selectedTags));
+  }, [selectedTags]);
+  useEffect(() => {
+    localStorage.setItem('linkportal.filterEnvironments', JSON.stringify(selectedEnvironments));
+  }, [selectedEnvironments]);
+
+  const hasActiveFilters = selectedTags.length > 0 || selectedEnvironments.length > 0;
+  const clearFilters = () => {
+    setSelectedTags([]);
+    setSelectedEnvironments([]);
   };
 
   // Debounce sökning
@@ -64,12 +102,16 @@ export default function DashboardPage() {
 
   const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories });
 
+  const tagsQuery = useQuery({ queryKey: ['tags'], queryFn: getTags });
+
   const linksQuery = useQuery({
-    queryKey: ['links', selectedCategory, debouncedSearch],
+    queryKey: ['links', selectedCategory, debouncedSearch, selectedTags, selectedEnvironments],
     queryFn: () =>
       getLinks({
         categoryId: selectedCategory ?? undefined,
         q: debouncedSearch || undefined,
+        tags: selectedTags.length ? selectedTags.map(Number) : undefined,
+        environment: selectedEnvironments.length ? selectedEnvironments : undefined,
       }),
   });
 
@@ -102,6 +144,14 @@ export default function DashboardPage() {
     mutationFn: ({ id, isFavorite }: { id: number; isFavorite: boolean }) => setFavorite(id, isFavorite),
     onSuccess: invalidate,
   });
+  const testMut = useMutation({
+    mutationFn: (id: number) => testLink(id),
+    onSuccess: invalidate,
+  });
+  const testAllMut = useMutation({
+    mutationFn: (ids?: number[]) => testAllLinks(ids),
+    onSuccess: invalidate,
+  });
 
   const onSubmitForm = async (input: LinkInput) => {
     if (editing) {
@@ -121,6 +171,10 @@ export default function DashboardPage() {
     favoriteMut.mutate({ id: l.id, isFavorite: !l.isFavorite });
   };
 
+  const onTest = (l: LinkItem) => {
+    testMut.mutate(l.id);
+  };
+
   const canEdit = hasRole('EDITOR');
   const canDelete = hasRole('ADMIN');
   const links = linksQuery.data ?? [];
@@ -134,16 +188,32 @@ export default function DashboardPage() {
     [allLinksQuery.data]
   );
 
+  // Monitor Alerts – länkar som varit gröna men ändrats till röda (alertActive).
+  const alerts = useMemo(
+    () =>
+      (allLinksQuery.data ?? [])
+        .filter((l) => l.alertActive)
+        .sort((a, b) => a.name.localeCompare(b.name, 'en')),
+    [allLinksQuery.data]
+  );
+
   const selectFavorites = () => {
     setFavoritesView(true);
+    setAlertsView(false);
+    setSelectedCategory(null);
+  };
+  const selectAlerts = () => {
+    setAlertsView(true);
+    setFavoritesView(false);
     setSelectedCategory(null);
   };
   const selectCategory = (id: number | null) => {
     setFavoritesView(false);
+    setAlertsView(false);
     setSelectedCategory(id);
   };
 
-  const displayLinks = favoritesView ? favorites : links;
+  const displayLinks = alertsView ? alerts : favoritesView ? favorites : links;
 
   return (
     <div className="app-shell">
@@ -184,6 +254,9 @@ export default function DashboardPage() {
               favoritesActive={favoritesView}
               favoritesCount={favorites.length}
               onSelectFavorites={selectFavorites}
+              alertsActive={alertsView}
+              alertsCount={alerts.length}
+              onSelectAlerts={selectAlerts}
             />
           )}
         </aside>
@@ -191,13 +264,43 @@ export default function DashboardPage() {
         <main className="content">
           <div className="content-header">
             <h2>
-              {favoritesView
+              {alertsView
+                ? t('dashboard.monitorAlerts')
+                : favoritesView
                 ? t('dashboard.favorites')
                 : selectedCategory
                 ? pathMap.get(selectedCategory) ?? t('dashboard.category')
                 : t('dashboard.allLinks')}
             </h2>
             <span className="muted">({displayLinks.length})</span>
+            {!favoritesView && !alertsView && (
+              <div className="filter-bar">
+                <MultiSelectDropdown
+                  label={t('filter.tags')}
+                  options={(tagsQuery.data ?? []).map((tg) => ({
+                    value: String(tg.id),
+                    label: tg.name,
+                  }))}
+                  selected={selectedTags}
+                  onChange={setSelectedTags}
+                  emptyText={t('filter.noTags')}
+                />
+                <MultiSelectDropdown
+                  label={t('filter.environment')}
+                  options={ENVIRONMENTS.map((e) => ({ value: e, label: e }))}
+                  selected={selectedEnvironments}
+                  onChange={setSelectedEnvironments}
+                />
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={clearFilters}
+                  disabled={!hasActiveFilters}
+                >
+                  {t('filter.clear')}
+                </button>
+              </div>
+            )}
             <span className="spacer" />
             <div className="view-toggle" role="group" aria-label={t('dashboard.viewModeLabel')}>
               <button
@@ -235,14 +338,29 @@ export default function DashboardPage() {
                 {t('dashboard.newLink')}
               </button>
             )}
+            {canEdit && !favoritesView && (
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => testAllMut.mutate(displayLinks.map((l) => l.id))}
+                disabled={testAllMut.isPending}
+                title={t('health.testAllHint')}
+              >
+                {testAllMut.isPending ? t('health.testing') : t('health.testAll')}
+              </button>
+            )}
           </div>
 
           {linksQuery.isLoading ? (
             <div className="empty">{t('dashboard.loadingLinks')}</div>
           ) : displayLinks.length === 0 ? (
             <div className="empty">
-              {favoritesView ? t('dashboard.noFavorites') : t('dashboard.noLinks')}
-              {!favoritesView && canEdit && t('dashboard.noLinksHint')}
+              {alertsView
+                ? t('dashboard.noAlerts')
+                : favoritesView
+                ? t('dashboard.noFavorites')
+                : t('dashboard.noLinks')}
+              {!favoritesView && !alertsView && canEdit && t('dashboard.noLinksHint')}
             </div>
           ) : viewMode === 'list' ? (
             <LinkList
@@ -256,6 +374,7 @@ export default function DashboardPage() {
               }}
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
+              onTest={onTest}
             />
           ) : viewMode === 'edited' ? (
             <LinkListEdited
@@ -269,6 +388,7 @@ export default function DashboardPage() {
               }}
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
+              onTest={onTest}
             />
           ) : (
             <div className="link-grid">
@@ -285,6 +405,7 @@ export default function DashboardPage() {
                   }}
                   onDelete={onDelete}
                   onToggleFavorite={onToggleFavorite}
+                  onTest={onTest}
                 />
               ))}
             </div>

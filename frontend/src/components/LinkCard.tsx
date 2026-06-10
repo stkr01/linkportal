@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
 import { formatDate } from '../utils/date';
+import HealthDot from './HealthDot';
 
 interface Props {
   link: LinkItem;
@@ -11,6 +12,7 @@ interface Props {
   onEdit: (l: LinkItem) => void;
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
+  onTest?: (l: LinkItem) => void;
 }
 
 function faviconUrl(url: string): string | null {
@@ -22,7 +24,7 @@ function faviconUrl(url: string): string | null {
   }
 }
 
-export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite }: Props) {
+export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite, onTest }: Props) {
   const { t } = useTranslation();
   const fav = faviconUrl(link.url);
   const lastEdited = formatDate(link.dateModified);
@@ -69,6 +71,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
           <a href={link.url} target="_blank" rel="noopener noreferrer">
             {link.name}
           </a>
+          <HealthDot link={link} />
           <span className={`env ${link.environment}`}>{link.environment}</span>
           {link.status === 'DEPRECATED' && <span className="env PROD">{t('card.deprecated')}</span>}
         </h3>
@@ -114,6 +117,11 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
         {canEdit && (
           <button className="secondary" onClick={() => onEdit(link)}>
             {t('common.edit')}
+          </button>
+        )}
+        {canEdit && onTest && (
+          <button className="secondary" onClick={() => onTest(link)}>
+            {t('health.test')}
           </button>
         )}
         {canDelete && (

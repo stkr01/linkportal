@@ -1,10 +1,12 @@
 import axios from 'axios';
 import type {
   AdminUser,
+  AppSettings,
   CategoryNode,
   LinkInput,
   LinkItem,
   Role,
+  Tag,
   Theme,
   User,
 } from '../types';
@@ -60,8 +62,26 @@ export async function deleteCategory(id: number): Promise<void> {
 }
 
 // Links
-export async function getLinks(params: { categoryId?: number; q?: string }): Promise<LinkItem[]> {
-  const { data } = await api.get('/links', { params });
+export async function getLinks(params: {
+  categoryId?: number;
+  q?: string;
+  tags?: number[];
+  environment?: string[];
+}): Promise<LinkItem[]> {
+  const { tags, environment, ...rest } = params;
+  const { data } = await api.get('/links', {
+    params: {
+      ...rest,
+      tags: tags && tags.length ? tags.join(',') : undefined,
+      environment: environment && environment.length ? environment.join(',') : undefined,
+    },
+  });
+  return data;
+}
+
+// Tags (för filter)
+export async function getTags(): Promise<Tag[]> {
+  const { data } = await api.get('/tags');
   return data;
 }
 
@@ -81,6 +101,27 @@ export async function deleteLink(id: number): Promise<void> {
 
 export async function setFavorite(id: number, isFavorite: boolean): Promise<LinkItem> {
   const { data } = await api.patch(`/links/${id}/favorite`, { isFavorite });
+  return data;
+}
+
+// Health-check
+export async function testLink(id: number): Promise<LinkItem> {
+  const { data } = await api.post(`/links/${id}/test`);
+  return data;
+}
+
+export async function testAllLinks(ids?: number[]): Promise<{ ok: boolean; tested: number }> {
+  const { data } = await api.post('/links/test-all', ids && ids.length ? { ids } : {});
+  return data;
+}
+
+export async function getSettings(): Promise<AppSettings> {
+  const { data } = await api.get('/settings');
+  return data;
+}
+
+export async function updateSettings(input: Partial<AppSettings>): Promise<AppSettings> {
+  const { data } = await api.put('/settings', input);
   return data;
 }
 

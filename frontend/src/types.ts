@@ -1,6 +1,7 @@
 export type Role = 'ADMIN' | 'EDITOR' | 'VIEWER';
 export type Environment = 'PROD' | 'TEST' | 'DEV' | 'NA';
 export type LinkStatus = 'ACTIVE' | 'DEPRECATED';
+export type HealthStatus = 'UP' | 'DOWN' | 'UNKNOWN';
 
 export type ThemeKey = 'primary' | 'primaryDark' | 'accent' | 'bg' | 'surface' | 'text';
 export type Theme = Partial<Record<ThemeKey, string>>;
@@ -44,6 +45,13 @@ export interface LinkItem {
   owningTeam: string | null;
   status: LinkStatus;
   isFavorite: boolean;
+  healthStatus: HealthStatus;
+  lastCheckedAt: string | null;
+  lastStatusCode: number | null;
+  lastLatencyMs: number | null;
+  extraMonitor: boolean;
+  extraMonitorMinutes: number | null;
+  alertActive: boolean;
   categoryId: number;
   category: { id: number; name: string; parentId: number | null };
   tags: Tag[];
@@ -64,4 +72,13 @@ export interface LinkInput {
   owningTeam?: string | null;
   status?: LinkStatus;
   tags?: string[];
+  extraMonitor?: boolean;
+  extraMonitorMinutes?: number | null;
+}
+
+export interface AppSettings {
+  healthCheckEnabled: boolean;
+  healthCheckIntervalHours: number;
+  healthCheckTimeoutSec: number;
+  healthRetentionDays: number;
 }

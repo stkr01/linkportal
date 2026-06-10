@@ -32,6 +32,22 @@ Förutsätter att **Node.js** (LTS) är installerat.
 
 > OBS: I PowerShell kan `npm.ps1` blockeras av execution policy. Använd då `npm.cmd` / `npx.cmd`, eller kör `Set-ExecutionPolicy -Scope Process Bypass`.
 
+### Snabbstart (när allt redan är installerat)
+
+Starta de två servrarna i **varsin terminal**:
+
+```powershell
+# Terminal 1 – backend (API på http://localhost:4000)
+cd backend
+npm run dev
+
+# Terminal 2 – frontend (webbapp på http://localhost:5173)
+cd frontend
+npm run dev
+```
+
+Öppna sedan http://localhost:5173 i webbläsaren.
+
 ### 1. Backend
 
 ```powershell

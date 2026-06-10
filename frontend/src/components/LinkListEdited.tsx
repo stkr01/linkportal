@@ -1,6 +1,7 @@
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
 import { formatDate } from '../utils/date';
+import HealthDot from './HealthDot';
 
 interface Props {
   links: LinkItem[];
@@ -10,6 +11,7 @@ interface Props {
   onEdit: (l: LinkItem) => void;
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
+  onTest?: (l: LinkItem) => void;
 }
 
 // Detail view variant that shows audit info (Last Edit / Edited by) instead of Tags.
@@ -21,6 +23,7 @@ export default function LinkListEdited({
   onEdit,
   onDelete,
   onToggleFavorite,
+  onTest,
 }: Props) {
   const { t } = useTranslation();
   const copy = (url: string) => navigator.clipboard.writeText(url);
@@ -60,6 +63,7 @@ export default function LinkListEdited({
                   ) : null}
                 </td>
                 <td>
+                  <HealthDot link={l} />{' '}
                   <a href={l.url} target="_blank" rel="noopener noreferrer">
                     {l.name}
                   </a>
@@ -88,6 +92,11 @@ export default function LinkListEdited({
                     {canEdit && (
                       <button className="secondary" onClick={() => onEdit(l)}>
                         {t('common.edit')}
+                      </button>
+                    )}
+                    {canEdit && onTest && (
+                      <button className="secondary" onClick={() => onTest(l)}>
+                        {t('health.test')}
                       </button>
                     )}
                     {canDelete && (

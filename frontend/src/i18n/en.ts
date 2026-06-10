@@ -40,10 +40,12 @@ export const en = {
   'dashboard.logout': 'Log out',
   'dashboard.loadingCategories': 'Loading categories…',
   'dashboard.favorites': '★ Favorites',
+  'dashboard.monitorAlerts': '🔴 Monitor Alerts',
   'dashboard.category': 'Category',
   'dashboard.allLinks': 'All links',
   'dashboard.loadingLinks': 'Loading links…',
   'dashboard.noFavorites': 'No favorites yet. Mark a link with ★ to add it here.',
+  'dashboard.noAlerts': 'No alerts. No link has changed from up to down.',
   'dashboard.noLinks': 'No links here yet.',
   'dashboard.noLinksHint': ' Click "+ New link" to add one.',
   'dashboard.newLink': '+ New link',
@@ -52,6 +54,34 @@ export const en = {
   'dashboard.viewDetail': 'Details',
   'dashboard.viewEdited': 'Last edited',
   'dashboard.viewModeLabel': 'View mode',
+
+  // Filters (tags / environment)
+  'filter.tags': 'Tags',
+  'filter.environment': 'Environment',
+  'filter.clear': 'Clear filters',
+  'filter.noTags': 'No tags yet',
+
+  // Health-check
+  'health.status.UP': 'Up',
+  'health.status.DOWN': 'Down',
+  'health.status.UNKNOWN': 'Not checked',
+  'health.checkedAt': 'Checked {{date}}',
+  'health.extraEvery': 'Extra monitor every {{minutes}} min',
+  'health.test': 'Test',
+  'health.testing': 'Testing…',
+  'health.testAll': 'Test Connections',
+  'health.testAllHint': 'Run a health-check on the links currently shown',
+  'form.extraMonitor': 'Extra monitor (frequent checks)',
+  'form.extraMonitorMinutes': 'Check interval (minutes)',
+  'form.extraMonitorHint': 'Checks this link on its own schedule, separate from the base sweep.',
+  'settings.health.title': 'Health-check',
+  'settings.health.hint':
+    'Periodically checks that links respond. HTTP(S) uses a HEAD request; rdp/ssh use a TCP port check.',
+  'settings.health.enabled': 'Enable health-check',
+  'settings.health.intervalHours': 'Base interval (hours)',
+  'settings.health.timeoutSec': 'Timeout (seconds)',
+  'settings.health.retentionDays': 'History retention (days, 0 = keep forever)',
+  'settings.health.saved': 'Health-check settings saved.',
 
   // Link card
   'card.openTitle': 'Open {{name}}',
@@ -79,6 +109,7 @@ export const en = {
   // Category tree
   'tree.favorites': 'Favorites',
   'tree.allLinks': 'All links',
+  'tree.monitorAlerts': 'Monitor Alerts',
 
   // Command palette
   'palette.placeholder': 'Search links… (Esc to close)',

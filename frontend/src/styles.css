@@ -577,6 +577,85 @@ th {
   font-size: 0.8rem;
 }
 
+/* Health-check status dot */
+.health-dot {
+  font-size: 0.7rem;
+  line-height: 1;
+  vertical-align: middle;
+  cursor: default;
+  user-select: none;
+}
+
+/* Filter bar (tags / environment) */
+.filter-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.filter-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.filter-toggle {
+  font-size: 0.82rem;
+  padding: 0.4rem 0.7rem;
+  white-space: nowrap;
+}
+.filter-toggle.active {
+  background: var(--rs-accent);
+  color: #1f2421;
+  border-color: var(--rs-accent);
+  font-weight: 600;
+}
+.filter-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 50;
+  min-width: 180px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 0.35rem;
+}
+.filter-option {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.filter-option:hover {
+  background: #eef5ec;
+}
+.filter-option input {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.filter-option span {
+  flex: 1 1 auto;
+  text-align: left;
+}
+.filter-empty {
+  padding: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
 /* View toggle (Cards / Details) */
 .view-toggle {
   display: inline-flex;

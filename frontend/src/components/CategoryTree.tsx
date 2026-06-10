@@ -9,6 +9,9 @@ interface Props {
   favoritesActive?: boolean;
   favoritesCount?: number;
   onSelectFavorites?: () => void;
+  alertsActive?: boolean;
+  alertsCount?: number;
+  onSelectAlerts?: () => void;
 }
 
 function TreeNode({
@@ -61,6 +64,9 @@ export default function CategoryTree({
   favoritesActive,
   favoritesCount,
   onSelectFavorites,
+  alertsActive,
+  alertsCount,
+  onSelectAlerts,
 }: Props) {
   const { t } = useTranslation();
   return (
@@ -77,13 +83,24 @@ export default function CategoryTree({
         </div>
       )}
       <div
-        className={`tree-row${!favoritesActive && selectedId === null ? ' active' : ''}`}
+        className={`tree-row${!favoritesActive && !alertsActive && selectedId === null ? ' active' : ''}`}
         onClick={() => onSelect(null)}
         style={{ fontWeight: 600 }}
       >
         <span className="twisty">•</span>
         <span>{t('tree.allLinks')}</span>
       </div>
+      {onSelectAlerts && (
+        <div
+          className={`tree-row${alertsActive ? ' active' : ''}`}
+          onClick={onSelectAlerts}
+          style={{ fontWeight: 600 }}
+        >
+          <span className="twisty" style={{ color: '#d33' }}>🔴</span>
+          <span>{t('tree.monitorAlerts')}</span>
+          <span className="count">{alertsCount ?? 0}</span>
+        </div>
+      )}
       <div style={{ marginTop: '0.5rem' }}>
         {nodes.map((n) => (
           <TreeNode key={n.id} node={n} selectedId={selectedId} onSelect={onSelect} depth={0} />
