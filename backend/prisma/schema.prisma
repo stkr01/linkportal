@@ -59,6 +59,7 @@ model Link {
   // Health-check (se BLUEPRINT avsnitt 14)
   healthStatus        String        @default("UNKNOWN") // UP | DOWN | UNKNOWN
   lastCheckedAt       DateTime?
+  lastUpAt            DateTime?     // last time a check returned UP (last successful monitoring)
   lastStatusCode      Int?
   lastLatencyMs       Int?
   extraMonitor        Boolean       @default(false)

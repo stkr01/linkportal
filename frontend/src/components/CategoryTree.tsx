@@ -12,6 +12,12 @@ interface Props {
   alertsActive?: boolean;
   alertsCount?: number;
   onSelectAlerts?: () => void;
+  recentActive?: boolean;
+  recentCount?: number;
+  onSelectRecent?: () => void;
+  trashActive?: boolean;
+  trashCount?: number;
+  onSelectTrash?: () => void;
 }
 
 function TreeNode({
@@ -67,6 +73,12 @@ export default function CategoryTree({
   alertsActive,
   alertsCount,
   onSelectAlerts,
+  recentActive,
+  recentCount,
+  onSelectRecent,
+  trashActive,
+  trashCount,
+  onSelectTrash,
 }: Props) {
   const { t } = useTranslation();
   return (
@@ -83,13 +95,24 @@ export default function CategoryTree({
         </div>
       )}
       <div
-        className={`tree-row${!favoritesActive && !alertsActive && selectedId === null ? ' active' : ''}`}
+        className={`tree-row${!favoritesActive && !alertsActive && !recentActive && !trashActive && selectedId === null ? ' active' : ''}`}
         onClick={() => onSelect(null)}
         style={{ fontWeight: 600 }}
       >
         <span className="twisty">•</span>
         <span>{t('tree.allLinks')}</span>
       </div>
+      {onSelectRecent && (
+        <div
+          className={`tree-row${recentActive ? ' active' : ''}`}
+          onClick={onSelectRecent}
+          style={{ fontWeight: 600 }}
+        >
+          <span className="twisty">🆕</span>
+          <span>{t('tree.recentlyAdded')}</span>
+          <span className="count">{recentCount ?? 0}</span>
+        </div>
+      )}
       {onSelectAlerts && (
         <div
           className={`tree-row${alertsActive ? ' active' : ''}`}
@@ -99,6 +122,17 @@ export default function CategoryTree({
           <span className="twisty" style={{ color: '#d33' }}>🔴</span>
           <span>{t('tree.monitorAlerts')}</span>
           <span className="count">{alertsCount ?? 0}</span>
+        </div>
+      )}
+      {onSelectTrash && (
+        <div
+          className={`tree-row${trashActive ? ' active' : ''}`}
+          onClick={onSelectTrash}
+          style={{ fontWeight: 600 }}
+        >
+          <span className="twisty">🗑</span>
+          <span>{t('tree.trash')}</span>
+          <span className="count">{trashCount ?? 0}</span>
         </div>
       )}
       <div style={{ marginTop: '0.5rem' }}>

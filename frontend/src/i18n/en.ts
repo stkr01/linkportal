@@ -35,14 +35,18 @@ export const en = {
 
   // Dashboard
   'dashboard.searchPlaceholder': 'Search… (or press Ctrl+K)',
+  'dashboard.clearSearch': 'Clear search',
   'dashboard.users': 'Users',
   'dashboard.settings': '⚙ Settings',
   'dashboard.logout': 'Log out',
   'dashboard.loadingCategories': 'Loading categories…',
   'dashboard.favorites': '★ Favorites',
   'dashboard.monitorAlerts': '🔴 Monitor Alerts',
+  'dashboard.trash': '🗑 Deleted',
+  'dashboard.noTrash': 'No deleted links.',
   'dashboard.category': 'Category',
   'dashboard.allLinks': 'All links',
+  'dashboard.recentlyAdded': '🆕 Recently added',
   'dashboard.loadingLinks': 'Loading links…',
   'dashboard.noFavorites': 'No favorites yet. Mark a link with ★ to add it here.',
   'dashboard.noAlerts': 'No alerts. No link has changed from up to down.',
@@ -66,6 +70,7 @@ export const en = {
   'health.status.DOWN': 'Down',
   'health.status.UNKNOWN': 'Not checked',
   'health.checkedAt': 'Checked {{date}}',
+  'health.lastUpAt': 'Last successful {{date}}',
   'health.extraEvery': 'Extra monitor every {{minutes}} min',
   'health.test': 'Test',
   'health.testing': 'Testing…',
@@ -100,16 +105,23 @@ export const en = {
   'list.environment': 'Environment',
   'list.manageSoftware': 'Manage Software',
   'list.team': 'Team',
+  'list.lastUp': 'Last successful',
   'list.added': 'Added',
   'list.tags': 'Tags',
   'list.lastEdit': 'Last Edit',
   'list.editedBy': 'Edited by',
   'list.actions': 'Actions',
+  'trash.colDeleted': 'Deleted',
+  'trash.restore': 'Restore',
+  'trash.deletePermanently': 'Delete permanently',
+  'trash.confirmPermanent': 'Permanently delete "{{name}}"? This cannot be undone.',
 
   // Category tree
   'tree.favorites': 'Favorites',
   'tree.allLinks': 'All links',
+  'tree.recentlyAdded': 'Recently added',
   'tree.monitorAlerts': 'Monitor Alerts',
+  'tree.trash': 'Deleted',
 
   // Command palette
   'palette.placeholder': 'Search links… (Esc to close)',
@@ -136,6 +148,11 @@ export const en = {
 
   // Settings
   'settings.title': 'Settings',
+  'settings.language': 'Language',
+  'settings.languageHint': 'Choose the interface language. The choice is saved in this browser.',
+  'settings.recent': 'Recently added',
+  'settings.recentHint': 'Choose how many links the "Recently added" view shows. Saved in this browser.',
+  'settings.recentCount': 'Number of links to show',
   'settings.theme': 'Color theme',
   'settings.themeHint':
     'The theme is saved to your account and follows you on any device. Changes are previewed instantly.',

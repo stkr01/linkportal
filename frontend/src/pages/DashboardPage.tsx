@@ -9,6 +9,9 @@ import {
   createLink,
   updateLink,
   deleteLink,
+  getDeletedLinks,
+  restoreLink,
+  permanentDeleteLink,
   setFavorite,
   testLink,
   testAllLinks,
@@ -20,6 +23,7 @@ import CategoryTree from '../components/CategoryTree';
 import LinkCard from '../components/LinkCard';
 import LinkList from '../components/LinkList';
 import LinkListEdited from '../components/LinkListEdited';
+import TrashList from '../components/TrashList';
 import LinkForm from '../components/LinkForm';
 import CommandPalette from '../components/CommandPalette';
 import MultiSelectDropdown from '../components/MultiSelectDropdown';
@@ -38,6 +42,12 @@ function readStoredList(key: string): string[] {
   }
 }
 
+// Reads the user-configurable "recently added" count from localStorage (1–100, default 10).
+function readRecentCount(): number {
+  const saved = Number(localStorage.getItem('linkportal.recentCount'));
+  return Number.isFinite(saved) && saved >= 1 ? Math.min(Math.floor(saved), 100) : 10;
+}
+
 export default function DashboardPage() {
   const { user, logout, hasRole } = useAuth();
   const { t } = useTranslation();
@@ -46,6 +56,8 @@ export default function DashboardPage() {
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [favoritesView, setFavoritesView] = useState(false);
   const [alertsView, setAlertsView] = useState(false);
+  const [recentView, setRecentView] = useState(false);
+  const [trashView, setTrashView] = useState(false);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
@@ -118,6 +130,13 @@ export default function DashboardPage() {
   // Alla länkar (för command palette) – oberoende av filter.
   const allLinksQuery = useQuery({ queryKey: ['links', 'all'], queryFn: () => getLinks({}) });
 
+  // Deleted links (Trash view) – admin-only; also drives the sidebar count.
+  const deletedQuery = useQuery({
+    queryKey: ['links', 'deleted'],
+    queryFn: getDeletedLinks,
+    enabled: hasRole('ADMIN'),
+  });
+
   const pathMap = useMemo(
     () => categoryPathMap(categoriesQuery.data ?? []),
     [categoriesQuery.data]
@@ -138,6 +157,14 @@ export default function DashboardPage() {
   });
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteLink(id),
+    onSuccess: invalidate,
+  });
+  const restoreMut = useMutation({
+    mutationFn: (id: number) => restoreLink(id),
+    onSuccess: invalidate,
+  });
+  const permanentDeleteMut = useMutation({
+    mutationFn: (id: number) => permanentDeleteLink(id),
     onSuccess: invalidate,
   });
   const favoriteMut = useMutation({
@@ -175,6 +202,16 @@ export default function DashboardPage() {
     testMut.mutate(l.id);
   };
 
+  const onRestore = (l: LinkItem) => {
+    restoreMut.mutate(l.id);
+  };
+
+  const onPermanentDelete = (l: LinkItem) => {
+    if (window.confirm(t('trash.confirmPermanent', { name: l.name }))) {
+      permanentDeleteMut.mutate(l.id);
+    }
+  };
+
   const canEdit = hasRole('EDITOR');
   const canDelete = hasRole('ADMIN');
   const links = linksQuery.data ?? [];
@@ -197,34 +234,88 @@ export default function DashboardPage() {
     [allLinksQuery.data]
   );
 
+  // Recently added – flat list across all links, newest first, capped by the user setting.
+  const recentCount = useMemo(() => readRecentCount(), []);
+  const recent = useMemo(
+    () =>
+      [...(allLinksQuery.data ?? [])]
+        .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
+        .slice(0, recentCount),
+    [allLinksQuery.data, recentCount]
+  );
+
+  const deleted = deletedQuery.data ?? [];
+
   const selectFavorites = () => {
     setFavoritesView(true);
     setAlertsView(false);
+    setRecentView(false);
+    setTrashView(false);
     setSelectedCategory(null);
   };
   const selectAlerts = () => {
     setAlertsView(true);
     setFavoritesView(false);
+    setRecentView(false);
+    setTrashView(false);
+    setSelectedCategory(null);
+  };
+  const selectRecent = () => {
+    setRecentView(true);
+    setFavoritesView(false);
+    setAlertsView(false);
+    setTrashView(false);
+    setSelectedCategory(null);
+  };
+  const selectTrash = () => {
+    setTrashView(true);
+    setFavoritesView(false);
+    setAlertsView(false);
+    setRecentView(false);
     setSelectedCategory(null);
   };
   const selectCategory = (id: number | null) => {
     setFavoritesView(false);
     setAlertsView(false);
+    setRecentView(false);
+    setTrashView(false);
     setSelectedCategory(id);
   };
 
-  const displayLinks = alertsView ? alerts : favoritesView ? favorites : links;
+  const displayLinks = recentView
+    ? recent
+    : alertsView
+    ? alerts
+    : favoritesView
+    ? favorites
+    : links;
 
   return (
     <div className="app-shell">
       <header className="topbar">
         <span className="brand">🔗 LinkPortal</span>
-        <input
-          className="search"
-          placeholder={t('dashboard.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="search-wrap">
+          <input
+            className="search"
+            placeholder={t('dashboard.searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setSearch('');
+            }}
+          />
+          {search && (
+            <button
+              type="button"
+              className="search-clear"
+              title={t('dashboard.clearSearch')}
+              aria-label={t('dashboard.clearSearch')}
+              onClick={() => setSearch('')}
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <span className="spacer" />
         {hasRole('ADMIN') && (
           <RouterLink to="/admin/users">
@@ -257,6 +348,12 @@ export default function DashboardPage() {
               alertsActive={alertsView}
               alertsCount={alerts.length}
               onSelectAlerts={selectAlerts}
+              recentActive={recentView}
+              recentCount={recent.length}
+              onSelectRecent={selectRecent}
+              trashActive={trashView}
+              trashCount={deleted.length}
+              onSelectTrash={canDelete ? selectTrash : undefined}
             />
           )}
         </aside>
@@ -264,7 +361,11 @@ export default function DashboardPage() {
         <main className="content">
           <div className="content-header">
             <h2>
-              {alertsView
+              {trashView
+                ? t('dashboard.trash')
+                : recentView
+                ? t('dashboard.recentlyAdded')
+                : alertsView
                 ? t('dashboard.monitorAlerts')
                 : favoritesView
                 ? t('dashboard.favorites')
@@ -272,8 +373,8 @@ export default function DashboardPage() {
                 ? pathMap.get(selectedCategory) ?? t('dashboard.category')
                 : t('dashboard.allLinks')}
             </h2>
-            <span className="muted">({displayLinks.length})</span>
-            {!favoritesView && !alertsView && (
+            <span className="muted">({trashView ? deleted.length : displayLinks.length})</span>
+            {!favoritesView && !alertsView && !recentView && !trashView && (
               <div className="filter-bar">
                 <MultiSelectDropdown
                   label={t('filter.tags')}
@@ -302,6 +403,7 @@ export default function DashboardPage() {
               </div>
             )}
             <span className="spacer" />
+            {!trashView && (
             <div className="view-toggle" role="group" aria-label={t('dashboard.viewModeLabel')}>
               <button
                 type="button"
@@ -328,7 +430,8 @@ export default function DashboardPage() {
                 🕓 {t('dashboard.viewEdited')}
               </button>
             </div>
-            {canEdit && (
+            )}
+            {canEdit && !trashView && (
               <button
                 onClick={() => {
                   setEditing(null);
@@ -338,7 +441,7 @@ export default function DashboardPage() {
                 {t('dashboard.newLink')}
               </button>
             )}
-            {canEdit && !favoritesView && (
+            {canEdit && !favoritesView && !trashView && (
               <button
                 type="button"
                 className="secondary"
@@ -351,7 +454,20 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {linksQuery.isLoading ? (
+          {trashView ? (
+            deletedQuery.isLoading ? (
+              <div className="empty">{t('dashboard.loadingLinks')}</div>
+            ) : deleted.length === 0 ? (
+              <div className="empty">{t('dashboard.noTrash')}</div>
+            ) : (
+              <TrashList
+                links={deleted}
+                pathMap={pathMap}
+                onRestore={onRestore}
+                onDeletePermanently={onPermanentDelete}
+              />
+            )
+          ) : linksQuery.isLoading ? (
             <div className="empty">{t('dashboard.loadingLinks')}</div>
           ) : displayLinks.length === 0 ? (
             <div className="empty">
@@ -360,7 +476,7 @@ export default function DashboardPage() {
                 : favoritesView
                 ? t('dashboard.noFavorites')
                 : t('dashboard.noLinks')}
-              {!favoritesView && !alertsView && canEdit && t('dashboard.noLinksHint')}
+              {!favoritesView && !alertsView && !recentView && canEdit && t('dashboard.noLinksHint')}
             </div>
           ) : viewMode === 'list' ? (
             <LinkList

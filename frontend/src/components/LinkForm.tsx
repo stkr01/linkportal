@@ -77,7 +77,20 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <form className="card modal" onClick={(e) => e.stopPropagation()} onSubmit={submit}>
-        <h2>{initial ? t('form.editTitle') : t('form.newTitle')}</h2>
+        <div className="modal-head">
+          <h2>{initial ? t('form.editTitle') : t('form.newTitle')}</h2>
+          {imageUrl.trim() && (
+            <img
+              key={imageUrl}
+              className="modal-logo"
+              src={imageUrl}
+              alt={name || t('form.name')}
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
+        </div>
 
         <label htmlFor="lf-name">{t('form.name')}</label>
         <input id="lf-name" value={name} onChange={(e) => setName(e.target.value)} autoFocus />

@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { config } from './config';
+import { config, isProd } from './config';
 import { errorHandler } from './middleware/error';
 import authRoutes from './routes/auth';
 import categoryRoutes from './routes/categories';
@@ -12,6 +12,12 @@ import settingsRoutes from './routes/settings';
 import { startScheduler } from './services/scheduler';
 
 const app = express();
+
+// Behind nginx (reverse proxy) in production: trust the first proxy hop so that
+// express-rate-limit sees the real client IP and Secure cookies behave correctly.
+if (isProd) {
+  app.set('trust proxy', 1);
+}
 
 app.use(
   cors({
@@ -35,7 +41,15 @@ app.use('/api/settings', settingsRoutes);
 
 app.use(errorHandler);
 
-app.listen(config.port, () => {
-  console.log(`LinkPortal backend running on http://localhost:${config.port}`);
+const onListening = () => {
+  console.log(`LinkPortal backend running on http://${config.host || 'localhost'}:${config.port}`);
   startScheduler();
-});
+};
+
+// In production config.host is '127.0.0.1' (loopback only, reached via nginx);
+// in development it is empty, so fall back to the default listen on all interfaces.
+if (config.host) {
+  app.listen(config.port, config.host, onListening);
+} else {
+  app.listen(config.port, onListening);
+}

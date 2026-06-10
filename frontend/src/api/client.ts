@@ -99,6 +99,20 @@ export async function deleteLink(id: number): Promise<void> {
   await api.delete(`/links/${id}`);
 }
 
+export async function getDeletedLinks(): Promise<LinkItem[]> {
+  const { data } = await api.get('/links/deleted');
+  return data;
+}
+
+export async function restoreLink(id: number): Promise<LinkItem> {
+  const { data } = await api.post(`/links/${id}/restore`);
+  return data;
+}
+
+export async function permanentDeleteLink(id: number): Promise<void> {
+  await api.delete(`/links/${id}/permanent`);
+}
+
 export async function setFavorite(id: number, isFavorite: boolean): Promise<LinkItem> {
   const { data } = await api.patch(`/links/${id}/favorite`, { isFavorite });
   return data;

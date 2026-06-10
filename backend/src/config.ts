@@ -10,9 +10,15 @@ function required(name: string, fallback?: string): string {
   return value;
 }
 
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 export const config = {
   port: parseInt(process.env.PORT || '4000', 10),
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
+  // Bind address. In production bind to loopback only (reachable solely via the
+  // reverse proxy); in development leave empty to listen on all interfaces so the
+  // Vite dev proxy can connect. Override with the HOST env variable if needed.
+  host: process.env.HOST || (nodeEnv === 'production' ? '127.0.0.1' : ''),
   jwtSecret: required('JWT_SECRET', 'dev-secret-change-me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',

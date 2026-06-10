@@ -10,6 +10,23 @@
 
 ---
 
+## 0. Status sedan blueprint (juni 2026)
+
+Mycket av det som ursprungligen låg "utanför scope" är nu byggt. Vad som finns i appen idag:
+
+- ✅ **Favoriter** (personliga per användare) och **taggar** utöver kategori.
+- ✅ **Health-check / övervakning** (HTTP/RDP/SSH): statusprick, "senast lyckad"-tid, extra-övervakning per länk och övervakningslarm.
+- ✅ **Soft delete med papperskorg** – återställ eller radera permanent (admin).
+- ✅ **Flerspråkigt gränssnitt** (8 språk) med språkväljare i inställningar.
+- ✅ **Tre listvyer** (kort/detalj/senast ändrad) + egna vyer för favoriter, senast tillagda och övervakningslarm.
+- ✅ **Chrome/Edge-tillägg** med snabbspara och favoriter.
+- ✅ **Produktionsdeploy** på Ubuntu (nginx + systemd), se `implementation.md` och `deploy/`.
+- ⬜ Kvar som idéer: SSO via Entra ID, import/export (CSV/JSON), versionshistorik per post, notifieringar om trasiga länkar.
+
+> Resten av dokumentet är den ursprungliga brainstormen och bevaras som historik.
+
+---
+
 ## 1. Vision & Mål
 
 Idag ligger kunskapen om länkar och managementverktyg spridd hos respektive team. Det skapar:

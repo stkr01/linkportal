@@ -13,18 +13,33 @@ Se [BLUEPRINT.md](./BLUEPRINT.md) för vision, datamodell och funktionsöversikt
 | Databas | SQLite (en fil) |
 | Auth | JWT i HTTP-only cookie, bcrypt-hashade lösenord, RBAC |
 
-## Funktioner (V1)
+## Funktioner
 
 - 🔐 Inloggning med lokala konton (3 roller: **Admin**, **Editor**, **Viewer**).
 - 🌳 Klickbart kategoriträd (skapas/hanteras endast av Admin).
 - 🔗 Länk-CRUD: Name, URL, Kategori, Manage Software, Beskrivning, Miljö, Ägande team, Taggar.
-- 🖼️ Valfri bild/logotyp per länk (visas som miniatyr på kortet; faller tillbaka på favicon eller begynnelsebokstav).- 🔎 Sökning + filter, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
+- 🖼️ Valfri bild/logotyp per länk (miniatyr på kortet och stort uppe till höger i redigeringsformuläret; faller tillbaka på favicon eller begynnelsebokstav).
+- 🔎 Sökning (✕-knapp och Esc rensar fältet) + filter på taggar och miljö, samt **command palette** (Ctrl/Cmd+K) med fuzzy-sök.
+- 👁️ Tre listvyer som växlas fritt: **kort**, **detalj** (kompakt tabell) och **senast ändrad**. Egna vyer i menyn för **⭐ Favoriter**, **🆕 Senast tillagda** och **🔴 Övervakningslarm**.
+- 🩺 **Övervakning / health-check** av länkar (HTTP/RDP/SSH): statusprick 🟢/🔴/⚪ med "senast lyckad"-tid, valfri extra-övervakning per länk och larm när en länk går upp → ner. Klicka på statuspricken för att testa direkt (Editor/Admin).
 - ⭐ Favoriter – **personliga per användare**; var och en markerar sina egna länkar (★). Visas högst upp i både webappen och webbläsartillägget.
-- 🗑️ Soft delete – endast Admin får radera (posten döljs, kan återställas i DB).
+- 🗑️ **Soft delete med papperskorg** – endast Admin raderar (posten döljs från listor och sök). I vyn **🗑 Borttagna** kan admin **återställa** eller **radera permanent**.
+- 🌍 **Flerspråkigt gränssnitt** (8 språk) med språkväljare i inställningar.
 - 📝 Audit-logg på alla ändringar.
 - 👥 Användarhantering (Admin): skapa konton, byt roll, aktivera/inaktivera, återställ lösenord.
-- ⚙️ Inställningssida: **färgtema per användare** (sparas på kontot) och **kategorihantering** (Admin: skapa/byt namn/flytta/radera).
+- ⚙️ Inställningssida: **språk**, **färgtema per användare** (sparas på kontot), **antal "senast tillagda"** och **kategorihantering** (Admin: skapa/byt namn/flytta/radera).
 - 🔑 Tvingat lösenordsbyte vid första inloggning.
+
+## Senaste tillägg (juni 2026)
+
+- **Övervakning & health-check:** statusprick med HTTP/port-koll, "senast lyckad"-tidpunkt (med sekunder), extra-övervakning per länk och vyn 🔴 Övervakningslarm. Klick på statuspricken kör ett test direkt – den gamla "Testa"-knappen är borttagen.
+- **Soft delete + papperskorg:** raderade länkar hamnar i vyn 🗑 Borttagna (endast admin), där de kan återställas eller raderas permanent.
+- **Tre listvyer** (kort/detalj/senast ändrad) med en kolumn för "senast lyckad".
+- **Senast tillagda-vy:** visar de N nyaste länkarna (N ställs in i inställningar).
+- **Flerspråkigt gränssnitt:** 8 språk med väljare i inställningar.
+- **Sökfält:** ✕-knapp och Esc rensar sökningen.
+- **Redigeringsformulär:** länkens logotyp visas högst upp till höger.
+- **Produktionsdeploy:** komplett guide för Ubuntu (nginx + systemd) i [implementation.md](./implementation.md) och mappen `deploy/`.
 
 ## Komma igång
 
@@ -104,8 +119,8 @@ LinkPortal/
 └─ frontend/             React + Vite
    └─ src/
       ├─ pages/          Login, Dashboard, ChangePassword, AdminUsers
-      ├─ components/     CategoryTree, LinkCard, LinkList, LinkForm, CommandPalette
-      ├─ i18n/           en.ts (språkordbok) + index.tsx (provider + useTranslation)
+      ├─ components/     CategoryTree, LinkCard, LinkList, LinkListEdited, TrashList, LinkForm, HealthDot, CommandPalette
+      ├─ i18n/           en.ts (huvudordbok) + sv/es/sl/de/no/da/pt + index.tsx (provider + useTranslation)
       ├─ api/            API-klient
       └─ auth/           AuthContext
 
@@ -119,7 +134,7 @@ extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
 
 ## Språk & översättning (i18n)
 
-Webbappens gränssnitt är **engelskt**, men byggt på en lättviktig i18n-grund så att fler språk kan läggas till utan att röra komponenterna. All synlig text hämtas via funktionen `t('nyckel')` i stället för hårdkodade strängar.
+Webbappen finns på **8 språk** – engelska (standard), svenska, spanska, slovenska, tyska, norska, danska och portugisiska – och språket väljs i **Inställningar**. Allt bygger på en lättviktig i18n-grund så att fler språk kan läggas till utan att röra komponenterna. All synlig text hämtas via funktionen `t('nyckel')` i stället för hårdkodade strängar.
 
 ### Var språkfilerna ligger
 
@@ -297,12 +312,15 @@ Hostnamnet skickas citerat till `mstsc /v:"…"` och alla `/` strippas, så en l
 - Rate limiting på login. Zod-validering på all indata. Parametriserade queries via Prisma.
 - **Inför produktion:** sätt ett långt slumpmässigt `JWT_SECRET`, kör bakom HTTPS, och ta backup av `backend/prisma/linkportal.db`.
 
-## Nästa steg (V2)
+## Nästa steg
 
 - ✅ Chrome/Edge-tillägg som läser `/api/links` och visar trädet i en popup.
 - ✅ Favoriter, personliga per användare (visas högst upp).
 - ✅ Snabbspara aktuell flik från tillägget (kategori eller 📥 Inbox).
-- Bulk-import (CSV/JSON), health-check av länkar, SSO via Entra ID.
+- ✅ Health-check / övervakning av länkar (HTTP/RDP/SSH) med övervakningslarm.
+- ✅ Flerspråkigt gränssnitt (8 språk).
+- ✅ Produktionsdeploy på Ubuntu (nginx + systemd) – se [implementation.md](./implementation.md) och `deploy/`.
+- ⬜ Bulk-import (CSV/JSON), SSO via Entra ID, versionshistorik per länk.
 
 ## Flytta / synka projektet till en annan dator
 

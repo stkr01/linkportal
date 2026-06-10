@@ -1,14 +1,40 @@
 import { createContext, useCallback, useContext, useMemo, useState, ReactNode } from 'react';
 import { en, type TranslationKey } from './en';
+import { sv } from './sv';
+import { es } from './es';
+import { sl } from './sl';
+import { de } from './de';
+import { no } from './no';
+import { da } from './da';
+import { pt } from './pt';
 
-// Languages available in the app. Add new codes here as dictionaries are added,
-// e.g. export type Lang = 'en' | 'sv';
-export type Lang = 'en';
+// Languages available in the app. Add new codes here as dictionaries are added.
+export type Lang = 'en' | 'sv' | 'es' | 'sl' | 'de' | 'no' | 'da' | 'pt';
 
 // Register dictionaries per language. Each must implement every TranslationKey.
 const dictionaries: Record<Lang, Record<TranslationKey, string>> = {
   en,
+  sv,
+  es,
+  sl,
+  de,
+  no,
+  da,
+  pt,
 };
+
+// Selectable languages for the UI, shown with their native names (used by the
+// language switcher on the settings page).
+export const LANGUAGES: { code: Lang; label: string }[] = [
+  { code: 'en', label: 'English' },
+  { code: 'sv', label: 'Svenska' },
+  { code: 'es', label: 'Español' },
+  { code: 'sl', label: 'Slovenščina' },
+  { code: 'de', label: 'Deutsch' },
+  { code: 'no', label: 'Norsk' },
+  { code: 'da', label: 'Dansk' },
+  { code: 'pt', label: 'Português' },
+];
 
 export const DEFAULT_LANG: Lang = 'en';
 const STORAGE_KEY = 'linkportal.lang';

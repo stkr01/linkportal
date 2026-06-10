@@ -47,6 +47,7 @@ export interface LinkItem {
   isFavorite: boolean;
   healthStatus: HealthStatus;
   lastCheckedAt: string | null;
+  lastUpAt: string | null;
   lastStatusCode: number | null;
   lastLatencyMs: number | null;
   extraMonitor: boolean;
@@ -57,6 +58,7 @@ export interface LinkItem {
   tags: Tag[];
   dateAdded: string;
   dateModified: string;
+  deletedAt: string | null;
   addedBy: { id: number; displayName: string; username: string } | null;
   modifiedBy: { id: number; displayName: string; username: string } | null;
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
-import { formatDate } from '../utils/date';
+import { formatDate, formatDateTime } from '../utils/date';
 import HealthDot from './HealthDot';
 
 interface Props {
@@ -71,7 +71,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
           <a href={link.url} target="_blank" rel="noopener noreferrer">
             {link.name}
           </a>
-          <HealthDot link={link} />
+          <HealthDot link={link} onTest={canEdit && onTest ? () => onTest(link) : undefined} />
           <span className={`env ${link.environment}`}>{link.environment}</span>
           {link.status === 'DEPRECATED' && <span className="env PROD">{t('card.deprecated')}</span>}
         </h3>
@@ -89,6 +89,12 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
         {link.owningTeam && (
           <>
             👥 {link.owningTeam}
+            <br />
+          </>
+        )}
+        {link.lastUpAt && (
+          <>
+            ✅ {t('health.lastUpAt', { date: formatDateTime(link.lastUpAt) })}
             <br />
           </>
         )}
@@ -117,11 +123,6 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
         {canEdit && (
           <button className="secondary" onClick={() => onEdit(link)}>
             {t('common.edit')}
-          </button>
-        )}
-        {canEdit && onTest && (
-          <button className="secondary" onClick={() => onTest(link)}>
-            {t('health.test')}
           </button>
         )}
         {canDelete && (

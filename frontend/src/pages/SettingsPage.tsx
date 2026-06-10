@@ -13,7 +13,7 @@ import {
 import type { AppSettings, Theme, ThemeKey } from '../types';
 import { flattenCategories } from '../utils/categories';
 import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
-import { useTranslation } from '../i18n';
+import { useTranslation, LANGUAGES, type Lang } from '../i18n';
 import type { TranslationKey } from '../i18n/en';
 
 // Maps each theme color to its translation key.
@@ -44,12 +44,79 @@ export default function SettingsPage() {
       <div className="content" style={{ overflowY: 'auto', maxWidth: 900, margin: '0 auto', width: '100%' }}>
         <h2>{t('settings.title')}</h2>
 
+        <LanguageSection />
+
+        <RecentSection />
+
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
 
         {isAdmin && <HealthCheckSection />}
 
         {isAdmin && <CategorySection />}
       </div>
+    </div>
+  );
+}
+
+/* ---------- Språk (alla användare) ---------- */
+
+function LanguageSection() {
+  const { t, lang, setLang } = useTranslation();
+
+  return (
+    <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.language')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {t('settings.languageHint')}
+      </p>
+      <select
+        value={lang}
+        onChange={(e) => setLang(e.target.value as Lang)}
+        aria-label={t('settings.language')}
+        style={{ maxWidth: 240 }}
+      >
+        {LANGUAGES.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/* ---------- Recently added (all users) ---------- */
+
+function RecentSection() {
+  const { t } = useTranslation();
+  const [count, setCount] = useState<number>(() => {
+    const saved = Number(localStorage.getItem('linkportal.recentCount'));
+    return Number.isFinite(saved) && saved >= 1 ? Math.min(Math.floor(saved), 100) : 10;
+  });
+
+  const update = (raw: number) => {
+    setCount(raw);
+    if (Number.isFinite(raw) && raw >= 1) {
+      localStorage.setItem('linkportal.recentCount', String(Math.min(Math.floor(raw), 100)));
+    }
+  };
+
+  return (
+    <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.recent')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {t('settings.recentHint')}
+      </p>
+      <label htmlFor="recent-count">{t('settings.recentCount')}</label>
+      <input
+        id="recent-count"
+        type="number"
+        min={1}
+        max={100}
+        value={count}
+        onChange={(e) => update(Number(e.target.value))}
+        style={{ maxWidth: 240 }}
+      />
     </div>
   );
 }

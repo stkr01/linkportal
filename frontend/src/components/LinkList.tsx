@@ -1,6 +1,7 @@
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
 import HealthDot from './HealthDot';
+import { formatDateTime } from '../utils/date';
 
 interface Props {
   links: LinkItem[];
@@ -38,6 +39,7 @@ export default function LinkList({
             <th>{t('list.environment')}</th>
             <th>{t('list.manageSoftware')}</th>
             <th>{t('list.team')}</th>
+            <th>{t('list.lastUp')}</th>
             <th>{t('list.tags')}</th>
             <th className="col-actions">{t('list.actions')}</th>
           </tr>
@@ -61,7 +63,7 @@ export default function LinkList({
                   ) : null}
                 </td>
                 <td>
-                  <HealthDot link={l} />{' '}
+                  <HealthDot link={l} onTest={canEdit && onTest ? () => onTest(l) : undefined} />{' '}
                   <a href={l.url} target="_blank" rel="noopener noreferrer">
                     {l.name}
                   </a>
@@ -77,6 +79,7 @@ export default function LinkList({
                 </td>
                 <td>{l.manageSoftware || '—'}</td>
                 <td>{l.owningTeam || '—'}</td>
+                <td className="muted">{l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}</td>
                 <td>
                   {l.tags.length > 0 ? (
                     <div className="row-tags">
@@ -101,11 +104,6 @@ export default function LinkList({
                     {canEdit && (
                       <button className="secondary" onClick={() => onEdit(l)}>
                         {t('common.edit')}
-                      </button>
-                    )}
-                    {canEdit && onTest && (
-                      <button className="secondary" onClick={() => onTest(l)}>
-                        {t('health.test')}
                       </button>
                     )}
                     {canDelete && (

@@ -63,7 +63,7 @@ export default function LinkListEdited({
                   ) : null}
                 </td>
                 <td>
-                  <HealthDot link={l} />{' '}
+                  <HealthDot link={l} onTest={canEdit && onTest ? () => onTest(l) : undefined} />{' '}
                   <a href={l.url} target="_blank" rel="noopener noreferrer">
                     {l.name}
                   </a>
@@ -92,11 +92,6 @@ export default function LinkListEdited({
                     {canEdit && (
                       <button className="secondary" onClick={() => onEdit(l)}>
                         {t('common.edit')}
-                      </button>
-                    )}
-                    {canEdit && onTest && (
-                      <button className="secondary" onClick={() => onTest(l)}>
-                        {t('health.test')}
                       </button>
                     )}
                     {canDelete && (

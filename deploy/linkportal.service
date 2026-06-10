@@ -1,0 +1,37 @@
+# LinkPortal backend - systemd unit
+# Install:
+#   sudo cp deploy/linkportal.service /etc/systemd/system/linkportal.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now linkportal
+# Logs:  journalctl -u linkportal -f
+
+[Unit]
+Description=LinkPortal backend (Express + Prisma + SQLite)
+After=network.target
+
+[Service]
+Type=simple
+# Dedicated unprivileged user. Create it with:
+#   sudo useradd --system --no-create-home --shell /usr/sbin/nologin linkportal
+User=linkportal
+Group=linkportal
+
+WorkingDirectory=/opt/linkportal/backend
+# The app loads /opt/linkportal/backend/.env itself via dotenv, so no EnvironmentFile
+# is needed here (this also avoids systemd/quoting differences for DATABASE_URL).
+ExecStart=/usr/bin/node dist/server.js
+
+Restart=on-failure
+RestartSec=5
+
+# --- Hardening ---
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+# The whole filesystem is read-only under ProtectSystem=strict EXCEPT these paths.
+# The SQLite database (and its -wal/-shm files) live here:
+ReadWritePaths=/opt/linkportal/data
+
+[Install]
+WantedBy=multi-user.target

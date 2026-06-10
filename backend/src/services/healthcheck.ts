@@ -159,6 +159,8 @@ export async function runCheck(
     data: {
       healthStatus: result.status,
       lastCheckedAt: new Date(),
+      // Track the last successful check separately so it survives later failures.
+      ...(result.status === 'UP' ? { lastUpAt: new Date() } : {}),
       lastStatusCode: result.statusCode ?? null,
       lastLatencyMs: result.latencyMs ?? null,
       alertActive,

@@ -115,9 +115,33 @@ label {
 .topbar .spacer {
   flex: 1;
 }
-.topbar .search {
+.topbar .search-wrap {
+  position: relative;
   width: 360px;
   max-width: 40vw;
+  display: flex;
+  align-items: center;
+}
+.topbar .search {
+  width: 100%;
+  padding-right: 2rem;
+}
+.topbar .search-clear {
+  position: absolute;
+  right: 0.4rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0 0.25rem;
+  margin: 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.45);
+}
+.topbar .search-clear:hover {
+  color: rgba(0, 0, 0, 0.75);
 }
 .topbar .user-chip {
   font-size: 0.85rem;
@@ -403,6 +427,26 @@ label {
 .modal h2 {
   margin-top: 0;
 }
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.modal-head h2 {
+  margin: 0;
+}
+.modal-logo {
+  height: 44px;
+  max-width: 140px;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px;
+  flex-shrink: 0;
+}
 .modal-actions {
   display: flex;
   gap: 0.5rem;
@@ -584,6 +628,15 @@ th {
   vertical-align: middle;
   cursor: default;
   user-select: none;
+}
+
+/* Clickable status dot: a discreet shortcut to run a health-check (no visible label). */
+.health-dot-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
 }
 
 /* Filter bar (tags / environment) */

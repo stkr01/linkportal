@@ -111,6 +111,21 @@ router.get(
   })
 );
 
+// GET /api/links/deleted – list soft-deleted links (ADMIN). Declared before '/:id' so 'deleted' is not captured as an id.
+router.get(
+  '/deleted',
+  authenticate,
+  requireRole(Role.ADMIN),
+  asyncHandler(async (req: Request, res: Response) => {
+    const links = await prisma.link.findMany({
+      where: { isDeleted: true },
+      include: linkIncludeFor(req.user!.userId),
+      orderBy: { deletedAt: 'desc' },
+    });
+    res.json(links.map(serializeLink));
+  })
+);
+
 // GET /api/links/:id
 router.get(
   '/:id',
@@ -387,6 +402,65 @@ router.delete(
 
     await writeAudit({
       action: 'DELETE_LINK',
+      entity: 'Link',
+      entityId: id,
+      userId: req.user!.userId,
+      oldValue: { name: existing.name, url: existing.url },
+    });
+
+    res.json({ ok: true });
+  })
+);
+
+// POST /api/links/:id/restore – restore a soft-deleted link (ADMIN)
+router.post(
+  '/:id/restore',
+  authenticate,
+  requireRole(Role.ADMIN),
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.link.findFirst({ where: { id, isDeleted: true } });
+    if (!existing) {
+      res.status(404).json({ error: 'Link not found.' });
+      return;
+    }
+
+    const link = await prisma.link.update({
+      where: { id },
+      data: { isDeleted: false, deletedAt: null },
+      include: linkIncludeFor(req.user!.userId),
+    });
+
+    await writeAudit({
+      action: 'RESTORE_LINK',
+      entity: 'Link',
+      entityId: id,
+      userId: req.user!.userId,
+      newValue: { name: existing.name, url: existing.url },
+    });
+
+    res.json(serializeLink(link));
+  })
+);
+
+// DELETE /api/links/:id/permanent – permanently remove an already soft-deleted link (ADMIN)
+router.delete(
+  '/:id/permanent',
+  authenticate,
+  requireRole(Role.ADMIN),
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const existing = await prisma.link.findFirst({ where: { id, isDeleted: true } });
+    if (!existing) {
+      res.status(404).json({ error: 'Link not found.' });
+      return;
+    }
+
+    // HealthCheck and UserFavorite rows cascade automatically (onDelete: Cascade); tag join rows are removed by Prisma.
+    await prisma.link.delete({ where: { id } });
+
+    await writeAudit({
+      action: 'PERMANENT_DELETE_LINK',
       entity: 'Link',
       entityId: id,
       userId: req.user!.userId,

@@ -370,6 +370,9 @@ els.saveConfirmBtn.addEventListener('click', doQuickSave);
   if (!token) {
     showLogin();
   } else {
+    // Put the cursor in the search box right away so you can start typing
+    // as soon as the popup opens (no extra click needed).
+    els.searchBox.focus();
     loadData();
   }
 })();
