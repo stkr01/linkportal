@@ -23,7 +23,8 @@ async function main() {
 
   // 1. Admin user
   const username = process.env.SEED_ADMIN_USERNAME || 'admin';
-  const password = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe123!';
+  // Dev convenience: fixed password, no forced change. Override via env in prod.
+  const password = process.env.SEED_ADMIN_PASSWORD || 'Emiliesk12!';
   const displayName = process.env.SEED_ADMIN_DISPLAYNAME || 'IT-Operations Admin';
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -36,14 +37,14 @@ async function main() {
       displayName,
       role: 'ADMIN',
       isActive: true,
-      mustChangePassword: true,
+      mustChangePassword: false,
     },
     create: {
       username,
       passwordHash,
       displayName,
       role: 'ADMIN',
-      mustChangePassword: true,
+      mustChangePassword: false,
     },
   });
   console.log(`Admin user ready: ${admin.username}`);

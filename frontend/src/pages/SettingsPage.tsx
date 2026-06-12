@@ -50,6 +50,8 @@ export default function SettingsPage() {
 
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
 
+        {isAdmin && <WebAppSection />}
+
         {isAdmin && <HealthCheckSection />}
 
         {isAdmin && <CategorySection />}
@@ -208,6 +210,56 @@ function ThemeSection({
         </button>
         <button type="submit" disabled={saving}>
           {saving ? t('common.saving') : t('settings.saveTheme')}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/* ---------- Web app address (endast Admin) ---------- */
+
+function WebAppSection() {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: getSettings });
+  const [draft, setDraft] = useState<string | null>(null);
+  const [status, setStatus] = useState('');
+
+  const current = draft ?? settingsQuery.data?.webAppUrl ?? '';
+
+  const saveMut = useMutation({
+    mutationFn: (webAppUrl: string) => updateSettings({ webAppUrl }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['settings'], data);
+      setDraft(null);
+      setStatus(t('settings.webAppSaved'));
+    },
+    onError: () => setStatus(t('settings.somethingWrong')),
+  });
+
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    setStatus('');
+    saveMut.mutate(current.trim());
+  };
+
+  return (
+    <form className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }} onSubmit={onSubmit}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.webApp')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {t('settings.webAppHint')}
+      </p>
+      <input
+        id="webapp-url"
+        type="url"
+        placeholder="https://linkportal.example.com"
+        value={current}
+        onChange={(e) => setDraft(e.target.value)}
+      />
+      <div className="modal-actions" style={{ marginTop: '1rem' }}>
+        {status && <span className="muted" style={{ marginRight: 'auto' }}>{status}</span>}
+        <button type="submit" disabled={saveMut.isPending}>
+          {saveMut.isPending ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </form>

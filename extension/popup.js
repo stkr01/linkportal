@@ -12,6 +12,7 @@ const els = {
   searchBox: document.getElementById('searchBox'),
   refreshBtn: document.getElementById('refreshBtn'),
   settingsBtn: document.getElementById('settingsBtn'),
+  webAppBtn: document.getElementById('webAppBtn'),
   saveBtn: document.getElementById('saveBtn'),
   saveView: document.getElementById('saveView'),
   saveName: document.getElementById('saveName'),
@@ -26,6 +27,9 @@ let allLinks = [];
 let tree = [];
 let pathMap = new Map();
 let canEdit = false;
+let webAppUrl = '';
+// Collapse state for the Favorites / Recently added sections (collapsed by default).
+let sectionOpen = { favorites: false, recent: false };
 
 const roleRank = { VIEWER: 0, EDITOR: 1, ADMIN: 2 };
 
@@ -147,6 +151,36 @@ function categoryNode(node, linksByCat) {
   return wrap;
 }
 
+// Build a collapsible section header that toggles the given body element.
+// The open/closed state is persisted in chrome.storage so it is remembered.
+function sectionHeader(titleText, key, count, bodyEl) {
+  const title = document.createElement('div');
+  title.className = 'section-title section-toggle';
+
+  const tw = document.createElement('span');
+  tw.className = 'sec-twisty';
+  const setIcon = () => (tw.textContent = sectionOpen[key] ? '▾' : '▸');
+  setIcon();
+
+  const label = document.createElement('span');
+  label.textContent = titleText;
+
+  const cnt = document.createElement('span');
+  cnt.className = 'sec-count';
+  cnt.textContent = String(count);
+
+  title.append(tw, label, cnt);
+  bodyEl.classList.toggle('hidden', !sectionOpen[key]);
+
+  title.addEventListener('click', () => {
+    sectionOpen[key] = !sectionOpen[key];
+    bodyEl.classList.toggle('hidden', !sectionOpen[key]);
+    setIcon();
+    chrome.storage.local.set({ sectionOpen });
+  });
+  return title;
+}
+
 function render() {
   els.content.innerHTML = '';
   els.status.classList.add('hidden');
@@ -158,20 +192,29 @@ function render() {
     linksByCat.set(l.categoryId, arr);
   }
 
-  // Favorites at the top
+  // Favorites at the top (collapsible)
   const favorites = allLinks.filter((l) => l.isFavorite);
   if (favorites.length) {
-    const title = document.createElement('div');
-    title.className = 'section-title';
-    title.textContent = '★ Favorites';
-    els.content.appendChild(title);
-
     const favBox = document.createElement('div');
     favBox.className = 'favorites';
     favorites
       .sort((a, b) => a.name.localeCompare(b.name, 'en'))
       .forEach((l) => favBox.appendChild(linkRow(l)));
+    els.content.appendChild(sectionHeader('★ Favorites', 'favorites', favorites.length, favBox));
     els.content.appendChild(favBox);
+  }
+
+  // Recently added – the 3 most recent links by dateAdded (collapsible).
+  const recent = [...allLinks]
+    .filter((l) => l.dateAdded)
+    .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+    .slice(0, 3);
+  if (recent.length) {
+    const recentBox = document.createElement('div');
+    recentBox.className = 'recent';
+    recent.forEach((l) => recentBox.appendChild(linkRow(l)));
+    els.content.appendChild(sectionHeader('🆕 Recently added', 'recent', recent.length, recentBox));
+    els.content.appendChild(recentBox);
   }
 
   const treeTitle = document.createElement('div');
@@ -222,6 +265,18 @@ async function loadData() {
     allLinks = links;
     pathMap = new Map();
     buildPathMap(tree);
+    // Fetch the configured web app URL (set on the web app's Settings page).
+    // Falls back to the API server URL (same-origin in production).
+    const settings = await apiFetch('/api/settings').catch(() => null);
+    const { baseUrl } = await getSettings();
+    webAppUrl = (settings && settings.webAppUrl) ? settings.webAppUrl : baseUrl;
+    // Restore the remembered collapse state for the sections.
+    const storedOpen = (await chrome.storage.local.get('sectionOpen')).sectionOpen;
+    if (storedOpen) sectionOpen = { favorites: false, recent: false, ...storedOpen };
+    // Mark everything currently visible as "seen" so the background worker only
+    // notifies about links added while the popup was closed, and clear the badge.
+    chrome.storage.local.set({ seenLinkIds: links.map((l) => l.id), notifyBaselineDone: true, unseenCount: 0 });
+    chrome.action.setBadgeText({ text: '' });
     canEdit = me ? roleRank[me.role] >= roleRank.EDITOR : false;
     els.saveBtn.classList.toggle('hidden', !canEdit);
     const q = els.searchBox.value.trim();
@@ -355,6 +410,10 @@ els.loginPass.addEventListener('keydown', (e) => {
 });
 els.refreshBtn.addEventListener('click', loadData);
 els.settingsBtn.addEventListener('click', () => chrome.runtime.openOptionsPage());
+els.webAppBtn.addEventListener('click', () => {
+  if (webAppUrl) openLink(webAppUrl);
+  else chrome.runtime.openOptionsPage();
+});
 els.searchBox.addEventListener('input', () => {
   const q = els.searchBox.value.trim();
   if (q) renderSearch(q);

@@ -81,6 +81,24 @@ body {
   font-weight: 700;
   padding: 6px 8px 2px;
 }
+.section-title.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  user-select: none;
+}
+.section-title.section-toggle:hover { background: #eef1ef; }
+.section-title .sec-twisty { width: 12px; font-size: 11px; }
+.section-title .sec-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: #eef1ef;
+  border-radius: 999px;
+  padding: 0 6px;
+}
 
 /* Länkrad */
 .link-item {
@@ -105,7 +123,7 @@ body {
   background: #eef1ef;
   color: var(--text-muted);
 }
-.li-env.PROD { background: #fde2e1; color: #a93226; }
+.li-env.PROD { background: #d6e4ff; color: #1d4ed8; }
 .li-env.TEST { background: #fff3cd; color: #8a6d00; }
 .li-env.DEV  { background: #e1ecf7; color: #1f5fa8; }
 
@@ -113,6 +131,15 @@ body {
 .favorites {
   background: #fffdf5;
   border: 1px solid #ffe9a8;
+  border-radius: 8px;
+  margin: 4px 6px 10px;
+  padding: 4px;
+}
+
+/* Senast tillagda-sektion */
+.recent {
+  background: #f6f9ff;
+  border: 1px solid #d6e4ff;
   border-radius: 8px;
   margin: 4px 6px 10px;
   padding: 4px;

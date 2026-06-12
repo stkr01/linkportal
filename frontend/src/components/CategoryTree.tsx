@@ -81,6 +81,10 @@ export default function CategoryTree({
   onSelectTrash,
 }: Props) {
   const { t } = useTranslation();
+  // The Inbox catch-all category (name starts with 📥) is pinned right under
+  // "All links" instead of appearing in its normal position further down.
+  const inboxNode = nodes.find((n) => n.name.trim().startsWith('📥'));
+  const treeNodes = inboxNode ? nodes.filter((n) => n.id !== inboxNode.id) : nodes;
   return (
     <div>
       {onSelectFavorites && (
@@ -102,6 +106,9 @@ export default function CategoryTree({
         <span className="twisty">•</span>
         <span>{t('tree.allLinks')}</span>
       </div>
+      {inboxNode && (
+        <TreeNode node={inboxNode} selectedId={selectedId} onSelect={onSelect} depth={0} />
+      )}
       {onSelectRecent && (
         <div
           className={`tree-row${recentActive ? ' active' : ''}`}
@@ -136,7 +143,7 @@ export default function CategoryTree({
         </div>
       )}
       <div style={{ marginTop: '0.5rem' }}>
-        {nodes.map((n) => (
+        {treeNodes.map((n) => (
           <TreeNode key={n.id} node={n} selectedId={selectedId} onSelect={onSelect} depth={0} />
         ))}
       </div>

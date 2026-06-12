@@ -155,6 +155,9 @@ export const da: Record<TranslationKey, string> = {
   'settings.recent': 'Senest tilføjet',
   'settings.recentHint': 'Vælg hvor mange links visningen "Senest tilføjet" viser. Gemmes i denne browser.',
   'settings.recentCount': 'Antal links der vises',
+  'settings.webApp': 'Webapp-adresse',
+  'settings.webAppHint': 'Den offentlige URL til LinkPortal-webappen. Browserudvidelsen bruger den til knappen "Åbn webapp".',
+  'settings.webAppSaved': 'Webapp-adresse gemt.',
   'settings.theme': 'Farvetema',
   'settings.themeHint':
     'Temaet gemmes på din konto og følger dig på alle enheder. Ændringer forhåndsvises med det samme.',

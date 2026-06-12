@@ -155,6 +155,9 @@ export const de: Record<TranslationKey, string> = {
   'settings.recent': 'Kürzlich hinzugefügt',
   'settings.recentHint': 'Wählen Sie, wie viele Links die Ansicht „Kürzlich hinzugefügt“ anzeigt. In diesem Browser gespeichert.',
   'settings.recentCount': 'Anzahl der anzuzeigenden Links',
+  'settings.webApp': 'Web-App-Adresse',
+  'settings.webAppHint': 'Die öffentliche URL der LinkPortal-Web-App. Die Browser-Erweiterung verwendet sie für die Schaltfläche „Web-App öffnen“.',
+  'settings.webAppSaved': 'Web-App-Adresse gespeichert.',
   'settings.theme': 'Farbschema',
   'settings.themeHint':
     'Das Farbschema wird in Ihrem Konto gespeichert und begleitet Sie auf allen Geräten. Änderungen werden sofort angezeigt.',

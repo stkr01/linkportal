@@ -11,6 +11,9 @@ const els = {
   loggedIn: document.getElementById('loggedIn'),
   loggedInMsg: document.getElementById('loggedInMsg'),
   msg: document.getElementById('msg'),
+  notifyEnabled: document.getElementById('notifyEnabled'),
+  notifyInterval: document.getElementById('notifyInterval'),
+  notifySaved: document.getElementById('notifySaved'),
 };
 
 function showError(text) {
@@ -76,4 +79,30 @@ els.logoutBtn.addEventListener('click', async () => {
   await refresh();
 });
 
+// --- Notification preferences --------------------------------------------
+
+async function loadNotifySettings() {
+  const s = await chrome.storage.local.get(['notifyEnabled', 'notifyIntervalMin']);
+  els.notifyEnabled.checked = s.notifyEnabled !== false; // default ON
+  els.notifyInterval.value = String(Math.min(120, Math.max(1, Number(s.notifyIntervalMin) || 5)));
+}
+
+function flashSaved() {
+  els.notifySaved.textContent = 'Saved.';
+  setTimeout(() => (els.notifySaved.textContent = ''), 1500);
+}
+
+els.notifyEnabled.addEventListener('change', async () => {
+  await chrome.storage.local.set({ notifyEnabled: els.notifyEnabled.checked });
+  flashSaved();
+});
+
+els.notifyInterval.addEventListener('change', async () => {
+  const val = Math.min(120, Math.max(1, Number(els.notifyInterval.value) || 5));
+  els.notifyInterval.value = String(val);
+  await chrome.storage.local.set({ notifyIntervalMin: val });
+  flashSaved();
+});
+
 refresh();
+loadNotifySettings();

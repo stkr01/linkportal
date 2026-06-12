@@ -83,4 +83,5 @@ export interface AppSettings {
   healthCheckIntervalHours: number;
   healthCheckTimeoutSec: number;
   healthRetentionDays: number;
+  webAppUrl: string;
 }

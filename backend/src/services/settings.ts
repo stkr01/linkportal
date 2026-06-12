@@ -5,6 +5,7 @@ export interface AppSettings {
   healthCheckIntervalHours: number;
   healthCheckTimeoutSec: number;
   healthRetentionDays: number;
+  webAppUrl: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -12,6 +13,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   healthCheckIntervalHours: 4,
   healthCheckTimeoutSec: 5,
   healthRetentionDays: 30,
+  webAppUrl: '',
 };
 
 // Hämta inställningarna (skapar standardraden vid första anropet).
@@ -26,6 +28,7 @@ export async function getSettings(): Promise<AppSettings> {
     healthCheckIntervalHours: row.healthCheckIntervalHours,
     healthCheckTimeoutSec: row.healthCheckTimeoutSec,
     healthRetentionDays: row.healthRetentionDays,
+    webAppUrl: row.webAppUrl,
   };
 }
 
@@ -40,5 +43,6 @@ export async function updateSettings(input: Partial<AppSettings>): Promise<AppSe
     healthCheckIntervalHours: row.healthCheckIntervalHours,
     healthCheckTimeoutSec: row.healthCheckTimeoutSec,
     healthRetentionDays: row.healthRetentionDays,
+    webAppUrl: row.webAppUrl,
   };
 }

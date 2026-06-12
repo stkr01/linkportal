@@ -22,6 +22,12 @@ const updateSchema = z.object({
   healthCheckIntervalHours: z.number().int().min(1).max(168).optional(),
   healthCheckTimeoutSec: z.number().int().min(1).max(60).optional(),
   healthRetentionDays: z.number().int().min(0).max(3650).optional(),
+  webAppUrl: z
+    .string()
+    .trim()
+    .max(2048)
+    .refine((v) => v === '' || /^https?:\/\/.+/i.test(v), 'Must be a valid http(s) URL or empty')
+    .optional(),
 });
 
 // PUT /api/settings – endast Admin

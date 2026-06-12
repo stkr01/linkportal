@@ -155,6 +155,9 @@ export const sv: Record<TranslationKey, string> = {
   'settings.recent': 'Senast tillagda',
   'settings.recentHint': 'Välj hur många länkar vyn "Senast tillagda" visar. Sparas i den här webbläsaren.',
   'settings.recentCount': 'Antal länkar att visa',
+  'settings.webApp': 'Webbappens adress',
+  'settings.webAppHint': 'Den publika URL:en till LinkPortal-webbappen. Webbläsartillägget använder den för sin "Öppna webbapp"-knapp.',
+  'settings.webAppSaved': 'Webbappens adress sparad.',
   'settings.theme': 'Färgtema',
   'settings.themeHint':
     'Temat sparas på ditt konto och följer med dig på alla enheter. Ändringar förhandsvisas direkt.',

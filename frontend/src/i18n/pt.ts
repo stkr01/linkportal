@@ -155,6 +155,9 @@ export const pt: Record<TranslationKey, string> = {
   'settings.recent': 'Adicionados recentemente',
   'settings.recentHint': 'Escolha quantas ligações a vista "Adicionados recentemente" mostra. Guardado neste navegador.',
   'settings.recentCount': 'Número de ligações a mostrar',
+  'settings.webApp': 'Endereço da aplicação web',
+  'settings.webAppHint': 'O URL público da aplicação web LinkPortal. A extensão do navegador usa-o para o botão "Abrir aplicação web".',
+  'settings.webAppSaved': 'Endereço da aplicação web guardado.',
   'settings.theme': 'Tema de cores',
   'settings.themeHint':
     'O tema é guardado na sua conta e acompanha-o em qualquer dispositivo. As alterações são pré-visualizadas de imediato.',

@@ -155,6 +155,9 @@ export const sl: Record<TranslationKey, string> = {
   'settings.recent': 'Nedavno dodano',
   'settings.recentHint': 'Izberite, koliko povezav prikaže pogled »Nedavno dodano«. Shranjeno v tem brskalniku.',
   'settings.recentCount': 'Število prikazanih povezav',
+  'settings.webApp': 'Naslov spletne aplikacije',
+  'settings.webAppHint': 'Javni URL spletne aplikacije LinkPortal. Brskalniška razširitev ga uporablja za gumb »Odpri spletno aplikacijo«.',
+  'settings.webAppSaved': 'Naslov spletne aplikacije shranjen.',
   'settings.theme': 'Barvna tema',
   'settings.themeHint':
     'Tema se shrani v vaš račun in vas spremlja na vseh napravah. Spremembe se predogledajo takoj.',

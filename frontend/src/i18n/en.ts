@@ -153,6 +153,9 @@ export const en = {
   'settings.recent': 'Recently added',
   'settings.recentHint': 'Choose how many links the "Recently added" view shows. Saved in this browser.',
   'settings.recentCount': 'Number of links to show',
+  'settings.webApp': 'Web app address',
+  'settings.webAppHint': 'The public URL of the LinkPortal web app. The browser extension uses it for its "Open web app" button.',
+  'settings.webAppSaved': 'Web app address saved.',
   'settings.theme': 'Color theme',
   'settings.themeHint':
     'The theme is saved to your account and follows you on any device. Changes are previewed instantly.',

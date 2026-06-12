@@ -155,6 +155,9 @@ export const no: Record<TranslationKey, string> = {
   'settings.recent': 'Nylig lagt til',
   'settings.recentHint': 'Velg hvor mange lenker visningen "Nylig lagt til" viser. Lagres i denne nettleseren.',
   'settings.recentCount': 'Antall lenker som vises',
+  'settings.webApp': 'Webapp-adresse',
+  'settings.webAppHint': 'Den offentlige URL-en til LinkPortal-webappen. Nettleserutvidelsen bruker den til «Åpne webapp»-knappen.',
+  'settings.webAppSaved': 'Webapp-adresse lagret.',
   'settings.theme': 'Fargetema',
   'settings.themeHint':
     'Temaet lagres i kontoen din og følger deg på alle enheter. Endringer forhåndsvises umiddelbart.',

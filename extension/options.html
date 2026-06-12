@@ -34,6 +34,19 @@
       <div id="msg" class="error"></div>
     </div>
 
+    <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--border);" />
+    <h1 style="font-size: 14px;">🔔 Notifications</h1>
+    <p class="muted">Get a desktop notification when new links are added to the catalog.</p>
+    <div class="login-view" style="padding: 0;">
+      <label class="check-row" style="display: flex; align-items: center; gap: 8px;">
+        <input id="notifyEnabled" type="checkbox" style="width: auto;" />
+        Notify me when new links are added
+      </label>
+      <label>Check interval (minutes)</label>
+      <input id="notifyInterval" type="number" min="1" max="120" />
+      <p class="ok" id="notifySaved"></p>
+    </div>
+
     <script type="module" src="options.js"></script>
   </body>
 </html>
