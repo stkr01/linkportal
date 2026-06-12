@@ -74,6 +74,7 @@ export const da: Record<TranslationKey, string> = {
   'health.checkedAt': 'Kontrolleret {{date}}',
   'health.lastUpAt': 'Senest vellykket {{date}}',
   'health.extraEvery': 'Ekstra overvågning hvert {{minutes}}. min',
+  'health.notMonitored': 'Overvåges ikke',
   'health.test': 'Test',
   'health.testing': 'Tester…',
   'health.testAll': 'Test forbindelser',
@@ -81,6 +82,8 @@ export const da: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Ekstra overvågning (hyppige tjek)',
   'form.extraMonitorMinutes': 'Tjekinterval (minutter)',
   'form.extraMonitorHint': 'Tjekker dette link efter sin egen tidsplan, adskilt fra grundscanningen.',
+  'form.doNotMonitor': 'Overvåg ikke',
+  'form.doNotMonitorHint': 'Tester aldrig dette link; viser altid en orange status.',
   'settings.health.title': 'Statustjek',
   'settings.health.hint':
     'Kontrollerer regelmæssigt, om links svarer. HTTP(S) bruger en HEAD-anmodning; rdp/ssh bruger et TCP-porttjek.',

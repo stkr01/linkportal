@@ -62,6 +62,7 @@ model Link {
   lastUpAt            DateTime?     // last time a check returned UP (last successful monitoring)
   lastStatusCode      Int?
   lastLatencyMs       Int?
+  doNotMonitor        Boolean       @default(false) // när true: testas aldrig, visas alltid med orange status
   extraMonitor        Boolean       @default(false)
   extraMonitorMinutes Int?
   alertActive         Boolean       @default(false) // true när status gått UP -> DOWN, nollas vid UP igen

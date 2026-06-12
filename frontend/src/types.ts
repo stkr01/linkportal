@@ -50,6 +50,7 @@ export interface LinkItem {
   lastUpAt: string | null;
   lastStatusCode: number | null;
   lastLatencyMs: number | null;
+  doNotMonitor: boolean;
   extraMonitor: boolean;
   extraMonitorMinutes: number | null;
   alertActive: boolean;
@@ -74,6 +75,7 @@ export interface LinkInput {
   owningTeam?: string | null;
   status?: LinkStatus;
   tags?: string[];
+  doNotMonitor?: boolean;
   extraMonitor?: boolean;
   extraMonitorMinutes?: number | null;
 }

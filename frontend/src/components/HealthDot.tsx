@@ -12,6 +12,16 @@ const DOT: Record<HealthStatus, string> = {
 export default function HealthDot({ link, onTest }: { link: LinkItem; onTest?: () => void }) {
   const { t } = useTranslation();
 
+  // Övervakning avstängd: visa alltid en orange prick och testa aldrig (ingen klick-/test-knapp).
+  if (link.doNotMonitor) {
+    const title = t('health.notMonitored');
+    return (
+      <span className="health-dot health-NOMONITOR" title={title} aria-label={title}>
+        🟠
+      </span>
+    );
+  }
+
   const parts: string[] = [t(`health.status.${link.healthStatus}` as never)];
   if (link.lastCheckedAt) {
     parts.push(t('health.checkedAt', { date: formatDate(link.lastCheckedAt) }));

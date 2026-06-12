@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="LinkPortal logo">
+  <title>LinkPortal</title>
+  <!-- Two interlocking rings = "links". Brand green. -->
+  <g fill="none" stroke-linecap="round">
+    <circle cx="50" cy="64" r="27" stroke="#00833e" stroke-width="13"/>
+    <circle cx="82" cy="64" r="27" stroke="#8bc63f" stroke-width="13"/>
+    <!-- Weave: redraw a short arc of the left (green) ring over the lime one at the crossing -->
+    <path d="M 70 41 A 27 27 0 0 1 70 87" stroke="#00833e" stroke-width="13"/>
+  </g>
+</svg>

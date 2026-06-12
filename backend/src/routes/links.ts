@@ -155,6 +155,7 @@ const upsertSchema = z.object({
   owningTeam: z.string().max(100).optional().nullable(),
   status: z.nativeEnum(LinkStatus).optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
+  doNotMonitor: z.boolean().optional(),
   extraMonitor: z.boolean().optional(),
   extraMonitorMinutes: z.number().int().min(1).max(1440).optional().nullable(),
 });
@@ -305,6 +306,7 @@ router.post(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        doNotMonitor: data.doNotMonitor ?? false,
         extraMonitor: data.extraMonitor ?? false,
         extraMonitorMinutes: data.extraMonitor ? data.extraMonitorMinutes ?? null : null,
         addedById: req.user!.userId,
@@ -360,6 +362,9 @@ router.put(
         environment: data.environment ?? Environment.NA,
         owningTeam: data.owningTeam ?? null,
         status: data.status ?? LinkStatus.ACTIVE,
+        doNotMonitor: data.doNotMonitor ?? false,
+        // När övervakning stängs av: nollställ ev. aktivt larm så länken inte ligger kvar i Övervakningslarm.
+        ...(data.doNotMonitor ? { alertActive: false } : {}),
         extraMonitor: data.extraMonitor ?? false,
         extraMonitorMinutes: data.extraMonitor ? data.extraMonitorMinutes ?? null : null,
         modifiedById: req.user!.userId,
@@ -483,7 +488,7 @@ router.post(
     const { ids } = testAllSchema.parse(req.body ?? {});
     const settings = await getSettings();
     const links = await prisma.link.findMany({
-      where: { isDeleted: false, ...(ids && ids.length ? { id: { in: ids } } : {}) },
+      where: { isDeleted: false, doNotMonitor: false, ...(ids && ids.length ? { id: { in: ids } } : {}) },
       select: { id: true, url: true },
     });
     await runChecks(links, settings.healthCheckTimeoutSec);
@@ -500,10 +505,20 @@ router.post(
     const id = Number(req.params.id);
     const existing = await prisma.link.findFirst({
       where: { id, isDeleted: false },
-      select: { id: true, url: true },
+      select: { id: true, url: true, doNotMonitor: true },
     });
     if (!existing) {
       res.status(404).json({ error: 'Link not found.' });
+      return;
+    }
+
+    // Övervakning avstängd för länken: kör inget test, returnera den som den är.
+    if (existing.doNotMonitor) {
+      const link = await prisma.link.findFirst({
+        where: { id },
+        include: linkIncludeFor(req.user!.userId),
+      });
+      res.json(serializeLink(link!));
       return;
     }
 

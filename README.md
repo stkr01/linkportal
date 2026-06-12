@@ -63,6 +63,8 @@ npm run dev
 
 Öppna sedan http://localhost:5173 i webbläsaren.
 
+> **Så hänger delarna ihop:** I utveckling körs **två servrar** – frontend (Vite, port 5173) och backend (Express, port 4000). Vite proxar alla `/api`-anrop vidare till backend (se `frontend/vite.config.ts`), så webbläsaren pratar bara med 5173. Backend är **en enda process** som förutom REST-API:t även startar en intern schemaläggare för health-check/övervakning (`backend/src/services/scheduler.ts`) – ingen separat övervaknings­server behövs. Konfiguration (port, `JWT_SECRET`, `CORS_ORIGIN`, host) läses från `backend/.env` via `backend/src/config.ts`.
+
 ### 1. Backend
 
 ```powershell
@@ -109,19 +111,23 @@ Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge**
 ```
 LinkPortal/
 ├─ BLUEPRINT.md          Design & brainstorm
-├─ backend/              Express + Prisma API
+├─ implementation.md     Produktionsdeploy-guide (Ubuntu: nginx + systemd)
+├─ deploy/               deploy.sh, linkportal.service (systemd), nginx-linkportal.conf
+├─ backend/              Express + Prisma API (en process, port 4000)
 │  ├─ prisma/            schema.prisma, migrations, seed.ts
 │  └─ src/
-│     ├─ routes/         auth, links, categories, users
+│     ├─ routes/         auth, categories, links, tags, users, settings
 │     ├─ middleware/     auth (JWT/RBAC), error
-│     ├─ services/       audit-logg
-│     └─ server.ts
-└─ frontend/             React + Vite
+│     ├─ services/       audit, healthcheck, scheduler (övervakning), settings
+│     ├─ auth/           jwt.ts (signering/verifiering)
+│     ├─ config.ts       env-läsning · constants.ts · db.ts (Prisma-klient)
+│     └─ server.ts       Express-appen + startar health-check-schedulern
+└─ frontend/             React + Vite (dev-server port 5173, proxar /api → 4000)
    └─ src/
-      ├─ pages/          Login, Dashboard, ChangePassword, AdminUsers
-      ├─ components/     CategoryTree, LinkCard, LinkList, LinkListEdited, TrashList, LinkForm, HealthDot, CommandPalette
+      ├─ pages/          Login, Dashboard, ChangePassword, AdminUsers, Settings
+      ├─ components/     CategoryTree, LinkCard, LinkList, LinkListEdited, TrashList, LinkForm, HealthDot, CommandPalette, MultiSelectDropdown
       ├─ i18n/           en.ts (huvudordbok) + sv/es/sl/de/no/da/pt + index.tsx (provider + useTranslation)
-      ├─ api/            API-klient
+      ├─ api/            API-klient (axios, baseURL /api)
       └─ auth/           AuthContext
 
 extension/               Chrome/Edge-tillägg (Manifest V3, vanilla JS)
@@ -193,6 +199,72 @@ Saknas en nyckel i det valda språket faller `t()` tillbaka på engelska, och i 
 3. **Lägg till en språkväljare** i UI:t (t.ex. på inställningssidan) som anropar `setLang('sv')` från `useTranslation()`. Det valda språket sparas automatiskt i `localStorage` och gäller vid nästa besök.
 
 Standardspråket styrs av `DEFAULT_LANG` i `index.tsx` (just nu `'en'`). En ny ordbok måste innehålla **samtliga** nycklar från `en.ts`, annars klagar TypeScript – det är med flit, så inget glöms bort.
+
+## Övervakning & larm (health-check)
+
+LinkPortal kan **automatiskt övervaka** att länkarna svarar och **larma** när en länk slutar fungera. Allt sköts av en intern schemaläggare i backend (`backend/src/services/scheduler.ts` + `healthcheck.ts`) – ingen separat övervakningsserver behövs.
+
+### Vad som kontrolleras
+
+| Schema | Metod | Räknas som UP |
+|--------|-------|---------------|
+| `http://` / `https://` | HTTP **HEAD**-anrop | **Vilket svar som helst** (även 401/403/500) – bara nätfel/timeout = DOWN |
+| `rdp://` / `ssh://` | TCP-portkoll (öppnar en socket mot porten) | Porten **öppen** = UP · nekad/timeout = DOWN |
+| Andra scheman / ogiltig URL | – | Testas inte → status **UNKNOWN** ⚪ |
+
+- Standardportar om ingen anges: `rdp` → 3389, `ssh` → 22, `http` → 80, `https` → 443. En explicit port i URL:en (t.ex. `rdp://host:3390`) används i stället.
+- HTTPS: självsignerade interna cert accepteras, inga redirects följs, ingen body läses och inga inloggningsuppgifter skickas.
+- Timeout per test: **5 sek** (kan ändras av Admin).
+
+### Status & färger
+
+| Prick | Status | Betydelse |
+|:-----:|--------|-----------|
+| 🟢 | UP | Senaste kontrollen lyckades |
+| 🔴 | DOWN | Senaste kontrollen misslyckades |
+| ⚪ | UNKNOWN | Aldrig testad, eller ett schema som inte kan testas |
+| 🟠 | – | **Övervakning avstängd** för länken (`doNotMonitor`) |
+
+Håll muspekaren över pricken för detaljer (status, senaste kontroll, "senast lyckad", HTTP-kod, svarstid). I detaljvyn blir kolumnen **Last successful** dessutom **röd och fet** när länken larmar (DOWN).
+
+### När den kontrollerar (och inte)
+
+- **Bas-svep:** alla länkar testas **var 4:e timme** (Admin-inställningen `healthCheckIntervalHours`). Ett första svep körs ca **10 sek efter serverstart**.
+- **Extra-övervakning:** sätt `extraMonitor` på en enskild länk för att testa den oftare, på sitt egna minut-intervall (1–1440 min). Schemaläggaren tittar **var 30:e sekund** efter vilka extra-länkar som är "due".
+- **Testas aldrig:**
+  - Länkar markerade **Do Not Monitor** (`doNotMonitor = true`) – visar alltid 🟠, har ingen testknapp, och ev. aktivt larm nollställs.
+  - **Borttagna** länkar (de som ligger i papperskorgen).
+  - Allt, om den globala inställningen är avstängd (`healthCheckEnabled = false`).
+- **Manuellt test (Editor/Admin):** klicka på statuspricken för att testa **en** länk direkt, eller kör "testa alla" för att svepa nu. Länkar med Do Not Monitor hoppas över även här.
+
+### Hur larmet fungerar
+
+Varje länk har en larmflagga (`alertActive`). Larmet styrs av **övergången** mellan två kontroller:
+
+- 🟢 → 🔴 (var UP, blev DOWN): **larm slås på** (`alertActive = true`).
+- ⟶ 🟢 (en kontroll lyckas igen): **larm nollställs** automatiskt – länken har återhämtat sig.
+- Markeras länken som **Do Not Monitor**: ev. larm nollställs.
+
+> Larmet utlöses alltså bara på själva **fallet från grönt till rött**. En länk som redan var ⚪ UNKNOWN och blir 🔴 DOWN slår *inte* på larmet. Länkar med aktivt larm listas i vyn **🔴 Övervakningslarm**.
+
+### "Senast lyckad" (Last successful)
+
+Tidpunkten `lastUpAt` uppdateras **bara när en kontroll lyckas** (UP). Den ligger kvar även om länken senare går ner – så du ser när länken **senast** fungerade, även mitt under ett pågående larm.
+
+### Historik & inställningar (Admin)
+
+Varje UP/DOWN-kontroll sparas som en historikrad (UNKNOWN sparas inte), och gammal historik städas automatiskt var 6:e timme.
+
+| Inställning | Standard | Vad den styr |
+|-------------|:--------:|--------------|
+| `healthCheckEnabled` | `true` | Slår på/av all automatisk övervakning |
+| `healthCheckIntervalHours` | `4` | Hur ofta bas-svepet kör (timmar) |
+| `healthCheckTimeoutSec` | `5` | Timeout per test (sekunder) |
+| `healthRetentionDays` | `30` | Hur länge historiken sparas (dygn) |
+
+### Säkerhet (SSRF-skydd)
+
+Health-checken vägrar testa molnens metadata-endpoint (`169.254.169.254`) och loopback (`127.0.0.1`, `localhost`, `::1`) – de ger status UNKNOWN. Interna IP-adresser är **medvetet tillåtna**, eftersom portalen är till för just interna länkar.
 
 ## RDP-länkar (Remote Desktop) & andra scheman
 

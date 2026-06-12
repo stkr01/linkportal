@@ -74,6 +74,7 @@ export const es: Record<TranslationKey, string> = {
   'health.checkedAt': 'Comprobado {{date}}',
   'health.lastUpAt': 'Último correcto {{date}}',
   'health.extraEvery': 'Monitorización extra cada {{minutes}} min',
+  'health.notMonitored': 'Sin monitorización',
   'health.test': 'Probar',
   'health.testing': 'Probando…',
   'health.testAll': 'Probar conexiones',
@@ -81,6 +82,8 @@ export const es: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Monitorización extra (comprobaciones frecuentes)',
   'form.extraMonitorMinutes': 'Intervalo de comprobación (minutos)',
   'form.extraMonitorHint': 'Comprueba este enlace según su propia programación, separada del barrido base.',
+  'form.doNotMonitor': 'No monitorizar',
+  'form.doNotMonitorHint': 'Nunca prueba este enlace; siempre muestra un estado naranja.',
   'settings.health.title': 'Comprobación de estado',
   'settings.health.hint':
     'Comprueba periódicamente que los enlaces responden. HTTP(S) usa una petición HEAD; rdp/ssh usan una comprobación de puerto TCP.',

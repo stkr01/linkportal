@@ -27,6 +27,7 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
   const [environment, setEnvironment] = useState<Environment>(initial?.environment ?? 'NA');
   const [owningTeam, setOwningTeam] = useState(initial?.owningTeam ?? '');
   const [tags, setTags] = useState((initial?.tags ?? []).map((t) => t.name).join(', '));
+  const [doNotMonitor, setDoNotMonitor] = useState(initial?.doNotMonitor ?? false);
   const [extraMonitor, setExtraMonitor] = useState(initial?.extraMonitor ?? false);
   const [extraMonitorMinutes, setExtraMonitorMinutes] = useState(
     initial?.extraMonitorMinutes != null ? String(initial.extraMonitorMinutes) : '5'
@@ -60,8 +61,10 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
           .split(',')
           .map((t) => t.trim())
           .filter(Boolean),
-        extraMonitor,
-        extraMonitorMinutes: extraMonitor ? Math.max(1, Number(extraMonitorMinutes) || 1) : null,
+        doNotMonitor,
+        extraMonitor: doNotMonitor ? false : extraMonitor,
+        extraMonitorMinutes:
+          !doNotMonitor && extraMonitor ? Math.max(1, Number(extraMonitorMinutes) || 1) : null,
       });
       onClose();
     } catch (err: unknown) {
@@ -157,28 +160,43 @@ export default function LinkForm({ categories, initial, defaultCategoryId, onSub
           )}
         </div>
 
-        <label htmlFor="lf-extra" className="checkbox-row">
+        <label htmlFor="lf-nomonitor" className="checkbox-row">
           <input
-            id="lf-extra"
+            id="lf-nomonitor"
             type="checkbox"
-            checked={extraMonitor}
-            onChange={(e) => setExtraMonitor(e.target.checked)}
+            checked={doNotMonitor}
+            onChange={(e) => setDoNotMonitor(e.target.checked)}
           />
-          <span>{t('form.extraMonitor')}</span>
+          <span>{t('form.doNotMonitor')}</span>
         </label>
-        {extraMonitor && (
-          <div>
-            <label htmlFor="lf-extra-min">{t('form.extraMonitorMinutes')}</label>
-            <input
-              id="lf-extra-min"
-              type="number"
-              min={1}
-              max={1440}
-              value={extraMonitorMinutes}
-              onChange={(e) => setExtraMonitorMinutes(e.target.value)}
-            />
-            <small className="field-hint">{t('form.extraMonitorHint')}</small>
-          </div>
+        <small className="field-hint">{t('form.doNotMonitorHint')}</small>
+
+        {!doNotMonitor && (
+          <>
+            <label htmlFor="lf-extra" className="checkbox-row">
+              <input
+                id="lf-extra"
+                type="checkbox"
+                checked={extraMonitor}
+                onChange={(e) => setExtraMonitor(e.target.checked)}
+              />
+              <span>{t('form.extraMonitor')}</span>
+            </label>
+            {extraMonitor && (
+              <div>
+                <label htmlFor="lf-extra-min">{t('form.extraMonitorMinutes')}</label>
+                <input
+                  id="lf-extra-min"
+                  type="number"
+                  min={1}
+                  max={1440}
+                  value={extraMonitorMinutes}
+                  onChange={(e) => setExtraMonitorMinutes(e.target.value)}
+                />
+                <small className="field-hint">{t('form.extraMonitorHint')}</small>
+              </div>
+            )}
+          </>
         )}
 
         {error && <div className="error">{error}</div>}

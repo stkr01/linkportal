@@ -79,7 +79,16 @@ export default function LinkList({
                 </td>
                 <td>{l.manageSoftware || '—'}</td>
                 <td>{l.owningTeam || '—'}</td>
-                <td className="muted">{l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}</td>
+                <td
+                  className={l.healthStatus === 'DOWN' ? undefined : 'muted'}
+                  style={
+                    l.healthStatus === 'DOWN'
+                      ? { color: 'var(--danger)', fontWeight: 700 }
+                      : undefined
+                  }
+                >
+                  {l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}
+                </td>
                 <td>
                   {l.tags.length > 0 ? (
                     <div className="row-tags">

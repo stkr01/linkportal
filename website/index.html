@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LinkPortal — one home for every IT tool & platform</title>
+  <meta name="description" content="LinkPortal is a central, searchable catalog of all your team's IT tools and platforms. Category tree, instant search, link health monitoring, role-based access and a browser extension — without the silos." />
+  <meta name="theme-color" content="#00833e" />
+
+  <!-- Open Graph / social preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="LinkPortal — one home for every IT tool & platform" />
+  <meta property="og:description" content="A central, searchable catalog of all your team's IT tools and platforms. Stop hunting for 'where do we manage X?'." />
+  <meta property="og:image" content="assets/logo.svg" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#top" aria-label="LinkPortal home">
+        <img class="brand-mark" src="assets/logo.svg" alt="" width="36" height="36" />
+        <span class="brand-name">Link<strong>Portal</strong></span>
+      </a>
+
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-toggle" aria-expanded="false" aria-controls="nav-menu" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#extension">Extension</a></li>
+          <li><a href="#security">Security</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a class="btn btn-primary btn-sm" href="#cta">Get started</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy reveal">
+          <p class="eyebrow">Internal tool catalog for IT-Operations</p>
+          <h1>One home for <span class="hl">every link</span> your team relies on.</h1>
+          <p class="lede">
+            LinkPortal is the “password manager for links” — a central, searchable catalog of
+            all your IT tools and platforms. No more tribal knowledge, no more hunting for
+            <em>“where do we manage X?”</em>
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#cta">Get started</a>
+            <a class="btn btn-ghost" href="#features">Explore features →</a>
+          </div>
+          <ul class="hero-points">
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> No secrets stored — we link, never store credentials</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Works in Chrome &amp; Edge with a browser extension</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Available in 8 languages</li>
+          </ul>
+        </div>
+
+        <!-- CSS/SVG app mockup -->
+        <div class="hero-visual reveal" aria-hidden="true">
+          <div class="window">
+            <div class="window-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <div class="window-url">linkportal.intern</div>
+            </div>
+            <div class="window-body">
+              <aside class="mock-side">
+                <div class="mock-search"></div>
+                <div class="mock-tree">
+                  <div class="mock-node open">📁 Platforms</div>
+                  <div class="mock-node sub">☁️ Cloud</div>
+                  <div class="mock-node sub active">🖥️ Servers</div>
+                  <div class="mock-node">📁 Networking</div>
+                  <div class="mock-node">⭐ Favorites</div>
+                  <div class="mock-node">🔴 Monitor alerts</div>
+                </div>
+              </aside>
+              <div class="mock-main">
+                <div class="mock-cards">
+                  <div class="mock-card">
+                    <span class="dotlive up"></span>
+                    <span class="mock-logo">vC</span>
+                    <div class="mock-lines"><i></i><i class="short"></i></div>
+                    <span class="env prod">PROD</span>
+                  </div>
+                  <div class="mock-card">
+                    <span class="dotlive up"></span>
+                    <span class="mock-logo alt">SSH</span>
+                    <div class="mock-lines"><i></i><i class="short"></i></div>
+                    <span class="env dev">DEV</span>
+                  </div>
+                  <div class="mock-card">
+                    <span class="dotlive down"></span>
+                    <span class="mock-logo">DB</span>
+                    <div class="mock-lines"><i></i><i class="short"></i></div>
+                    <span class="env test">TEST</span>
+                  </div>
+                  <div class="mock-card">
+                    <span class="dotlive na"></span>
+                    <span class="mock-logo alt">RDP</span>
+                    <div class="mock-lines"><i></i><i class="short"></i></div>
+                    <span class="env na">NA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="float-badge b1"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg> Ctrl + K</div>
+          <div class="float-badge b2"><span class="dotlive up"></span> Live health-check</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ STAT BAR ============ -->
+    <section class="stats" aria-label="At a glance">
+      <div class="container stats-grid">
+        <div class="stat reveal"><span class="stat-num">8</span><span class="stat-lbl">Languages</span></div>
+        <div class="stat reveal"><span class="stat-num">3</span><span class="stat-lbl">Access roles</span></div>
+        <div class="stat reveal"><span class="stat-num">HTTP·RDP·SSH</span><span class="stat-lbl">Monitored protocols</span></div>
+        <div class="stat reveal"><span class="stat-num">Chrome &amp; Edge</span><span class="stat-lbl">Browser extension</span></div>
+      </div>
+    </section>
+
+    <!-- ============ PROBLEM / SOLUTION ============ -->
+    <section class="section problem" id="why">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Why LinkPortal</p>
+          <h2>Knowledge about your tools shouldn’t live in someone’s head.</h2>
+        </div>
+        <div class="prob-grid">
+          <div class="prob-card reveal">
+            <div class="prob-ic bad"><svg class="ic" aria-hidden="true"><use href="#i-silo"/></svg></div>
+            <h3>Silos</h3>
+            <p>Only one team knows where a platform is managed. When they’re away, everyone’s stuck.</p>
+          </div>
+          <div class="prob-card reveal">
+            <div class="prob-ic bad"><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></div>
+            <h3>Wasted time</h3>
+            <p>Minutes lost every day hunting through bookmarks, chats and wikis for the right link.</p>
+          </div>
+          <div class="prob-card reveal">
+            <div class="prob-ic bad"><svg class="ic" aria-hidden="true"><use href="#i-risk"/></svg></div>
+            <h3>Bus-factor risk</h3>
+            <p>Staff changes mean lost context. Critical access knowledge walks out the door.</p>
+          </div>
+        </div>
+        <p class="solution-line reveal">
+          <svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg>
+          LinkPortal makes every tool <strong>findable, owned and traceable</strong> — in one place the whole team can trust.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ FEATURES ============ -->
+    <section class="section features" id="features">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Features</p>
+          <h2>Everything you need to organize, find and launch.</h2>
+          <p class="section-sub">Built for IT-Operations, but useful for any team drowning in links.</p>
+        </div>
+        <div class="feat-grid">
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg></div>
+            <h3>Clickable category tree</h3>
+            <p>Organize links into a hierarchical tree. Drill into sub-categories or see everything at once.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></div>
+            <h3>Instant search &amp; command palette</h3>
+            <p>Fuzzy search across names, tags, teams and URLs. Hit <kbd>Ctrl</kbd>+<kbd>K</kbd> to jump anywhere.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-pulse"/></svg></div>
+            <h3>Health-check &amp; monitoring</h3>
+            <p>Automatic HTTP, RDP and SSH checks with a status dot, “last successful” time and alerts when a link goes down.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></div>
+            <h3>Personal favorites</h3>
+            <p>Everyone stars their own most-used links — pinned to the top in both the web app and the extension.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-tag"/></svg></div>
+            <h3>Tags &amp; environments</h3>
+            <p>Label links with tags and PROD/TEST/DEV/NA environments, then filter the catalog in a click.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></div>
+            <h3>Role-based access</h3>
+            <p>Admin, Editor and Viewer roles enforced on the server — not just hidden in the UI.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></div>
+            <h3>Multilingual</h3>
+            <p>The whole interface ships in 8 languages, switchable per user from settings.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-log"/></svg></div>
+            <h3>Audit log</h3>
+            <p>Every change is recorded — who added or edited what, and when. Full traceability.</p>
+          </article>
+          <article class="feat-card reveal">
+            <div class="feat-ic"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></div>
+            <h3>Trash &amp; soft delete</h3>
+            <p>Deleted links land in a recycle bin. Admins can restore them or remove them for good.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ HOW IT WORKS ============ -->
+    <section class="section how" id="how">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">How it works</p>
+          <h2>From scattered bookmarks to one source of truth.</h2>
+        </div>
+        <ol class="steps">
+          <li class="step reveal">
+            <span class="step-num">1</span>
+            <h3>Organize</h3>
+            <p>An admin sets up the category tree. Editors add links with descriptions, owning team, tags and environment.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step-num">2</span>
+            <h3>Find</h3>
+            <p>Anyone searches or browses the tree. Favorites and the command palette make the daily links one keystroke away.</p>
+          </li>
+          <li class="step reveal">
+            <span class="step-num">3</span>
+            <h3>Launch</h3>
+            <p>Click to open — web apps in a new tab, or <code>rdp://</code> / <code>ssh://</code> straight into your desktop client.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ EXTENSION ============ -->
+    <section class="section extension" id="extension">
+      <div class="container split">
+        <div class="split-copy reveal">
+          <p class="eyebrow">Browser extension</p>
+          <h2>Your catalog, one click from the toolbar.</h2>
+          <p>The Chrome &amp; Edge extension (Manifest V3, no build needed) puts your favorites and category tree in a popup — anywhere you browse.</p>
+          <ul class="check-list">
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Favorites pinned to the top, then the full tree</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Quick-save the current tab into any category — or the Inbox</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Search and open links without leaving your page</li>
+            <li><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Point it at any LinkPortal server</li>
+          </ul>
+        </div>
+        <div class="split-visual reveal" aria-hidden="true">
+          <div class="popup">
+            <div class="popup-head">
+              <img class="popup-logo" src="assets/logo.svg" alt="" width="22" height="22" />
+              <span>LinkPortal</span>
+              <span class="popup-tools">🔄 🔎 ⚙️</span>
+            </div>
+            <div class="popup-fav">⭐ Favorites</div>
+            <div class="popup-link"><span class="dotlive up"></span> vCenter <span class="popup-add">＋</span></div>
+            <div class="popup-link"><span class="dotlive up"></span> Grafana</div>
+            <div class="popup-link"><span class="dotlive down"></span> Backup console</div>
+            <div class="popup-cat">📁 Servers</div>
+            <div class="popup-link sub"><span class="dotlive up"></span> rdp://server01</div>
+            <div class="popup-link sub"><span class="dotlive na"></span> ssh://admin@10.0.0.5</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PROTOCOLS ============ -->
+    <section class="section protocols">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Beyond http(s)</p>
+          <h2>Launch remote sessions, not just web pages.</h2>
+          <p class="section-sub">Store any scheme. Click an <code>rdp://</code> or <code>ssh://</code> link and your OS handler takes over.</p>
+        </div>
+        <div class="proto-grid">
+          <div class="proto reveal"><span class="proto-scheme">https://</span><span>Web apps &amp; dashboards</span></div>
+          <div class="proto reveal"><span class="proto-scheme">rdp://</span><span>Remote Desktop (mstsc)</span></div>
+          <div class="proto reveal"><span class="proto-scheme">ssh://</span><span>SSH terminal sessions</span></div>
+          <div class="proto reveal"><span class="proto-scheme">vnc://</span><span>VNC &amp; other clients</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SECURITY ============ -->
+    <section class="section security" id="security">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Security by design</p>
+          <h2>Built to be trusted with your internal map.</h2>
+        </div>
+        <div class="sec-grid">
+          <div class="sec-card reveal"><svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg><h3>Hashed passwords</h3><p>bcrypt (cost 12). No plaintext passwords, ever.</p></div>
+          <div class="sec-card reveal"><svg class="ic" aria-hidden="true"><use href="#i-cookie"/></svg><h3>HTTP-only JWT</h3><p>Tokens in a SameSite, HTTP-only cookie — safe from page scripts.</p></div>
+          <div class="sec-card reveal"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg><h3>Server-side RBAC</h3><p>Permissions enforced on the API, not just hidden in the UI.</p></div>
+          <div class="sec-card reveal"><svg class="ic" aria-hidden="true"><use href="#i-gate"/></svg><h3>Rate limiting &amp; validation</h3><p>Login rate limits, Zod-validated input, parameterized queries via Prisma.</p></div>
+        </div>
+        <p class="solution-line reveal">
+          <svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg>
+          LinkPortal stores <strong>links, never secrets</strong> — it’s a catalog, not a credential vault.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============ ROLES ============ -->
+    <section class="section roles">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="eyebrow">Roles</p>
+          <h2>The right access for everyone.</h2>
+        </div>
+        <div class="table-wrap reveal">
+          <table class="roles-table">
+            <thead>
+              <tr><th scope="col">Capability</th><th scope="col">Viewer</th><th scope="col">Editor</th><th scope="col">Admin</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">See &amp; search links</th><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+              <tr><th scope="row">Create / edit links</th><td class="no">—</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+              <tr><th scope="row">Delete links</th><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+              <tr><th scope="row">Manage categories</th><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+              <tr><th scope="row">Manage users</th><td class="no">—</td><td class="no">—</td><td class="yes">✓</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section faq" id="faq">
+      <div class="container narrow">
+        <div class="section-head reveal">
+          <p class="eyebrow">FAQ</p>
+          <h2>Good questions, quick answers.</h2>
+        </div>
+        <div class="faq-list reveal">
+          <details class="faq-item">
+            <summary>Does LinkPortal store passwords or credentials?</summary>
+            <p>No. It deliberately stores only links and metadata. Think of it as a map to your tools, not a vault for secrets.</p>
+          </details>
+          <details class="faq-item">
+            <summary>What do I need to run it?</summary>
+            <p>Node.js for the API and web app, and a single SQLite file for storage. It deploys on Ubuntu behind nginx with systemd — a full guide ships in the repo.</p>
+          </details>
+          <details class="faq-item">
+            <summary>How does the health-check work?</summary>
+            <p>A scheduler periodically checks each link: HTTP(S) via a HEAD request, and rdp/ssh via a TCP port check. You get a status dot, the last successful time, optional per-link extra monitoring, and alerts when a link goes from up to down.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Can I open Remote Desktop or SSH from a link?</summary>
+            <p>Yes. Store an <code>rdp://</code> or <code>ssh://</code> URL and clicking it hands off to your OS protocol handler. A one-time per-PC setup (or GPO/Intune rollout) registers the handlers.</p>
+          </details>
+          <details class="faq-item">
+            <summary>Which languages are supported?</summary>
+            <p>Eight: English, Swedish, Spanish, Slovenian, German, Norwegian, Danish and Portuguese — selectable per user.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FINAL CTA ============ -->
+    <section class="cta" id="cta">
+      <div class="container cta-inner reveal">
+        <h2>Ready to give your team one home for every link?</h2>
+        <p>Spin up LinkPortal, load the extension, and stop asking “where do we manage that again?”.</p>
+        <div class="hero-actions center">
+          <a class="btn btn-light" href="#top">Open the app</a>
+          <a class="btn btn-outline" href="#extension">Install the extension</a>
+        </div>
+        <p class="cta-fine">Internal IT-Operations project · contact IT-Ops to get access.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#top" aria-label="LinkPortal home">
+          <img class="brand-mark" src="assets/logo.svg" alt="" width="32" height="32" />
+          <span class="brand-name">Link<strong>Portal</strong></span>
+        </a>
+        <p class="footer-tag">A central, searchable catalog of all your IT tools and platforms.</p>
+      </div>
+      <nav class="footer-col" aria-label="Sections">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#extension">Extension</a>
+        <a href="#security">Security</a>
+      </nav>
+      <nav class="footer-col" aria-label="More">
+        <h4>More</h4>
+        <a href="#faq">FAQ</a>
+        <a href="#why">Why LinkPortal</a>
+        <a href="#cta">Get started</a>
+      </nav>
+    </div>
+    <div class="container footer-base">
+      <span>© <span id="year">2026</span> LinkPortal · IT-Operations</span>
+      <span>Links, never secrets.</span>
+    </div>
+  </footer>
+
+  <!-- ============ INLINE SVG ICON SPRITE ============ -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m20 20-3.2-3.2"/></symbol>
+      <symbol id="i-tree" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 5h7M4 12h11M4 19h7M11 5v14M15 12h5"/></symbol>
+      <symbol id="i-pulse" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 3 2.7 5.5 6 .9-4.3 4.2 1 6L12 16.8 6.6 19.6l1-6L3.3 9.4l6-.9z"/></symbol>
+      <symbol id="i-tag" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="7.5" r="1.6" fill="currentColor"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m8.5 12 2.5 2.5 4.5-4.5"/></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" d="M3 12h18M12 3c2.5 2.5 2.5 16 0 18M12 3c-2.5 2.5-2.5 16 0 18"/></symbol>
+      <symbol id="i-log" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 8h8M8 12h8M8 16h5"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></symbol>
+      <symbol id="i-silo" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M6 9a6 3 0 0 1 12 0v11H6zM6 9h12"/><path stroke="currentColor" stroke-width="2" d="M12 9v11"/></symbol>
+      <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 7v5l3 2"/></symbol>
+      <symbol id="i-risk" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3 2 20h20z"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 10v4M12 17h.01"/></symbol>
+      <symbol id="i-spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path fill="none" stroke="currentColor" stroke-width="2" d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+      <symbol id="i-cookie" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M12 3a9 9 0 1 0 9 9 4 4 0 0 1-4-4 4 4 0 0 1-5-5z"/><circle cx="9" cy="13" r="1.2" fill="currentColor"/><circle cx="14" cy="15" r="1.2" fill="currentColor"/></symbol>
+      <symbol id="i-gate" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3 21V5l9-2 9 2v16M3 9h18M9 9v12M15 9v12"/></symbol>
+    </defs>
+  </svg>
+
+  <script src="main.js" defer></script>
+</body>
+</html>

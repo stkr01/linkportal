@@ -19,7 +19,7 @@ async function runBaseSweep(): Promise<void> {
   const settings = await getSettings();
   if (!settings.healthCheckEnabled) return;
   const links = await prisma.link.findMany({
-    where: { isDeleted: false },
+    where: { isDeleted: false, doNotMonitor: false },
     select: { id: true, url: true },
   });
   await runChecks(links, settings.healthCheckTimeoutSec);
@@ -30,7 +30,7 @@ async function runExtraTick(): Promise<void> {
   if (!settings.healthCheckEnabled) return;
 
   const links = await prisma.link.findMany({
-    where: { isDeleted: false, extraMonitor: true, extraMonitorMinutes: { gt: 0 } },
+    where: { isDeleted: false, doNotMonitor: false, extraMonitor: true, extraMonitorMinutes: { gt: 0 } },
     select: { id: true, url: true, extraMonitorMinutes: true },
   });
 

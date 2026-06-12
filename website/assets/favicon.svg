@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="LinkPortal">
+  <title>LinkPortal</title>
+  <rect width="128" height="128" rx="28" fill="#00833e"/>
+  <g fill="none" stroke="#ffffff" stroke-width="12" stroke-linecap="round">
+    <circle cx="51" cy="64" r="25"/>
+    <circle cx="81" cy="64" r="25"/>
+  </g>
+</svg>

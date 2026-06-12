@@ -74,6 +74,7 @@ export const no: Record<TranslationKey, string> = {
   'health.checkedAt': 'Sjekket {{date}}',
   'health.lastUpAt': 'Sist vellykket {{date}}',
   'health.extraEvery': 'Ekstra overvåking hvert {{minutes}}. min',
+  'health.notMonitored': 'Overvåkes ikke',
   'health.test': 'Test',
   'health.testing': 'Tester…',
   'health.testAll': 'Test tilkoblinger',
@@ -81,6 +82,8 @@ export const no: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Ekstra overvåking (hyppige sjekker)',
   'form.extraMonitorMinutes': 'Sjekkintervall (minutter)',
   'form.extraMonitorHint': 'Sjekker denne lenken etter sin egen tidsplan, atskilt fra grunnskanningen.',
+  'form.doNotMonitor': 'Ikke overvåk',
+  'form.doNotMonitorHint': 'Tester aldri denne lenken; viser alltid oransje status.',
   'settings.health.title': 'Statussjekk',
   'settings.health.hint':
     'Sjekker jevnlig om lenker svarer. HTTP(S) bruker en HEAD-forespørsel; rdp/ssh bruker en TCP-portsjekk.',

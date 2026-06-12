@@ -72,6 +72,7 @@ export const en = {
   'health.checkedAt': 'Checked {{date}}',
   'health.lastUpAt': 'Last successful {{date}}',
   'health.extraEvery': 'Extra monitor every {{minutes}} min',
+  'health.notMonitored': 'Not monitored',
   'health.test': 'Test',
   'health.testing': 'Testing…',
   'health.testAll': 'Test Connections',
@@ -79,6 +80,8 @@ export const en = {
   'form.extraMonitor': 'Extra monitor (frequent checks)',
   'form.extraMonitorMinutes': 'Check interval (minutes)',
   'form.extraMonitorHint': 'Checks this link on its own schedule, separate from the base sweep.',
+  'form.doNotMonitor': 'Do not monitor',
+  'form.doNotMonitorHint': 'Never test this link; it always shows an orange status.',
   'settings.health.title': 'Health-check',
   'settings.health.hint':
     'Periodically checks that links respond. HTTP(S) uses a HEAD request; rdp/ssh use a TCP port check.',

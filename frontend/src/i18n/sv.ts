@@ -74,6 +74,7 @@ export const sv: Record<TranslationKey, string> = {
   'health.checkedAt': 'Kontrollerad {{date}}',
   'health.lastUpAt': 'Senast lyckad {{date}}',
   'health.extraEvery': 'Extra övervakning var {{minutes}} min',
+  'health.notMonitored': 'Övervakas inte',
   'health.test': 'Testa',
   'health.testing': 'Testar…',
   'health.testAll': 'Testa anslutningar',
@@ -81,6 +82,8 @@ export const sv: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Extra övervakning (täta kontroller)',
   'form.extraMonitorMinutes': 'Kontrollintervall (minuter)',
   'form.extraMonitorHint': 'Kontrollerar den här länken enligt eget schema, separat från bassvepet.',
+  'form.doNotMonitor': 'Övervaka inte',
+  'form.doNotMonitorHint': 'Testar aldrig den här länken; den visar alltid orange status.',
   'settings.health.title': 'Hälsokoll',
   'settings.health.hint':
     'Kontrollerar regelbundet att länkar svarar. HTTP(S) använder en HEAD-förfrågan; rdp/ssh använder en TCP-portkontroll.',

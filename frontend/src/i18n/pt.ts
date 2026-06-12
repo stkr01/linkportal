@@ -74,6 +74,7 @@ export const pt: Record<TranslationKey, string> = {
   'health.checkedAt': 'Verificada {{date}}',
   'health.lastUpAt': 'Último com sucesso {{date}}',
   'health.extraEvery': 'Monitorização extra a cada {{minutes}} min',
+  'health.notMonitored': 'Sem monitorização',
   'health.test': 'Testar',
   'health.testing': 'A testar…',
   'health.testAll': 'Testar ligações',
@@ -81,6 +82,8 @@ export const pt: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Monitorização extra (verificações frequentes)',
   'form.extraMonitorMinutes': 'Intervalo de verificação (minutos)',
   'form.extraMonitorHint': 'Verifica esta ligação segundo o seu próprio horário, separado da análise base.',
+  'form.doNotMonitor': 'Não monitorizar',
+  'form.doNotMonitorHint': 'Nunca testa esta ligação; mostra sempre um estado laranja.',
   'settings.health.title': 'Verificação de estado',
   'settings.health.hint':
     'Verifica regularmente se as ligações respondem. HTTP(S) usa um pedido HEAD; rdp/ssh usam uma verificação de porta TCP.',

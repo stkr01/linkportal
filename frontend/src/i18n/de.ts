@@ -74,6 +74,7 @@ export const de: Record<TranslationKey, string> = {
   'health.checkedAt': 'Geprüft {{date}}',
   'health.lastUpAt': 'Zuletzt erfolgreich {{date}}',
   'health.extraEvery': 'Zusätzliche Überwachung alle {{minutes}} Min.',
+  'health.notMonitored': 'Nicht überwacht',
   'health.test': 'Testen',
   'health.testing': 'Wird getestet…',
   'health.testAll': 'Verbindungen testen',
@@ -81,6 +82,8 @@ export const de: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Zusätzliche Überwachung (häufige Prüfungen)',
   'form.extraMonitorMinutes': 'Prüfintervall (Minuten)',
   'form.extraMonitorHint': 'Prüft diesen Link nach eigenem Zeitplan, getrennt vom Basis-Durchlauf.',
+  'form.doNotMonitor': 'Nicht überwachen',
+  'form.doNotMonitorHint': 'Testet diesen Link nie; zeigt immer einen orangefarbenen Status.',
   'settings.health.title': 'Statusprüfung',
   'settings.health.hint':
     'Prüft regelmäßig, ob Links antworten. HTTP(S) verwendet eine HEAD-Anfrage; rdp/ssh verwenden eine TCP-Port-Prüfung.',

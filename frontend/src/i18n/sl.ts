@@ -74,6 +74,7 @@ export const sl: Record<TranslationKey, string> = {
   'health.checkedAt': 'Preverjeno {{date}}',
   'health.lastUpAt': 'Zadnji uspešen {{date}}',
   'health.extraEvery': 'Dodatni nadzor vsakih {{minutes}} min',
+  'health.notMonitored': 'Brez nadzora',
   'health.test': 'Preizkus',
   'health.testing': 'Preizkušanje…',
   'health.testAll': 'Preizkusi povezave',
@@ -81,6 +82,8 @@ export const sl: Record<TranslationKey, string> = {
   'form.extraMonitor': 'Dodatni nadzor (pogosta preverjanja)',
   'form.extraMonitorMinutes': 'Interval preverjanja (minute)',
   'form.extraMonitorHint': 'Preveri to povezavo po lastnem urniku, ločeno od osnovnega pregleda.',
+  'form.doNotMonitor': 'Ne nadziraj',
+  'form.doNotMonitorHint': 'Te povezave nikoli ne preverja; vedno prikaže oranžno stanje.',
   'settings.health.title': 'Preverjanje stanja',
   'settings.health.hint':
     'Redno preverja, ali se povezave odzivajo. HTTP(S) uporablja zahtevo HEAD; rdp/ssh uporabljata preverjanje vrat TCP.',
