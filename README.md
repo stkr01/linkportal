@@ -63,6 +63,8 @@ npm run dev
 
 Öppna sedan http://localhost:5173 i webbläsaren.
 
+> 💡 Se [Starta, stoppa och starta om tjänsterna](#starta-stoppa-och-starta-om-tjänsterna) för hur du **stoppar**, **startar om** och felsöker tjänsterna – samt produktionskommandon för systemd/nginx.
+
 > **Så hänger delarna ihop:** I utveckling körs **två servrar** – frontend (Vite, port 5173) och backend (Express, port 4000). Vite proxar alla `/api`-anrop vidare till backend (se `frontend/vite.config.ts`), så webbläsaren pratar bara med 5173. Backend är **en enda process** som förutom REST-API:t även startar en intern schemaläggare för health-check/övervakning (`backend/src/services/scheduler.ts`) – ingen separat övervaknings­server behövs. Konfiguration (port, `JWT_SECRET`, `CORS_ORIGIN`, host) läses från `backend/.env` via `backend/src/config.ts`.
 
 ### 1. Backend
@@ -104,7 +106,99 @@ Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge**
 
 **Använda:** Klicka på ikonen → favoriter visas högst upp, därunder kategoriträdet. Klicka på en länk så öppnas den i en ny flik. 🔄 uppdaterar listan, 🔎 söker, ⚙️ öppnar inställningar (server-URL, logga ut).
 **Spara aktuell sida:** Editor/Admin ser en ➕-knapp i tillägget. Klicka på den för att spara fliken du har öppen – namn och URL fylls i automatiskt. Välj kategori, eller lämna den som **📥 Inbox (unsorted)** för att sortera in den senare i webappen.
+
+**Kortkommando:** öppna popup-fönstret med `Ctrl + Shift + L` (Mac: `Cmd + Shift + L`). Tangenten kan ändras – eller göras **global** så den funkar även när webbläsaren inte är i fokus – under `chrome://extensions/shortcuts` (Edge: `edge://extensions/shortcuts`). Om kombinationen redan är upptagen av ett annat tillägg tilldelas den inte automatiskt; sätt den då manuellt där.
 > Ikonerna i `extension/icons/` genereras av `extension/make-icons.js` (`node make-icons.js`). Vill du peka tillägget mot en annan server än localhost ber det automatiskt om host-behörighet.
+
+## Starta, stoppa och starta om tjänsterna
+
+### Tjänsterna i korthet
+
+| Tjänst | Kommando (dev) | Port | Stoppa |
+|--------|----------------|:----:|--------|
+| **Backend** – Express + Prisma API (kör även health-check-schemaläggaren) | `npm run dev` i `backend/` | 4000 | `Ctrl + C` i terminalen |
+| **Frontend** – Vite dev-server (webbappen) | `npm run dev` i `frontend/` | 5173 | `Ctrl + C` i terminalen |
+
+> Health-check/övervakningen är **ingen egen tjänst** – den startas inuti backend-processen (`backend/src/services/scheduler.ts`). Stoppar du backend stoppas även övervakningen. Webbläsartillägget körs i Chrome/Edge och behöver inte startas eller stoppas separat.
+
+### Starta (utveckling)
+
+Starta de två servrarna i **varsin terminal**:
+
+```powershell
+# Terminal 1 – backend (API på http://localhost:4000)
+cd backend
+npm run dev
+
+# Terminal 2 – frontend (webbapp på http://localhost:5173)
+cd frontend
+npm run dev
+```
+
+Öppna sedan http://localhost:5173. (Första gången behöver beroenden och databasen sättas upp – se [Komma igång](#komma-igång).)
+
+> PowerShell-tips: blockeras `npm.ps1` av execution policy, använd `npm.cmd run dev` / `npx.cmd …`, eller kör `Set-ExecutionPolicy -Scope Process Bypass` en gång i terminalen.
+
+### Stoppa
+
+- **Normalt:** tryck `Ctrl + C` i varje terminal som kör `npm run dev`. Backend (och därmed övervakningen) respektive frontend stängs direkt.
+- **Stäng alltid backend innan du kopierar eller synkar databasen** – annars kan `backend/prisma/linkportal.db` låsas eller bli korrupt.
+
+**Om en server hänger kvar (föräldralös process på porten)** – stoppa via porten i PowerShell:
+
+```powershell
+# Stoppa det som lyssnar på backend-porten (4000)
+Get-NetTCPConnection -LocalPort 4000 -State Listen |
+  Select-Object -Expand OwningProcess -Unique |
+  ForEach-Object { Stop-Process -Id $_ -Force }
+
+# Samma för frontend-porten (5173)
+Get-NetTCPConnection -LocalPort 5173 -State Listen |
+  Select-Object -Expand OwningProcess -Unique |
+  ForEach-Object { Stop-Process -Id $_ -Force }
+```
+
+> Detta dödar processen som äger porten – kör bara om du vet att det är LinkPortals dev-server (t.ex. en kvarhängande `node` / `ts-node-dev`).
+
+### Starta om
+
+Snabbast: `Ctrl + C` i terminalen och kör `npm run dev` igen.
+
+- **Backend** startar normalt om sig själv när du sparar en `.ts`-fil (`ts-node-dev --respawn`). En full omstart behövs t.ex. efter `npx prisma generate` eller ändrad `.env`.
+- **Frontend** (Vite) har hot reload och behöver sällan startas om manuellt – men startar om automatiskt om du ändrar `vite.config.ts`.
+
+### Kontrollera att tjänsterna är uppe
+
+```powershell
+# Backend ska svara 200 med {"status":"ok"}
+Invoke-WebRequest http://localhost:4000/api/health -UseBasicParsing | Select-Object StatusCode, Content
+
+# Frontend ska svara 200
+Invoke-WebRequest http://localhost:5173 -UseBasicParsing | Select-Object StatusCode
+
+# Vilka av portarna lyssnar just nu?
+Get-NetTCPConnection -LocalPort 4000,5173 -State Listen
+```
+
+### Produktion (Ubuntu: systemd + nginx)
+
+I produktion körs backend som **systemd-tjänsten `linkportal`** och frontend serveras statiskt av **nginx** (se [implementation.md](./implementation.md)).
+
+```bash
+# Backend (Node-tjänsten)
+sudo systemctl start linkportal      # starta
+sudo systemctl stop linkportal       # stoppa
+sudo systemctl restart linkportal    # starta om (t.ex. efter deploy)
+sudo systemctl status linkportal     # status
+journalctl -u linkportal -f          # följ loggen
+
+# nginx (TLS + statisk frontend + /api-proxy)
+sudo nginx -t                        # testa config innan omläsning
+sudo systemctl reload nginx          # läs om config utan avbrott
+sudo systemctl restart nginx         # full omstart
+```
+
+> `deploy/deploy.sh` gör hela kedjan automatiskt: hämtar koden, bygger frontend, kör `prisma migrate deploy`, startar om `linkportal` och kör en avslutande health-check.
 
 ## Projektstruktur
 

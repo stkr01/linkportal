@@ -26,5 +26,14 @@
   },
   "permissions": ["storage", "tabs", "notifications", "alarms"],
   "host_permissions": ["http://localhost:4000/*"],
-  "optional_host_permissions": ["http://*/*", "https://*/*"]
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Open LinkPortal"
+    }
+  }
 }

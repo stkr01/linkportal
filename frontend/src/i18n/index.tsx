@@ -7,9 +7,10 @@ import { de } from './de';
 import { no } from './no';
 import { da } from './da';
 import { pt } from './pt';
+import { et } from './et';
 
 // Languages available in the app. Add new codes here as dictionaries are added.
-export type Lang = 'en' | 'sv' | 'es' | 'sl' | 'de' | 'no' | 'da' | 'pt';
+export type Lang = 'en' | 'sv' | 'es' | 'sl' | 'de' | 'no' | 'da' | 'pt' | 'et';
 
 // Register dictionaries per language. Each must implement every TranslationKey.
 const dictionaries: Record<Lang, Record<TranslationKey, string>> = {
@@ -21,6 +22,7 @@ const dictionaries: Record<Lang, Record<TranslationKey, string>> = {
   no,
   da,
   pt,
+  et,
 };
 
 // Selectable languages for the UI, shown with their native names (used by the
@@ -34,6 +36,7 @@ export const LANGUAGES: { code: Lang; label: string }[] = [
   { code: 'no', label: 'Norsk' },
   { code: 'da', label: 'Dansk' },
   { code: 'pt', label: 'Português' },
+  { code: 'et', label: 'Eesti' },
 ];
 
 export const DEFAULT_LANG: Lang = 'en';
