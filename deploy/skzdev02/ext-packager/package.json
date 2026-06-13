@@ -1,0 +1,13 @@
+{
+  "name": "linkportal-ext-packager",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Packs the LinkPortal browser extension into a signed CRX3 + update manifest for self-hosting on skzdev02.",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "crx3": "^5.1.0"
+  }
+}

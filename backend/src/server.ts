@@ -13,10 +13,11 @@ import { startScheduler } from './services/scheduler';
 
 const app = express();
 
-// Behind nginx (reverse proxy) in production: trust the first proxy hop so that
-// express-rate-limit sees the real client IP and Secure cookies behave correctly.
+// Behind a reverse proxy in production: trust the configured number of proxy hops
+// so express-rate-limit sees the real client IP and Secure cookies behave correctly.
+// 1 = a single nginx; 2 = Tailscale Serve + nginx (see config.trustProxy / TRUST_PROXY).
 if (isProd) {
-  app.set('trust proxy', 1);
+  app.set('trust proxy', config.trustProxy);
 }
 
 app.use(

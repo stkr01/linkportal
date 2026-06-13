@@ -4,3 +4,8 @@ dist/
 *.db-journal
 .env
 *.local
+
+# Self-hosted Chrome/Edge extension packaging (deploy/skzdev02)
+deploy/skzdev02/ext-packager/build/
+deploy/skzdev02/ext-packager/extension-key.pem
+*.crx

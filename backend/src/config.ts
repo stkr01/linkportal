@@ -19,6 +19,10 @@ export const config = {
   // reverse proxy); in development leave empty to listen on all interfaces so the
   // Vite dev proxy can connect. Override with the HOST env variable if needed.
   host: process.env.HOST || (nodeEnv === 'production' ? '127.0.0.1' : ''),
+  // Number of reverse-proxy hops in front of the app, used by express-rate-limit
+  // to resolve the real client IP. 1 = a single nginx; 2 = Tailscale Serve + nginx
+  // (the skzdev02 setup). Override with the TRUST_PROXY env variable.
+  trustProxy: parseInt(process.env.TRUST_PROXY || '1', 10),
   jwtSecret: required('JWT_SECRET', 'dev-secret-change-me'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
   corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
