@@ -126,6 +126,59 @@ router.get(
   })
 );
 
+// GET /api/links/export – export all (non-deleted) links as portable JSON (any authenticated user).
+// Declared before '/:id' so 'export' is not captured as an id. Links carry their category PATH
+// (array of names from root to leaf) and tag names, so the export is portable between instances.
+router.get(
+  '/export',
+  authenticate,
+  asyncHandler(async (_req: Request, res: Response) => {
+    const categories = await prisma.category.findMany({
+      select: { id: true, name: true, parentId: true },
+    });
+    const byId = new Map(categories.map((c) => [c.id, c]));
+    const pathOf = (categoryId: number): string[] => {
+      const path: string[] = [];
+      let cur = byId.get(categoryId);
+      let guard = 0;
+      while (cur && guard++ < 100) {
+        path.unshift(cur.name);
+        cur = cur.parentId != null ? byId.get(cur.parentId) : undefined;
+      }
+      return path;
+    };
+
+    const links = await prisma.link.findMany({
+      where: { isDeleted: false },
+      include: { tags: { select: { name: true } } },
+      orderBy: { name: 'asc' },
+    });
+
+    const exported = links.map((l) => ({
+      name: l.name,
+      url: l.url,
+      categoryPath: pathOf(l.categoryId),
+      manageSoftware: l.manageSoftware,
+      description: l.description,
+      imageUrl: l.imageUrl,
+      environment: l.environment,
+      owningTeam: l.owningTeam,
+      status: l.status,
+      tags: l.tags.map((t) => t.name),
+      doNotMonitor: l.doNotMonitor,
+      extraMonitor: l.extraMonitor,
+      extraMonitorMinutes: l.extraMonitorMinutes,
+    }));
+
+    res.json({
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      count: exported.length,
+      links: exported,
+    });
+  })
+);
+
 // GET /api/links/:id
 router.get(
   '/:id',
@@ -530,6 +583,125 @@ router.post(
       include: linkIncludeFor(req.user!.userId),
     });
     res.json(serializeLink(link!));
+  })
+);
+
+// ---- Bulk import (ADMIN) ----
+
+const importLinkSchema = z.object({
+  name: z.string().min(1).max(200),
+  url: z.string().url(),
+  categoryPath: z.array(z.string().min(1).max(100)).max(20).optional(),
+  manageSoftware: z.string().max(200).optional().nullable(),
+  description: z.string().max(2000).optional().nullable(),
+  imageUrl: z.string().max(2000).optional().nullable(),
+  environment: z.nativeEnum(Environment).optional(),
+  owningTeam: z.string().max(100).optional().nullable(),
+  status: z.nativeEnum(LinkStatus).optional(),
+  tags: z.array(z.string().min(1).max(50)).max(50).optional(),
+  doNotMonitor: z.boolean().optional(),
+  extraMonitor: z.boolean().optional(),
+  extraMonitorMinutes: z.number().int().min(1).max(1440).optional().nullable(),
+});
+
+const importSchema = z.object({
+  links: z.array(importLinkSchema).max(5000),
+});
+
+// Find-or-create the system Inbox category (top level), migrating the legacy Swedish name.
+async function resolveInboxCategory(): Promise<number> {
+  let inbox = await prisma.category.findFirst({
+    where: { name: { in: [INBOX_NAME, LEGACY_INBOX_NAME] }, parentId: null },
+  });
+  if (!inbox) {
+    inbox = await prisma.category.create({ data: { name: INBOX_NAME, sortOrder: 999 } });
+  } else if (inbox.name === LEGACY_INBOX_NAME) {
+    inbox = await prisma.category.update({ where: { id: inbox.id }, data: { name: INBOX_NAME } });
+  }
+  return inbox.id;
+}
+
+// Find-or-create a category chain from a name path (root -> leaf); returns the leaf id.
+// Empty path falls back to the Inbox. Relies on the @@unique([parentId, name]) constraint.
+async function resolveCategoryPath(path: string[]): Promise<number> {
+  let parentId: number | null = null;
+  let leafId: number | null = null;
+  for (const raw of path) {
+    const name = raw.trim();
+    if (!name) continue;
+    let cat = await prisma.category.findFirst({ where: { name, parentId } });
+    if (!cat) cat = await prisma.category.create({ data: { name, parentId } });
+    parentId = cat.id;
+    leafId = cat.id;
+  }
+  return leafId ?? resolveInboxCategory();
+}
+
+// POST /api/links/import – bulk import links from a JSON export (ADMIN). Non-destructive:
+// adds new links, skips duplicates (same name + url among non-deleted links). Categories in
+// each link's path are created on demand. Returns a per-row summary.
+router.post(
+  '/import',
+  authenticate,
+  requireRole(Role.ADMIN),
+  asyncHandler(async (req: Request, res: Response) => {
+    const data = importSchema.parse(req.body);
+    let created = 0;
+    let skipped = 0;
+    const errors: { index: number; name: string; error: string }[] = [];
+
+    for (let i = 0; i < data.links.length; i++) {
+      const item = data.links[i];
+      try {
+        const dup = await prisma.link.findFirst({
+          where: { name: item.name, url: item.url, isDeleted: false },
+          select: { id: true },
+        });
+        if (dup) {
+          skipped++;
+          continue;
+        }
+
+        const categoryId = await resolveCategoryPath(item.categoryPath ?? []);
+        const tagConnect = item.tags ? await resolveTags(item.tags) : [];
+
+        await prisma.link.create({
+          data: {
+            name: item.name,
+            url: item.url,
+            categoryId,
+            manageSoftware: item.manageSoftware ?? null,
+            description: item.description ?? null,
+            imageUrl: item.imageUrl ? item.imageUrl : null,
+            environment: item.environment ?? Environment.NA,
+            owningTeam: item.owningTeam ?? null,
+            status: item.status ?? LinkStatus.ACTIVE,
+            doNotMonitor: item.doNotMonitor ?? false,
+            extraMonitor: item.extraMonitor ?? false,
+            extraMonitorMinutes: item.extraMonitor ? item.extraMonitorMinutes ?? null : null,
+            addedById: req.user!.userId,
+            tags: { connect: tagConnect },
+          },
+        });
+        created++;
+      } catch (err) {
+        errors.push({
+          index: i,
+          name: item.name,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    }
+
+    await writeAudit({
+      action: 'IMPORT_LINKS',
+      entity: 'Link',
+      entityId: 0,
+      userId: req.user!.userId,
+      newValue: { created, skipped, errorCount: errors.length },
+    });
+
+    res.json({ created, skipped, errors });
   })
 );
 

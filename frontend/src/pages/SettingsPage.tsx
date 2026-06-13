@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
@@ -9,8 +9,10 @@ import {
   updateCategory,
   getSettings,
   updateSettings,
+  exportLinks,
+  importLinks,
 } from '../api/client';
-import type { AppSettings, Theme, ThemeKey } from '../types';
+import type { AppSettings, LinkExportItem, Theme, ThemeKey } from '../types';
 import { flattenCategories } from '../utils/categories';
 import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
 import { useTranslation, LANGUAGES, type Lang } from '../i18n';
@@ -49,6 +51,8 @@ export default function SettingsPage() {
         <RecentSection />
 
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
+
+        <ImportExportSection isAdmin={isAdmin} />
 
         {isAdmin && <WebAppSection />}
 
@@ -213,6 +217,107 @@ function ThemeSection({
         </button>
       </div>
     </form>
+  );
+}
+
+/* ---------- Import / Export ---------- */
+
+function ImportExportSection({ isAdmin }: { isAdmin: boolean }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState('');
+  const [exporting, setExporting] = useState(false);
+
+  const onExport = async () => {
+    setStatus('');
+    setExporting(true);
+    try {
+      const data = await exportLinks();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `linkportal-export-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      setStatus(t('settings.exportFailed'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const importMut = useMutation({
+    mutationFn: (links: LinkExportItem[]) => importLinks({ links }),
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['links'] });
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      let msg = t('settings.importResult', { created: result.created, skipped: result.skipped });
+      if (result.errors.length) msg += ' ' + t('settings.importErrors', { count: result.errors.length });
+      setStatus(msg);
+    },
+    onError: () => setStatus(t('settings.importFailed')),
+  });
+
+  const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    setStatus('');
+    const file = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const links = Array.isArray(parsed) ? parsed : parsed?.links;
+      if (!Array.isArray(links)) {
+        setStatus(t('settings.importFailed'));
+        return;
+      }
+      importMut.mutate(links as LinkExportItem[]);
+    } catch {
+      setStatus(t('settings.importFailed'));
+    }
+  };
+
+  return (
+    <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.importExport')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>{t('settings.importExportHint')}</p>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <button type="button" onClick={onExport} disabled={exporting}>
+          {exporting ? t('common.loading') : t('settings.exportBtn')}
+        </button>
+        {isAdmin && (
+          <>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="application/json,.json"
+              onChange={onFile}
+              style={{ display: 'none' }}
+            />
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => fileRef.current?.click()}
+              disabled={importMut.isPending}
+            >
+              {importMut.isPending ? t('common.loading') : t('settings.importBtn')}
+            </button>
+          </>
+        )}
+      </div>
+
+      {isAdmin && (
+        <p className="muted" style={{ marginTop: '0.75rem', marginBottom: 0 }}>
+          {t('settings.importHint')}
+        </p>
+      )}
+      {status && <p className="muted" style={{ marginBottom: 0 }}>{status}</p>}
+    </div>
   );
 }
 

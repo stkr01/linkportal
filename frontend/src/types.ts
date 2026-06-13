@@ -87,3 +87,32 @@ export interface AppSettings {
   healthRetentionDays: number;
   webAppUrl: string;
 }
+
+export interface LinkExportItem {
+  name: string;
+  url: string;
+  categoryPath: string[];
+  manageSoftware: string | null;
+  description: string | null;
+  imageUrl: string | null;
+  environment: Environment;
+  owningTeam: string | null;
+  status: LinkStatus;
+  tags: string[];
+  doNotMonitor: boolean;
+  extraMonitor: boolean;
+  extraMonitorMinutes: number | null;
+}
+
+export interface LinkExport {
+  version: number;
+  exportedAt: string;
+  count: number;
+  links: LinkExportItem[];
+}
+
+export interface ImportResult {
+  created: number;
+  skipped: number;
+  errors: { index: number; name: string; error: string }[];
+}

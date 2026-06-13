@@ -3,6 +3,9 @@ import type {
   AdminUser,
   AppSettings,
   CategoryNode,
+  ImportResult,
+  LinkExport,
+  LinkExportItem,
   LinkInput,
   LinkItem,
   Role,
@@ -126,6 +129,17 @@ export async function testLink(id: number): Promise<LinkItem> {
 
 export async function testAllLinks(ids?: number[]): Promise<{ ok: boolean; tested: number }> {
   const { data } = await api.post('/links/test-all', ids && ids.length ? { ids } : {});
+  return data;
+}
+
+// Import / export
+export async function exportLinks(): Promise<LinkExport> {
+  const { data } = await api.get('/links/export');
+  return data;
+}
+
+export async function importLinks(payload: { links: LinkExportItem[] }): Promise<ImportResult> {
+  const { data } = await api.post('/links/import', payload);
   return data;
 }
 
