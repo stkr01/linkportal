@@ -109,9 +109,13 @@ SEED_ADMIN_PASSWORD=<starkt engångslösenord>
 ```bash
 npx prisma generate
 npx prisma migrate deploy     # skapar/uppdaterar DB (INTE 'migrate dev')
-npm run seed                  # bara första gången – skapar admin + exempeldata
+npm run seed                  # ENDAST första gången – seed återställer admin-lösenordet om den körs igen
 npm run build                 # tsc -> dist/
 ```
+
+> `migrate deploy` skapar alltid `.db`-filen, så kör `npm run seed` bara vid första
+> uppsättningen. `seed.ts` kör upsert och **återställer admin-lösenordet** – kör den aldrig vid
+> rutinmässiga om-deployer (annars nollas ett ändrat lösenord).
 
 ### 4.5 Frontend: bygg statiska filer
 

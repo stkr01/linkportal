@@ -64,8 +64,9 @@ tailscale status | head -n 3                 # ska visa skzdev02 i tailnet:et
 # Är port 443 redan upptagen i Tailscale Serve? (todo-appen ska ligga på 9121, inte 443)
 sudo tailscale serve status
 
-# Verktyg som behövs
-node -v 2>/dev/null || echo "Node saknas"
+# Verktyg som behövs. Tjänsten kräver SYSTEM-Node på /usr/bin/node: unit-filen kör
+# /usr/bin/node och ProtectHome=true döljer ev. Node i /home (t.ex. hermes egen).
+/usr/bin/node -v 2>/dev/null || echo "System-Node (/usr/bin/node) saknas → installera i 4.1"
 nginx -v 2>/dev/null || echo "nginx saknas"
 
 # Krockar någon redan på våra loopback-portar?
@@ -74,6 +75,8 @@ sudo ss -ltnp | grep -E '127.0.0.1:(4010|8090)\b' || echo "4010/8090 lediga"
 
 - Visar `tailscale serve status` redan `:443` → **stanna och fråga** människan (vi vill inte kapa
   en befintlig bindning).
+- Visar `node -v` en Node under `/home` (t.ex. hermes egen) men `/usr/bin/node` saknas → tjänsten
+  kan ändå inte nå den (`ProtectHome=true`). Installera **system-Node** i steg 4.1.
 - Saknas Node/nginx → installera i steg 4.1.
 
 ---
@@ -84,9 +87,13 @@ sudo ss -ltnp | grep -E '127.0.0.1:(4010|8090)\b' || echo "4010/8090 lediga"
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-sudo apt-get install -y nodejs nginx
-node -v   # förvänta v22.x
+# noninteractive: en väntande needrestart-/kernel-dialog ska inte stoppa installationen.
+sudo DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a apt-get install -y nodejs nginx
+/usr/bin/node -v   # förvänta v22.x (krävs av tjänsten + crx3 2.x)
 ```
+
+> **Notis (reboot):** finns en väntande kernel-uppgradering rör du den **inte** här – rapportera
+> bara till människan att en omstart rekommenderas vid tillfälle.
 
 ### 4.2 Tjänsteanvändare + kataloger
 
@@ -142,8 +149,13 @@ Databas + bygg:
 ```bash
 npx prisma generate
 npx prisma migrate deploy
-# Seed ENDAST första gången (om databasen saknas). Kör inte om DB redan finns.
-[ -f /opt/linkportal/data/linkportal.db ] || npm run seed
+
+# Seed ENDAST vid första uppsättningen. `migrate deploy` skapar ALLTID .db-filen, så
+# en fil-finns-koll triggar aldrig – räkna användare istället. seed.ts kör upsert och
+# ÅTERSTÄLLER admin-lösenordet, så den får aldrig köras vid vanliga om-deployer.
+USERS=$(node -e 'const{PrismaClient}=require("@prisma/client");new PrismaClient().user.count().then(n=>console.log(n)).catch(()=>console.log(0))')
+if [ "$USERS" = "0" ]; then npm run seed; else echo "Användare finns redan ($USERS) – hoppar över seed."; fi
+
 npm run build
 ```
 
