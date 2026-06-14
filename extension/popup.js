@@ -21,6 +21,7 @@ const els = {
   saveError: document.getElementById('saveError'),
   saveCancelBtn: document.getElementById('saveCancelBtn'),
   saveConfirmBtn: document.getElementById('saveConfirmBtn'),
+  versionFooter: document.getElementById('versionFooter'),
 };
 
 let allLinks = [];
@@ -36,6 +37,23 @@ const roleRank = { VIEWER: 0, EDITOR: 1, ADMIN: 2 };
 function setStatus(msg) {
   els.status.textContent = msg;
   els.status.classList.remove('hidden');
+}
+
+// Show the backend version (public endpoint) so it can be compared with the
+// server and a local checkout. Silently hidden if the server is unreachable.
+async function showVersion() {
+  if (!els.versionFooter) return;
+  try {
+    const data = await apiFetch('/api/version', { auth: false });
+    if (data && data.display) {
+      els.versionFooter.textContent = `Server ${data.display}`;
+      els.versionFooter.title = data.commitDate ? `Commit ${data.commit} · ${data.commitDate}` : '';
+    } else {
+      els.versionFooter.textContent = '';
+    }
+  } catch {
+    els.versionFooter.textContent = '';
+  }
 }
 
 function faviconUrl(url) {
@@ -323,6 +341,7 @@ async function doLogin() {
     await chrome.storage.local.set({ baseUrl });
     await login(username, password);
     await loadData();
+    showVersion();
   } catch (err) {
     els.loginError.textContent = err.message || 'Sign-in failed.';
   } finally {
@@ -425,6 +444,7 @@ els.saveConfirmBtn.addEventListener('click', doQuickSave);
 
 // Init
 (async () => {
+  showVersion();
   const { token } = await getSettings();
   if (!token) {
     showLogin();

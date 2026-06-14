@@ -629,8 +629,11 @@ async function resolveCategoryPath(path: string[]): Promise<number> {
   for (const raw of path) {
     const name = raw.trim();
     if (!name) continue;
-    let cat = await prisma.category.findFirst({ where: { name, parentId } });
-    if (!cat) cat = await prisma.category.create({ data: { name, parentId } });
+    let cat: { id: number } | null = await prisma.category.findFirst({
+      where: { name, parentId },
+      select: { id: true },
+    });
+    if (!cat) cat = await prisma.category.create({ data: { name, parentId }, select: { id: true } });
     parentId = cat.id;
     leafId = cat.id;
   }

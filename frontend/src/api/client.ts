@@ -2,6 +2,7 @@ import axios from 'axios';
 import type {
   AdminUser,
   AppSettings,
+  BackendVersion,
   CategoryNode,
   ImportResult,
   LinkExport,
@@ -18,6 +19,12 @@ export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });
+
+// Version / health
+export async function getVersion(): Promise<BackendVersion> {
+  const { data } = await api.get('/version');
+  return data;
+}
 
 // Auth
 export async function login(username: string, password: string): Promise<{ user: User }> {

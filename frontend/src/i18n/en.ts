@@ -168,6 +168,10 @@ export const en = {
   'settings.importResult': '{{created}} links imported, {{skipped}} skipped.',
   'settings.importErrors': '{{count}} could not be imported.',
   'settings.importFailed': 'Could not import the file. Make sure it is a valid LinkPortal export.',
+  'settings.about': 'About',
+  'settings.aboutHint': 'The version reported by the server. Server and local match when both are on the same commit.',
+  'settings.versionUpdated': 'Updated {{date}}',
+  'settings.versionDirty': 'uncommitted local changes',
   'settings.theme': 'Color theme',
   'settings.themeHint':
     'The theme is saved to your account and follows you on any device. Changes are previewed instantly.',

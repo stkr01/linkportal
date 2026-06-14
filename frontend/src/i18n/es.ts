@@ -170,6 +170,10 @@ export const es: Record<TranslationKey, string> = {
   'settings.importResult': '{{created}} enlaces importados, {{skipped}} omitidos.',
   'settings.importErrors': '{{count}} no se pudieron importar.',
   'settings.importFailed': 'No se pudo importar el archivo. Asegúrate de que sea una exportación válida de LinkPortal.',
+  'settings.about': 'Acerca de',
+  'settings.aboutHint': 'La versión que informa el servidor. El servidor y el entorno local coinciden cuando ambos están en el mismo commit.',
+  'settings.versionUpdated': 'Actualizado {{date}}',
+  'settings.versionDirty': 'cambios locales sin confirmar',
   'settings.theme': 'Tema de color',
   'settings.themeHint':
     'El tema se guarda en tu cuenta y te acompaña en cualquier dispositivo. Los cambios se previsualizan al instante.',

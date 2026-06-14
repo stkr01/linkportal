@@ -10,6 +10,7 @@ import tagRoutes from './routes/tags';
 import userRoutes from './routes/users';
 import settingsRoutes from './routes/settings';
 import { startScheduler } from './services/scheduler';
+import { versionInfo } from './version';
 
 const app = express();
 
@@ -30,7 +31,17 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'linkportal-backend' });
+  res.json({
+    status: 'ok',
+    service: 'linkportal-backend',
+    version: versionInfo.display,
+    build: versionInfo.build,
+    commit: versionInfo.commit,
+  });
+});
+
+app.get('/api/version', (_req, res) => {
+  res.json(versionInfo);
 });
 
 app.use('/api/auth', authRoutes);

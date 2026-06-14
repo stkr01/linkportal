@@ -262,3 +262,13 @@ body {
   font-size: 12px;
   font-weight: 600;
 }
+
+/* Backend version footer */
+.version-footer {
+  padding: 6px 10px;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+.version-footer:empty { display: none; }

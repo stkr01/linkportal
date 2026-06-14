@@ -11,10 +11,12 @@ import {
   updateSettings,
   exportLinks,
   importLinks,
+  getVersion,
 } from '../api/client';
 import type { AppSettings, LinkExportItem, Theme, ThemeKey } from '../types';
 import { flattenCategories } from '../utils/categories';
 import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
+import { formatDateTime } from '../utils/date';
 import { useTranslation, LANGUAGES, type Lang } from '../i18n';
 import type { TranslationKey } from '../i18n/en';
 
@@ -59,6 +61,8 @@ export default function SettingsPage() {
         {isAdmin && <HealthCheckSection />}
 
         {isAdmin && <CategorySection />}
+
+        <AboutSection />
       </div>
     </div>
   );
@@ -87,6 +91,38 @@ function LanguageSection() {
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+/* ---------- About / version (all users) ---------- */
+
+function AboutSection() {
+  const { t } = useTranslation();
+  const versionQuery = useQuery({ queryKey: ['version'], queryFn: getVersion });
+  const v = versionQuery.data;
+
+  return (
+    <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.about')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>{t('settings.aboutHint')}</p>
+      {v ? (
+        <p style={{ margin: 0 }}>
+          <code style={{ fontSize: '1rem' }}>{v.display}</code>
+          {v.dirty && (
+            <span className="muted" style={{ marginLeft: '0.5rem' }}>
+              • {t('settings.versionDirty')}
+            </span>
+          )}
+          {v.commitDate && (
+            <span className="muted" style={{ display: 'block', marginTop: '0.35rem' }}>
+              {t('settings.versionUpdated', { date: formatDateTime(v.commitDate) })}
+            </span>
+          )}
+        </p>
+      ) : (
+        <p className="muted" style={{ margin: 0 }}>{t('common.loading')}</p>
+      )}
     </div>
   );
 }

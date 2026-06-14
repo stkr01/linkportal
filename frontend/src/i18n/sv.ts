@@ -170,6 +170,10 @@ export const sv: Record<TranslationKey, string> = {
   'settings.importResult': '{{created}} länkar importerade, {{skipped}} överhoppade.',
   'settings.importErrors': '{{count}} kunde inte importeras.',
   'settings.importFailed': 'Kunde inte importera filen. Kontrollera att det är en giltig LinkPortal-export.',
+  'settings.about': 'Om',
+  'settings.aboutHint': 'Versionen som servern rapporterar. Servern och lokalt matchar när båda står på samma commit.',
+  'settings.versionUpdated': 'Uppdaterad {{date}}',
+  'settings.versionDirty': 'lokala ändringar är inte committade',
   'settings.theme': 'Färgtema',
   'settings.themeHint':
     'Temat sparas på ditt konto och följer med dig på alla enheter. Ändringar förhandsvisas direkt.',

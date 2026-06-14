@@ -170,6 +170,10 @@ export const de: Record<TranslationKey, string> = {
   'settings.importResult': '{{created}} Links importiert, {{skipped}} übersprungen.',
   'settings.importErrors': '{{count}} konnten nicht importiert werden.',
   'settings.importFailed': 'Die Datei konnte nicht importiert werden. Stellen Sie sicher, dass es ein gültiger LinkPortal-Export ist.',
+  'settings.about': 'Info',
+  'settings.aboutHint': 'Die vom Server gemeldete Version. Server und lokal stimmen überein, wenn beide auf demselben Commit sind.',
+  'settings.versionUpdated': 'Aktualisiert {{date}}',
+  'settings.versionDirty': 'nicht committete lokale Änderungen',
   'settings.theme': 'Farbschema',
   'settings.themeHint':
     'Das Farbschema wird in Ihrem Konto gespeichert und begleitet Sie auf allen Geräten. Änderungen werden sofort angezeigt.',

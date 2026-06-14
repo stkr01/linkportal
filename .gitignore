@@ -5,6 +5,9 @@ dist/
 .env
 *.local
 
+# Generated build/version info (created from git at build time, never committed)
+backend/version.json
+
 # Self-hosted Chrome/Edge extension packaging (deploy/skzdev02)
 deploy/skzdev02/ext-packager/build/
 deploy/skzdev02/ext-packager/extension-key.pem

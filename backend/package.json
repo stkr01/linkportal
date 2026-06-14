@@ -5,7 +5,9 @@
   "main": "dist/server.js",
   "type": "commonjs",
   "scripts": {
+    "predev": "node ../scripts/gen-version.mjs --out version.json",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "prebuild": "node ../scripts/gen-version.mjs --out version.json",
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",

@@ -6,6 +6,17 @@ export type HealthStatus = 'UP' | 'DOWN' | 'UNKNOWN';
 export type ThemeKey = 'primary' | 'primaryDark' | 'accent' | 'bg' | 'surface' | 'text';
 export type Theme = Partial<Record<ThemeKey, string>>;
 
+export interface BackendVersion {
+  version: string;
+  build: number;
+  commit: string;
+  commitDate: string;
+  branch: string;
+  dirty: boolean;
+  display: string;
+  generatedAt: string;
+}
+
 export interface User {
   id: number;
   username: string;

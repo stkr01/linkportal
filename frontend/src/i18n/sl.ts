@@ -170,6 +170,10 @@ export const sl: Record<TranslationKey, string> = {
   'settings.importResult': '{{created}} povezav uvoženih, {{skipped}} preskočenih.',
   'settings.importErrors': '{{count}} povezav ni bilo mogoče uvoziti.',
   'settings.importFailed': 'Datoteke ni bilo mogoče uvoziti. Prepričajte se, da je veljaven izvoz LinkPortal.',
+  'settings.about': 'O programu',
+  'settings.aboutHint': 'Različica, ki jo sporoča strežnik. Strežnik in lokalno okolje se ujemata, ko sta oba na istem commitu.',
+  'settings.versionUpdated': 'Posodobljeno {{date}}',
+  'settings.versionDirty': 'nepotrjene lokalne spremembe',
   'settings.theme': 'Barvna tema',
   'settings.themeHint':
     'Tema se shrani v vaš račun in vas spremlja na vseh napravah. Spremembe se predogledajo takoj.',

@@ -170,6 +170,10 @@ export const et: Record<TranslationKey, string> = {
   'settings.importResult': '{{created}} linki imporditud, {{skipped}} vahele jäetud.',
   'settings.importErrors': '{{count}} ei õnnestunud importida.',
   'settings.importFailed': 'Faili ei õnnestunud importida. Veendu, et see on kehtiv LinkPortali eksport.',
+  'settings.about': 'Teave',
+  'settings.aboutHint': 'Serveri teatatud versioon. Server ja kohalik ühtivad, kui mõlemad on samal commitil.',
+  'settings.versionUpdated': 'Uuendatud {{date}}',
+  'settings.versionDirty': 'kinnitamata kohalikud muudatused',
   'settings.theme': 'Värviteema',
   'settings.themeHint':
     'Teema salvestatakse sinu kontole ja järgib sind igal seadmel. Muudatusi kuvatakse kohe eelvaates.',
