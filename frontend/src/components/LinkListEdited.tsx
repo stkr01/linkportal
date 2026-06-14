@@ -12,6 +12,7 @@ interface Props {
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
   onTest?: (l: LinkItem) => void;
+  highlightId?: number | null;
 }
 
 // Detail view variant that shows audit info (Last Edit / Edited by) instead of Tags.
@@ -24,6 +25,7 @@ export default function LinkListEdited({
   onDelete,
   onToggleFavorite,
   onTest,
+  highlightId,
 }: Props) {
   const { t } = useTranslation();
   const copy = (url: string) => navigator.clipboard.writeText(url);
@@ -46,7 +48,7 @@ export default function LinkListEdited({
         </thead>
         <tbody>
           {links.map((l) => (
-              <tr key={l.id}>
+              <tr key={l.id} id={`link-${l.id}`} className={l.id === highlightId ? 'highlight' : undefined}>
                 <td className="col-fav">
                   {canEdit ? (
                     <button

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../auth/AuthContext';
 import {
@@ -13,6 +13,7 @@ import {
   restoreLink,
   permanentDeleteLink,
   setFavorite,
+  registerClick,
   testLink,
   testAllLinks,
 } from '../api/client';
@@ -53,6 +54,8 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  const params = useParams<{ id: string }>();
+
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [favoritesView, setFavoritesView] = useState(false);
   const [alertsView, setAlertsView] = useState(false);
@@ -63,6 +66,8 @@ export default function DashboardPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<LinkItem | null>(null);
   const [showPalette, setShowPalette] = useState(false);
+  // Deep link target (/link/:id) – the card/row to scroll to and flash.
+  const [highlightId, setHighlightId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const saved = localStorage.getItem('linkportal.viewMode');
     return saved === 'list' || saved === 'edited' ? saved : 'card';
@@ -198,6 +203,17 @@ export default function DashboardPage() {
     favoriteMut.mutate({ id: l.id, isFavorite: !l.isFavorite });
   };
 
+  // Register a click when a link is opened. Optimistically bump the count in all
+  // cached link lists (no refetch/re-sort), then fire-and-forget to the server.
+  const onOpen = (l: LinkItem) => {
+    queryClient.setQueriesData<LinkItem[]>({ queryKey: ['links'] }, (old) =>
+      old?.map((x) => (x.id === l.id ? { ...x, clickCount: x.clickCount + 1 } : x))
+    );
+    registerClick(l.id).catch(() => {
+      /* best-effort; ignore network/auth errors so opening the link is never blocked */
+    });
+  };
+
   const onTest = (l: LinkItem) => {
     testMut.mutate(l.id);
   };
@@ -290,6 +306,33 @@ export default function DashboardPage() {
     ? favorites
     : links;
 
+  // Deep link (/link/:id): clear any active view/filter so the target is visible,
+  // then mark it for scroll + highlight. Runs once per :id change.
+  useEffect(() => {
+    if (!params.id) return;
+    const n = Number(params.id);
+    if (!Number.isFinite(n)) return;
+    setFavoritesView(false);
+    setAlertsView(false);
+    setRecentView(false);
+    setTrashView(false);
+    setSelectedCategory(null);
+    setSearch('');
+    setSelectedTags([]);
+    setSelectedEnvironments([]);
+    setHighlightId(n);
+  }, [params.id]);
+
+  // Once the target link is rendered, scroll it into view and clear the flash
+  // after the animation. Re-runs as links load so the element is found.
+  useEffect(() => {
+    if (highlightId == null) return;
+    const el = document.getElementById(`link-${highlightId}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const tmo = setTimeout(() => setHighlightId(null), 2600);
+    return () => clearTimeout(tmo);
+  }, [highlightId, displayLinks]);
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -322,6 +365,9 @@ export default function DashboardPage() {
             <button className="secondary">{t('dashboard.users')}</button>
           </RouterLink>
         )}
+        <RouterLink to="/help">
+          <button className="secondary">{t('dashboard.help')}</button>
+        </RouterLink>
         <RouterLink to="/settings">
           <button className="secondary">{t('dashboard.settings')}</button>
         </RouterLink>
@@ -491,6 +537,8 @@ export default function DashboardPage() {
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
               onTest={onTest}
+              onOpen={onOpen}
+              highlightId={highlightId}
             />
           ) : viewMode === 'edited' ? (
             <LinkListEdited
@@ -505,6 +553,7 @@ export default function DashboardPage() {
               onDelete={onDelete}
               onToggleFavorite={onToggleFavorite}
               onTest={onTest}
+              highlightId={highlightId}
             />
           ) : (
             <div className="link-grid">
@@ -522,6 +571,8 @@ export default function DashboardPage() {
                   onDelete={onDelete}
                   onToggleFavorite={onToggleFavorite}
                   onTest={onTest}
+                  onOpen={onOpen}
+                  highlight={l.id === highlightId}
                 />
               ))}
             </div>

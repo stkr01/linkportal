@@ -12,6 +12,8 @@ interface Props {
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
   onTest?: (l: LinkItem) => void;
+  onOpen?: (l: LinkItem) => void;
+  highlightId?: number | null;
 }
 
 // Compact, image-free detail view (alternative to the card grid).
@@ -24,6 +26,8 @@ export default function LinkList({
   onDelete,
   onToggleFavorite,
   onTest,
+  onOpen,
+  highlightId,
 }: Props) {
   const { t } = useTranslation();
   const copy = (url: string) => navigator.clipboard.writeText(url);
@@ -40,13 +44,14 @@ export default function LinkList({
             <th>{t('list.manageSoftware')}</th>
             <th>{t('list.team')}</th>
             <th>{t('list.lastUp')}</th>
+            <th className="col-clicks">{t('list.clicks')}</th>
             <th>{t('list.tags')}</th>
             <th className="col-actions">{t('list.actions')}</th>
           </tr>
         </thead>
         <tbody>
           {links.map((l) => (
-              <tr key={l.id}>
+              <tr key={l.id} id={`link-${l.id}`} className={l.id === highlightId ? 'highlight' : undefined}>
                 <td className="col-fav">
                   {canEdit ? (
                     <button
@@ -64,7 +69,7 @@ export default function LinkList({
                 </td>
                 <td>
                   <HealthDot link={l} onTest={canEdit && onTest ? () => onTest(l) : undefined} />{' '}
-                  <a href={l.url} target="_blank" rel="noopener noreferrer">
+                  <a href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => onOpen?.(l)}>
                     {l.name}
                   </a>
                   {l.status === 'DEPRECATED' && (
@@ -89,6 +94,7 @@ export default function LinkList({
                 >
                   {l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}
                 </td>
+                <td className="col-clicks muted">{l.clickCount}</td>
                 <td>
                   {l.tags.length > 0 ? (
                     <div className="row-tags">
@@ -107,7 +113,7 @@ export default function LinkList({
                     <button className="secondary" onClick={() => copy(l.url)}>
                       {t('card.copy')}
                     </button>
-                    <a href={l.url} target="_blank" rel="noopener noreferrer">
+                    <a href={l.url} target="_blank" rel="noopener noreferrer" onClick={() => onOpen?.(l)}>
                       <button className="secondary">{t('card.open')}</button>
                     </a>
                     {canEdit && (

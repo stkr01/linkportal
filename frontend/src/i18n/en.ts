@@ -38,6 +38,7 @@ export const en = {
   'dashboard.clearSearch': 'Clear search',
   'dashboard.users': 'Users',
   'dashboard.settings': '⚙ Settings',
+  'dashboard.help': '❔ Help',
   'dashboard.logout': 'Log out',
   'dashboard.loadingCategories': 'Loading categories…',
   'dashboard.favorites': '★ Favorites',
@@ -81,7 +82,7 @@ export const en = {
   'form.extraMonitorMinutes': 'Check interval (minutes)',
   'form.extraMonitorHint': 'Checks this link on its own schedule, separate from the base sweep.',
   'form.doNotMonitor': 'Do not monitor',
-  'form.doNotMonitorHint': 'Never test this link; it always shows an orange status.',
+  'form.doNotMonitorHint': 'Never test this link; it always shows a blue status.',
   'settings.health.title': 'Health-check',
   'settings.health.hint':
     'Periodically checks that links respond. HTTP(S) uses a HEAD request; rdp/ssh use a TCP port check.',
@@ -99,7 +100,11 @@ export const en = {
   'card.deprecated': 'DEPRECATED',
   'card.lastEdited': 'Last edited {{date}}',
   'card.lastEditedBy': 'Last edited {{date}} by {{name}}',
-  'card.copy': 'Copy',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Copy URL',
+  'card.copyLink': 'Copy link',
+  'card.copyLinkTitle': 'Copy a shareable link to this entry',
+  'card.copied': 'Copied!',
   'card.open': 'Open ↗',
 
   // Detail list (table)
@@ -109,6 +114,7 @@ export const en = {
   'list.manageSoftware': 'Manage Software',
   'list.team': 'Team',
   'list.lastUp': 'Last successful',
+  'list.clicks': 'Clicks',
   'list.added': 'Added',
   'list.tags': 'Tags',
   'list.lastEdit': 'Last Edit',

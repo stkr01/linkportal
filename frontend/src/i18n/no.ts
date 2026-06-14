@@ -40,6 +40,7 @@ export const no: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Tøm søk',
   'dashboard.users': 'Brukere',
   'dashboard.settings': '⚙ Innstillinger',
+  'dashboard.help': '❔ Hjelp',
   'dashboard.logout': 'Logg ut',
   'dashboard.loadingCategories': 'Laster kategorier…',
   'dashboard.favorites': '★ Favoritter',
@@ -83,7 +84,7 @@ export const no: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Sjekkintervall (minutter)',
   'form.extraMonitorHint': 'Sjekker denne lenken etter sin egen tidsplan, atskilt fra grunnskanningen.',
   'form.doNotMonitor': 'Ikke overvåk',
-  'form.doNotMonitorHint': 'Tester aldri denne lenken; viser alltid oransje status.',
+  'form.doNotMonitorHint': 'Tester aldri denne lenken; viser alltid blå status.',
   'settings.health.title': 'Statussjekk',
   'settings.health.hint':
     'Sjekker jevnlig om lenker svarer. HTTP(S) bruker en HEAD-forespørsel; rdp/ssh bruker en TCP-portsjekk.',
@@ -101,7 +102,11 @@ export const no: Record<TranslationKey, string> = {
   'card.deprecated': 'UTDATERT',
   'card.lastEdited': 'Sist redigert {{date}}',
   'card.lastEditedBy': 'Sist redigert {{date}} av {{name}}',
-  'card.copy': 'Kopier',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Kopier URL',
+  'card.copyLink': 'Kopier lenke',
+  'card.copyLinkTitle': 'Kopier en delbar lenke til oppføringen',
+  'card.copied': 'Kopiert!',
   'card.open': 'Åpne ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const no: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Administrasjonsprogramvare',
   'list.team': 'Team',
   'list.lastUp': 'Sist vellykket',
+  'list.clicks': 'Klikk',
   'list.added': 'Lagt til',
   'list.tags': 'Etiketter',
   'list.lastEdit': 'Sist redigert',

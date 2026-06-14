@@ -40,6 +40,7 @@ export const sv: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Rensa sökning',
   'dashboard.users': 'Användare',
   'dashboard.settings': '⚙ Inställningar',
+  'dashboard.help': '❔ Hjälp',
   'dashboard.logout': 'Logga ut',
   'dashboard.loadingCategories': 'Laddar kategorier…',
   'dashboard.favorites': '★ Favoriter',
@@ -83,7 +84,7 @@ export const sv: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Kontrollintervall (minuter)',
   'form.extraMonitorHint': 'Kontrollerar den här länken enligt eget schema, separat från bassvepet.',
   'form.doNotMonitor': 'Övervaka inte',
-  'form.doNotMonitorHint': 'Testar aldrig den här länken; den visar alltid orange status.',
+  'form.doNotMonitorHint': 'Testar aldrig den här länken; den visar alltid blå status.',
   'settings.health.title': 'Hälsokoll',
   'settings.health.hint':
     'Kontrollerar regelbundet att länkar svarar. HTTP(S) använder en HEAD-förfrågan; rdp/ssh använder en TCP-portkontroll.',
@@ -101,7 +102,11 @@ export const sv: Record<TranslationKey, string> = {
   'card.deprecated': 'UTFASAD',
   'card.lastEdited': 'Senast ändrad {{date}}',
   'card.lastEditedBy': 'Senast ändrad {{date}} av {{name}}',
-  'card.copy': 'Kopiera',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Kopiera URL',
+  'card.copyLink': 'Kopiera länk',
+  'card.copyLinkTitle': 'Kopiera en delbar länk till posten',
+  'card.copied': 'Kopierad!',
   'card.open': 'Öppna ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const sv: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Hanteringsprogram',
   'list.team': 'Team',
   'list.lastUp': 'Senast lyckad',
+  'list.clicks': 'Klick',
   'list.added': 'Tillagd',
   'list.tags': 'Taggar',
   'list.lastEdit': 'Senast ändrad',

@@ -313,8 +313,9 @@ label {
 .link-card .actions {
   display: flex;
   gap: 0.35rem;
-  margin-top: 0.5rem;
-  flex-wrap: nowrap;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  flex-wrap: wrap;
 }
 .link-card .actions a {
   display: inline-flex;
@@ -492,6 +493,38 @@ label {
 }
 .muted {
   color: var(--text-muted);
+}
+/* Click statistics */
+.click-count {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.col-clicks {
+  text-align: right;
+  white-space: nowrap;
+}
+/* Deep-link target flash (/link/:id) */
+@keyframes lp-highlight {
+  0% {
+    box-shadow: 0 0 0 3px var(--rs-primary), 0 0 12px 2px var(--rs-accent);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent, 0 0 12px 2px transparent;
+  }
+}
+.link-card.highlight {
+  animation: lp-highlight 2.5s ease-out;
+}
+@keyframes lp-row-highlight {
+  0% {
+    background: rgba(0, 131, 62, 0.18);
+  }
+  100% {
+    background: transparent;
+  }
+}
+.link-table tr.highlight > td {
+  animation: lp-row-highlight 2.5s ease-out;
 }
 .field-hint {
   display: block;
@@ -791,4 +824,59 @@ th {
   flex-wrap: wrap;
   gap: 0.25rem;
 }
+
+/* Help / "How it works" page */
+.help-page {
+  overflow-y: auto;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+}
+.help-intro {
+  font-size: 1rem;
+  margin-top: 0;
+}
+.help-fallback {
+  font-style: italic;
+}
+.help-toc {
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.help-toc ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  columns: 2;
+}
+.help-toc li {
+  margin: 0.2rem 0;
+  break-inside: avoid;
+}
+.help-toc a {
+  color: var(--rs-primary, #00833e);
+  text-decoration: none;
+}
+.help-toc a:hover {
+  text-decoration: underline;
+}
+.help-section {
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+  scroll-margin-top: 1rem;
+}
+.help-section h3 {
+  margin-top: 0;
+}
+.help-section p {
+  line-height: 1.55;
+}
+.help-section p:last-child {
+  margin-bottom: 0;
+}
+@media (max-width: 640px) {
+  .help-toc ul {
+    columns: 1;
+  }
+}
+
 

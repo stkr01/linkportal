@@ -40,6 +40,7 @@ export const pt: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Limpar pesquisa',
   'dashboard.users': 'Utilizadores',
   'dashboard.settings': '⚙ Definições',
+  'dashboard.help': '❔ Ajuda',
   'dashboard.logout': 'Terminar sessão',
   'dashboard.loadingCategories': 'A carregar categorias…',
   'dashboard.favorites': '★ Favoritos',
@@ -83,7 +84,7 @@ export const pt: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Intervalo de verificação (minutos)',
   'form.extraMonitorHint': 'Verifica esta ligação segundo o seu próprio horário, separado da análise base.',
   'form.doNotMonitor': 'Não monitorizar',
-  'form.doNotMonitorHint': 'Nunca testa esta ligação; mostra sempre um estado laranja.',
+  'form.doNotMonitorHint': 'Nunca testa esta ligação; mostra sempre um estado azul.',
   'settings.health.title': 'Verificação de estado',
   'settings.health.hint':
     'Verifica regularmente se as ligações respondem. HTTP(S) usa um pedido HEAD; rdp/ssh usam uma verificação de porta TCP.',
@@ -101,7 +102,11 @@ export const pt: Record<TranslationKey, string> = {
   'card.deprecated': 'OBSOLETA',
   'card.lastEdited': 'Última edição {{date}}',
   'card.lastEditedBy': 'Última edição {{date}} por {{name}}',
-  'card.copy': 'Copiar',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Copiar URL',
+  'card.copyLink': 'Copiar link',
+  'card.copyLinkTitle': 'Copiar um link partilhável para esta entrada',
+  'card.copied': 'Copiado!',
   'card.open': 'Abrir ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const pt: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Software de gestão',
   'list.team': 'Equipa',
   'list.lastUp': 'Último com sucesso',
+  'list.clicks': 'Cliques',
   'list.added': 'Adicionada',
   'list.tags': 'Etiquetas',
   'list.lastEdit': 'Última edição',

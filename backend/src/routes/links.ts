@@ -263,7 +263,27 @@ router.patch(
   })
 );
 
-// POST /api/links/quick-save – snabbspara aktuell flik från tillägget (Editor+)
+// POST /api/links/:id/click – register that a link was opened (any role). Lightweight:
+// increments a counter only, no audit row (clicks are high-frequency).
+router.post(
+  '/:id/click',
+  authenticate,
+  asyncHandler(async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const updated = await prisma.link.updateMany({
+      where: { id, isDeleted: false },
+      data: { clickCount: { increment: 1 } },
+    });
+    if (updated.count === 0) {
+      res.status(404).json({ error: 'Link not found.' });
+      return;
+    }
+    const link = await prisma.link.findUnique({ where: { id }, select: { clickCount: true } });
+    res.json({ id, clickCount: link?.clickCount ?? 0 });
+  })
+);
+
+
 const quickSaveSchema = z.object({
   url: z.string().url('Invalid URL.'),
   name: z.string().max(200).optional().nullable(),

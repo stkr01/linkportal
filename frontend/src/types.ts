@@ -65,6 +65,7 @@ export interface LinkItem {
   extraMonitor: boolean;
   extraMonitorMinutes: number | null;
   alertActive: boolean;
+  clickCount: number;
   categoryId: number;
   category: { id: number; name: string; parentId: number | null };
   tags: Tag[];

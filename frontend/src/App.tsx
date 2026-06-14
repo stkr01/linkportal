@@ -5,6 +5,7 @@ import DashboardPage from './pages/DashboardPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import AdminUsersPage from './pages/AdminUsersPage';
 import SettingsPage from './pages/SettingsPage';
+import HelpPage from './pages/HelpPage';
 import type { Role } from './types';
 import { ReactNode } from 'react';
 import { useTranslation } from './i18n';
@@ -39,6 +40,14 @@ export default function App() {
         }
       />
       <Route
+        path="/link/:id"
+        element={
+          <Protected>
+            <DashboardPage />
+          </Protected>
+        }
+      />
+      <Route
         path="/admin/users"
         element={
           <Protected minRole="ADMIN">
@@ -51,6 +60,14 @@ export default function App() {
         element={
           <Protected>
             <SettingsPage />
+          </Protected>
+        }
+      />
+      <Route
+        path="/help"
+        element={
+          <Protected>
+            <HelpPage />
           </Protected>
         }
       />

@@ -13,6 +13,8 @@ interface Props {
   onDelete: (l: LinkItem) => void;
   onToggleFavorite: (l: LinkItem) => void;
   onTest?: (l: LinkItem) => void;
+  onOpen?: (l: LinkItem) => void;
+  highlight?: boolean;
 }
 
 function faviconUrl(url: string): string | null {
@@ -24,7 +26,7 @@ function faviconUrl(url: string): string | null {
   }
 }
 
-export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite, onTest }: Props) {
+export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite, onTest, onOpen, highlight }: Props) {
   const { t } = useTranslation();
   const fav = faviconUrl(link.url);
   const lastEdited = formatDate(link.dateModified);
@@ -34,12 +36,26 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
   const [srcIndex, setSrcIndex] = useState(0);
   const currentSrc = sources[srcIndex];
 
+  // Transient "Copied!" feedback for the two copy buttons.
+  const [copied, setCopied] = useState<'url' | 'link' | null>(null);
+  const flash = (what: 'url' | 'link') => {
+    setCopied(what);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
   const copy = () => {
     navigator.clipboard.writeText(link.url);
+    flash('url');
+  };
+
+  // Shareable deep link to this entry inside LinkPortal (not the tool URL).
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/link/${link.id}`);
+    flash('link');
   };
 
   return (
-    <div className="card link-card">
+    <div className={`card link-card${highlight ? ' highlight' : ''}`} id={`link-${link.id}`}>
       <div className="crumb">{path}</div>
       <div className="link-head">
         <a
@@ -48,6 +64,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
           target="_blank"
           rel="noopener noreferrer"
           title={t('card.openTitle', { name: link.name })}
+          onClick={() => onOpen?.(link)}
         >
           {currentSrc ? (
             <img src={currentSrc} alt="" onError={() => setSrcIndex((i) => i + 1)} />
@@ -68,7 +85,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
             </button>
           )}
           {!canEdit && link.isFavorite && <span title={t('card.favorite')}>★</span>}
-          <a href={link.url} target="_blank" rel="noopener noreferrer">
+          <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={() => onOpen?.(link)}>
             {link.name}
           </a>
           <HealthDot link={link} onTest={canEdit && onTest ? () => onTest(link) : undefined} />
@@ -101,6 +118,10 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
         {link.modifiedBy
           ? t('card.lastEditedBy', { date: lastEdited, name: link.modifiedBy.displayName })
           : t('card.lastEdited', { date: lastEdited })}
+        <span className="click-count" title={`${t('list.clicks')}: ${link.clickCount}`}>
+          {' · '}
+          {t('card.clicks', { count: link.clickCount })}
+        </span>
       </div>
 
       {link.tags.length > 0 && (
@@ -115,9 +136,12 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
 
       <div className="actions">
         <button className="secondary" onClick={copy}>
-          {t('card.copy')}
+          {copied === 'url' ? t('card.copied') : t('card.copy')}
         </button>
-        <a href={link.url} target="_blank" rel="noopener noreferrer">
+        <button className="secondary" onClick={copyLink} title={t('card.copyLinkTitle')}>
+          {copied === 'link' ? t('card.copied') : t('card.copyLink')}
+        </button>
+        <a href={link.url} target="_blank" rel="noopener noreferrer" onClick={() => onOpen?.(link)}>
           <button className="secondary">{t('card.open')}</button>
         </a>
         {canEdit && (

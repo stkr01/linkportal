@@ -68,6 +68,8 @@ model Link {
   alertActive         Boolean       @default(false) // true när status gått UP -> DOWN, nollas vid UP igen
   checks              HealthCheck[]
 
+  clickCount     Int         @default(0) // how many times the link has been opened
+
   dateAdded      DateTime    @default(now())
   addedById      Int
   addedBy        User        @relation("LinkCreatedBy", fields: [addedById], references: [id])

@@ -128,6 +128,12 @@ export async function setFavorite(id: number, isFavorite: boolean): Promise<Link
   return data;
 }
 
+// Register that a link was opened (click statistics). Returns the new total.
+export async function registerClick(id: number): Promise<{ id: number; clickCount: number }> {
+  const { data } = await api.post(`/links/${id}/click`);
+  return data;
+}
+
 // Health-check
 export async function testLink(id: number): Promise<LinkItem> {
   const { data } = await api.post(`/links/${id}/test`);

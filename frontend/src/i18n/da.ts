@@ -40,6 +40,7 @@ export const da: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Ryd søgning',
   'dashboard.users': 'Brugere',
   'dashboard.settings': '⚙ Indstillinger',
+  'dashboard.help': '❔ Hjælp',
   'dashboard.logout': 'Log ud',
   'dashboard.loadingCategories': 'Indlæser kategorier…',
   'dashboard.favorites': '★ Favoritter',
@@ -83,7 +84,7 @@ export const da: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Tjekinterval (minutter)',
   'form.extraMonitorHint': 'Tjekker dette link efter sin egen tidsplan, adskilt fra grundscanningen.',
   'form.doNotMonitor': 'Overvåg ikke',
-  'form.doNotMonitorHint': 'Tester aldrig dette link; viser altid en orange status.',
+  'form.doNotMonitorHint': 'Tester aldrig dette link; viser altid en blå status.',
   'settings.health.title': 'Statustjek',
   'settings.health.hint':
     'Kontrollerer regelmæssigt, om links svarer. HTTP(S) bruger en HEAD-anmodning; rdp/ssh bruger et TCP-porttjek.',
@@ -101,7 +102,11 @@ export const da: Record<TranslationKey, string> = {
   'card.deprecated': 'FORÆLDET',
   'card.lastEdited': 'Senest redigeret {{date}}',
   'card.lastEditedBy': 'Senest redigeret {{date}} af {{name}}',
-  'card.copy': 'Kopiér',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Kopiér URL',
+  'card.copyLink': 'Kopiér link',
+  'card.copyLinkTitle': 'Kopiér et delbart link til posten',
+  'card.copied': 'Kopieret!',
   'card.open': 'Åbn ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const da: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Administrationssoftware',
   'list.team': 'Team',
   'list.lastUp': 'Senest vellykket',
+  'list.clicks': 'Klik',
   'list.added': 'Tilføjet',
   'list.tags': 'Tags',
   'list.lastEdit': 'Senest redigeret',

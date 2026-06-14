@@ -40,6 +40,7 @@ export const sl: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Počisti iskanje',
   'dashboard.users': 'Uporabniki',
   'dashboard.settings': '⚙ Nastavitve',
+  'dashboard.help': '❔ Pomoč',
   'dashboard.logout': 'Odjava',
   'dashboard.loadingCategories': 'Nalaganje kategorij…',
   'dashboard.favorites': '★ Priljubljene',
@@ -83,7 +84,7 @@ export const sl: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Interval preverjanja (minute)',
   'form.extraMonitorHint': 'Preveri to povezavo po lastnem urniku, ločeno od osnovnega pregleda.',
   'form.doNotMonitor': 'Ne nadziraj',
-  'form.doNotMonitorHint': 'Te povezave nikoli ne preverja; vedno prikaže oranžno stanje.',
+  'form.doNotMonitorHint': 'Te povezave nikoli ne preverja; vedno prikaže modro stanje.',
   'settings.health.title': 'Preverjanje stanja',
   'settings.health.hint':
     'Redno preverja, ali se povezave odzivajo. HTTP(S) uporablja zahtevo HEAD; rdp/ssh uporabljata preverjanje vrat TCP.',
@@ -101,7 +102,11 @@ export const sl: Record<TranslationKey, string> = {
   'card.deprecated': 'OPUŠČENO',
   'card.lastEdited': 'Nazadnje urejeno {{date}}',
   'card.lastEditedBy': 'Nazadnje urejeno {{date}} – {{name}}',
-  'card.copy': 'Kopiraj',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Kopiraj URL',
+  'card.copyLink': 'Kopiraj povezavo',
+  'card.copyLinkTitle': 'Kopiraj povezavo do tega vnosa za deljenje',
+  'card.copied': 'Kopirano!',
   'card.open': 'Odpri ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const sl: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Programska oprema za upravljanje',
   'list.team': 'Ekipa',
   'list.lastUp': 'Zadnji uspešen',
+  'list.clicks': 'Kliki',
   'list.added': 'Dodano',
   'list.tags': 'Oznake',
   'list.lastEdit': 'Nazadnje urejeno',

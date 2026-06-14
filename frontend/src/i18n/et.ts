@@ -40,6 +40,7 @@ export const et: Record<TranslationKey, string> = {
   'dashboard.clearSearch': 'Tühjenda otsing',
   'dashboard.users': 'Kasutajad',
   'dashboard.settings': '⚙ Seaded',
+  'dashboard.help': '❔ Abi',
   'dashboard.logout': 'Logi välja',
   'dashboard.loadingCategories': 'Kategooriate laadimine…',
   'dashboard.favorites': '★ Lemmikud',
@@ -83,7 +84,7 @@ export const et: Record<TranslationKey, string> = {
   'form.extraMonitorMinutes': 'Kontrollimisintervall (minutites)',
   'form.extraMonitorHint': 'Kontrollib seda linki oma ajakava järgi, eraldi baasläbivaatusest.',
   'form.doNotMonitor': 'Ära jälgi',
-  'form.doNotMonitorHint': 'Ära kunagi testi seda linki; see kuvab alati oranži oleku.',
+  'form.doNotMonitorHint': 'Ära kunagi testi seda linki; see kuvab alati sinise oleku.',
   'settings.health.title': 'Tervisekontroll',
   'settings.health.hint':
     'Kontrollib perioodiliselt, kas lingid vastavad. HTTP(S) kasutab HEAD-päringut; rdp/ssh kasutavad TCP-pordi kontrolli.',
@@ -101,7 +102,11 @@ export const et: Record<TranslationKey, string> = {
   'card.deprecated': 'AEGUNUD',
   'card.lastEdited': 'Viimati muudetud {{date}}',
   'card.lastEditedBy': 'Viimati muudetud {{date}} kasutaja {{name}} poolt',
-  'card.copy': 'Kopeeri',
+  'card.clicks': '👆 {{count}}',
+  'card.copy': 'Kopeeri URL',
+  'card.copyLink': 'Kopeeri link',
+  'card.copyLinkTitle': 'Kopeeri jagatav link sellele kirjele',
+  'card.copied': 'Kopeeritud!',
   'card.open': 'Ava ↗',
 
   // Detail list (table)
@@ -111,6 +116,7 @@ export const et: Record<TranslationKey, string> = {
   'list.manageSoftware': 'Halda tarkvara',
   'list.team': 'Meeskond',
   'list.lastUp': 'Viimati töökorras',
+  'list.clicks': 'Klõpsud',
   'list.added': 'Lisatud',
   'list.tags': 'Sildid',
   'list.lastEdit': 'Viimane muudatus',

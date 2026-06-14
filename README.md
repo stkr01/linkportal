@@ -107,7 +107,13 @@ Tillägget ligger i mappen `extension/` och fungerar i **både Chrome och Edge**
 **Använda:** Klicka på ikonen → favoriter visas högst upp, därunder kategoriträdet. Klicka på en länk så öppnas den i en ny flik. 🔄 uppdaterar listan, 🔎 söker, ⚙️ öppnar inställningar (server-URL, logga ut).
 **Spara aktuell sida:** Editor/Admin ser en ➕-knapp i tillägget. Klicka på den för att spara fliken du har öppen – namn och URL fylls i automatiskt. Välj kategori, eller lämna den som **📥 Inbox (unsorted)** för att sortera in den senare i webappen.
 
-**Kortkommando:** öppna popup-fönstret med `Ctrl + Shift + L` (Mac: `Cmd + Shift + L`). Tangenten kan ändras – eller göras **global** så den funkar även när webbläsaren inte är i fokus – under `chrome://extensions/shortcuts` (Edge: `edge://extensions/shortcuts`). Om kombinationen redan är upptagen av ett annat tillägg tilldelas den inte automatiskt; sätt den då manuellt där.
+**Kortkommando:** popup-fönstret kan öppnas med `Ctrl + Shift + L` (Mac: `Cmd + Shift + L`), men **du måste oftast aktivera genvägen själv en gång** – Chrome/Edge sätter bara ett *förslag* som inte binds automatiskt vid installation. Gör så här:
+
+1. Öppna `chrome://extensions/shortcuts` (Edge: `edge://extensions/shortcuts`).
+2. Hitta **LinkPortal** → raden *Open LinkPortal*, klicka i fältet och tryck `Ctrl + Shift + L`.
+3. Vill du att genvägen ska funka även när webbläsaren inte är i fokus: ställ omfånget på **Global** (annars **I Chrome/Edge**).
+
+Är kombinationen upptagen av ett annat tillägg tilldelas den inte – välj då en annan, t.ex. `Alt + Shift + L`.
 > Ikonerna i `extension/icons/` genereras av `extension/make-icons.js` (`node make-icons.js`). Vill du peka tillägget mot en annan server än localhost ber det automatiskt om host-behörighet.
 
 ## Starta, stoppa och starta om tjänsterna
