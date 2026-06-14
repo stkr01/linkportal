@@ -25,6 +25,7 @@ model User {
   modifiedLinks Link[]     @relation("LinkModifiedBy")
   auditLogs     AuditLog[]
   favorites     UserFavorite[]
+  ownedCategories Category[] @relation("CategoryOwner")
 }
 
 model Category {
@@ -34,9 +35,14 @@ model Category {
   parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id])
   children  Category[] @relation("CategoryTree")
   sortOrder Int        @default(0)
+  // Privacy: when true the category (and everything under it) is visible only to its
+  // owner and admins. Inherited down the tree (denormalised onto every descendant).
+  isPrivate Boolean    @default(false)
+  ownerId   Int?       // creator when private; null for shared categories
+  owner     User?      @relation("CategoryOwner", fields: [ownerId], references: [id])
   links     Link[]
 
-  @@unique([parentId, name])
+  @@unique([parentId, name, ownerId])
 }
 
 model Link {

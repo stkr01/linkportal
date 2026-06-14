@@ -503,6 +503,37 @@ label {
   text-align: right;
   white-space: nowrap;
 }
+/* Monitoring status as a colored frame around the whole card */
+.link-card.mon-up {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 1px rgba(22, 163, 74, 0.35), 0 2px 10px rgba(22, 163, 74, 0.12);
+}
+.link-card.mon-off {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3), 0 2px 10px rgba(37, 99, 235, 0.1);
+}
+.link-card.mon-unknown {
+  border-color: #b6bdb8;
+}
+.link-card.mon-down {
+  border-color: #dc2626;
+  animation: mon-pulse-red 1.8s ease-in-out infinite;
+}
+@keyframes mon-pulse-red {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.5), 0 0 6px rgba(220, 38, 38, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.95), 0 0 20px rgba(220, 38, 38, 0.55);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-card.mon-down {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.8), 0 0 12px rgba(220, 38, 38, 0.4);
+  }
+}
 /* Deep-link target flash (/link/:id) */
 @keyframes lp-highlight {
   0% {

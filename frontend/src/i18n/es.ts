@@ -200,6 +200,11 @@ export const es: Record<TranslationKey, string> = {
   'settings.enterName': 'Introduce un nombre.',
   'settings.deleteCategoryConfirm':
     '¿Eliminar la categoría "{{name}}"? Debe estar vacía (sin subcategorías ni enlaces).',
+  'settings.categoryPrivate': 'Privada (solo tú puedes verla)',
+  'settings.privateInherited': 'Hereda la privacidad del elemento superior',
+  'settings.categoryPrivateHint':
+    'Una categoría privada y sus enlaces solo son visibles para ti y los administradores. Las subcategorías lo heredan. La privacidad solo se puede establecer al crearla.',
+  'category.private': 'Categoría privada',
 
   // Theme color labels
   'theme.primary': 'Color primario (botones, acentos)',

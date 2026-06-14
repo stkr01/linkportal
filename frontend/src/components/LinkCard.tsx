@@ -54,8 +54,17 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
     flash('link');
   };
 
+  // Monitoring status as a colored frame around the whole card.
+  const monClass = link.doNotMonitor
+    ? 'mon-off'
+    : link.healthStatus === 'UP'
+    ? 'mon-up'
+    : link.healthStatus === 'DOWN'
+    ? 'mon-down'
+    : 'mon-unknown';
+
   return (
-    <div className={`card link-card${highlight ? ' highlight' : ''}`} id={`link-${link.id}`}>
+    <div className={`card link-card ${monClass}${highlight ? ' highlight' : ''}`} id={`link-${link.id}`}>
       <div className="crumb">{path}</div>
       <div className="link-head">
         <a

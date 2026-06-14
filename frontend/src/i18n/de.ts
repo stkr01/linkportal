@@ -200,6 +200,11 @@ export const de: Record<TranslationKey, string> = {
   'settings.enterName': 'Geben Sie einen Namen ein.',
   'settings.deleteCategoryConfirm':
     'Kategorie „{{name}}“ löschen? Sie muss leer sein (keine Unterkategorien oder Links).',
+  'settings.categoryPrivate': 'Privat (nur Sie sehen sie)',
+  'settings.privateInherited': 'Erbt Privatsphäre vom übergeordneten Element',
+  'settings.categoryPrivateHint':
+    'Eine private Kategorie und ihre Links sind nur für Sie und Administratoren sichtbar. Unterkategorien erben dies. Die Privatsphäre kann nur beim Erstellen festgelegt werden.',
+  'category.private': 'Private Kategorie',
 
   // Theme color labels
   'theme.primary': 'Primärfarbe (Schaltflächen, Akzente)',

@@ -200,6 +200,11 @@ export const no: Record<TranslationKey, string> = {
   'settings.enterName': 'Skriv inn et navn.',
   'settings.deleteCategoryConfirm':
     'Slette kategorien «{{name}}»? Den må være tom (ingen underkategorier eller lenker).',
+  'settings.categoryPrivate': 'Privat (bare du ser den)',
+  'settings.privateInherited': 'Arver privat fra overordnet',
+  'settings.categoryPrivateHint':
+    'En privat kategori og lenkene i den er bare synlige for deg og administratorer. Underkategorier arver det. Privat kan bare velges når kategorien opprettes.',
+  'category.private': 'Privat kategori',
 
   // Theme color labels
   'theme.primary': 'Primærfarge (knapper, aksenter)',

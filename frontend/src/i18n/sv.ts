@@ -200,6 +200,11 @@ export const sv: Record<TranslationKey, string> = {
   'settings.enterName': 'Ange ett namn.',
   'settings.deleteCategoryConfirm':
     'Ta bort kategorin "{{name}}"? Den måste vara tom (inga underkategorier eller länkar).',
+  'settings.categoryPrivate': 'Privat (bara du ser den)',
+  'settings.privateInherited': 'Ärver privat från överordnad',
+  'settings.categoryPrivateHint':
+    'En privat kategori och dess länkar syns bara för dig och administratörer. Underkategorier ärver den. Privat kan bara väljas när kategorin skapas.',
+  'category.private': 'Privat kategori',
 
   // Theme color labels
   'theme.primary': 'Primärfärg (knappar, accenter)',

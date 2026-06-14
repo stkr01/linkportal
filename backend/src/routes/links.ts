@@ -13,7 +13,7 @@ const router = Router();
 
 function linkIncludeFor(userId: number) {
   return {
-    category: { select: { id: true, name: true, parentId: true } },
+    category: { select: { id: true, name: true, parentId: true, isPrivate: true } },
     tags: { select: { id: true, name: true } },
     addedBy: { select: { id: true, displayName: true, username: true } },
     modifiedBy: { select: { id: true, displayName: true, username: true } },
@@ -25,6 +25,20 @@ function linkIncludeFor(userId: number) {
 function serializeLink<T extends { favoritedBy: unknown[] }>(link: T) {
   const { favoritedBy, ...rest } = link;
   return { ...rest, isFavorite: favoritedBy.length > 0 };
+}
+
+// Restrict links to categories the user may see (admins see everything).
+function visibleLinkWhere(user: { userId: number; role: string }): Prisma.LinkWhereInput {
+  if (user.role === Role.ADMIN) return {};
+  return { category: { is: { OR: [{ isPrivate: false }, { ownerId: user.userId }] } } };
+}
+
+// True when a category may be used by the user as a link's target (create/update/quick-save).
+function canUseCategory(
+  cat: { isPrivate: boolean; ownerId: number | null },
+  user: { userId: number; role: string }
+): boolean {
+  return user.role === Role.ADMIN || !cat.isPrivate || cat.ownerId === user.userId;
 }
 
 // Hämta alla descendant-kategori-id (för att inkludera underkategoriers länkar).
@@ -102,6 +116,11 @@ router.get(
       ];
     }
 
+    // Hide links in private categories the user doesn't own (admins see all).
+    if (req.user!.role !== Role.ADMIN) {
+      where.category = { is: { OR: [{ isPrivate: false }, { ownerId: req.user!.userId }] } };
+    }
+
     const links = await prisma.link.findMany({
       where,
       include: linkIncludeFor(req.user!.userId),
@@ -132,7 +151,7 @@ router.get(
 router.get(
   '/export',
   authenticate,
-  asyncHandler(async (_req: Request, res: Response) => {
+  asyncHandler(async (req: Request, res: Response) => {
     const categories = await prisma.category.findMany({
       select: { id: true, name: true, parentId: true },
     });
@@ -149,7 +168,7 @@ router.get(
     };
 
     const links = await prisma.link.findMany({
-      where: { isDeleted: false },
+      where: { isDeleted: false, ...visibleLinkWhere(req.user!) },
       include: { tags: { select: { name: true } } },
       orderBy: { name: 'asc' },
     });
@@ -186,7 +205,7 @@ router.get(
   asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const link = await prisma.link.findFirst({
-      where: { id, isDeleted: false },
+      where: { id, isDeleted: false, ...visibleLinkWhere(req.user!) },
       include: linkIncludeFor(req.user!.userId),
     });
     if (!link) {
@@ -239,7 +258,9 @@ router.patch(
     const { isFavorite } = favoriteSchema.parse(req.body);
     const userId = req.user!.userId;
 
-    const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
+    const existing = await prisma.link.findFirst({
+      where: { id, isDeleted: false, ...visibleLinkWhere(req.user!) },
+    });
     if (!existing) {
       res.status(404).json({ error: 'Link not found.' });
       return;
@@ -271,7 +292,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const updated = await prisma.link.updateMany({
-      where: { id, isDeleted: false },
+      where: { id, isDeleted: false, ...visibleLinkWhere(req.user!) },
       data: { clickCount: { increment: 1 } },
     });
     if (updated.count === 0) {
@@ -303,7 +324,7 @@ router.post(
     let categoryId = data.categoryId ?? null;
     if (categoryId) {
       const cat = await prisma.category.findUnique({ where: { id: categoryId } });
-      if (!cat) {
+      if (!cat || !canUseCategory(cat, req.user!)) {
         res.status(400).json({ error: 'The selected category does not exist.' });
         return;
       }
@@ -361,7 +382,7 @@ router.post(
     const data = upsertSchema.parse(req.body);
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
-    if (!category) {
+    if (!category || !canUseCategory(category, req.user!)) {
       res.status(400).json({ error: 'The selected category does not exist.' });
       return;
     }
@@ -409,14 +430,14 @@ router.put(
     const id = Number(req.params.id);
     const data = upsertSchema.parse(req.body);
 
-    const existing = await prisma.link.findFirst({ where: { id, isDeleted: false } });
+    const existing = await prisma.link.findFirst({ where: { id, isDeleted: false, ...visibleLinkWhere(req.user!) } });
     if (!existing) {
       res.status(404).json({ error: 'Link not found.' });
       return;
     }
 
     const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
-    if (!category) {
+    if (!category || !canUseCategory(category, req.user!)) {
       res.status(400).json({ error: 'The selected category does not exist.' });
       return;
     }
@@ -561,7 +582,12 @@ router.post(
     const { ids } = testAllSchema.parse(req.body ?? {});
     const settings = await getSettings();
     const links = await prisma.link.findMany({
-      where: { isDeleted: false, doNotMonitor: false, ...(ids && ids.length ? { id: { in: ids } } : {}) },
+      where: {
+        isDeleted: false,
+        doNotMonitor: false,
+        ...visibleLinkWhere(req.user!),
+        ...(ids && ids.length ? { id: { in: ids } } : {}),
+      },
       select: { id: true, url: true },
     });
     await runChecks(links, settings.healthCheckTimeoutSec);
@@ -577,7 +603,7 @@ router.post(
   asyncHandler(async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const existing = await prisma.link.findFirst({
-      where: { id, isDeleted: false },
+      where: { id, isDeleted: false, ...visibleLinkWhere(req.user!) },
       select: { id: true, url: true, doNotMonitor: true },
     });
     if (!existing) {

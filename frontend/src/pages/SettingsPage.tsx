@@ -60,7 +60,7 @@ export default function SettingsPage() {
 
         {isAdmin && <HealthCheckSection />}
 
-        {isAdmin && <CategorySection />}
+        {hasRole('EDITOR') && <CategorySection />}
 
         <AboutSection />
       </div>
@@ -512,16 +512,19 @@ function HealthCheckSection() {
   );
 }
 
-/* ---------- Kategorihantering (endast Admin) ---------- */
+/* ---------- Kategorihantering (Editor+; privata kategorier ägs av skaparen) ---------- */
 
 function CategorySection() {
   const { t } = useTranslation();
+  const { user, hasRole } = useAuth();
+  const isAdmin = hasRole('ADMIN');
   const queryClient = useQueryClient();
   const categoriesQuery = useQuery({ queryKey: ['categories'], queryFn: getCategories });
   const flat = flattenCategories(categoriesQuery.data ?? []);
 
   const [name, setName] = useState('');
   const [parentId, setParentId] = useState<number | ''>('');
+  const [isPrivate, setIsPrivate] = useState(false);
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
@@ -533,12 +536,22 @@ function CategorySection() {
         t('settings.somethingWrong')
     );
 
+  // Admins manage every category; editors only the private categories they own.
+  const canManage = (node?: import('../types').CategoryNode | null) =>
+    !!node && (isAdmin || (node.isPrivate && node.ownerId === user?.id));
+
   const createMut = useMutation({
-    mutationFn: () => createCategory({ name: name.trim(), parentId: parentId === '' ? null : Number(parentId) }),
+    mutationFn: () =>
+      createCategory({
+        name: name.trim(),
+        parentId: parentId === '' ? null : Number(parentId),
+        isPrivate: parentId === '' ? isPrivate : undefined,
+      }),
     onSuccess: () => {
       invalidate();
       setName('');
       setParentId('');
+      setIsPrivate(false);
       setError('');
     },
     onError,
@@ -613,6 +626,16 @@ function CategorySection() {
             </select>
           </div>
         </div>
+        <label className="checkbox-row" style={{ marginTop: '0.5rem' }}>
+          <input
+            type="checkbox"
+            checked={parentId === '' ? isPrivate : false}
+            disabled={parentId !== ''}
+            onChange={(e) => setIsPrivate(e.target.checked)}
+          />
+          <span>{parentId === '' ? t('settings.categoryPrivate') : t('settings.privateInherited')}</span>
+        </label>
+        <p className="field-hint" style={{ marginTop: '0.25rem' }}>{t('settings.categoryPrivateHint')}</p>
         <button type="submit" disabled={createMut.isPending} style={{ marginTop: '0.5rem' }}>
           {t('settings.addCategory')}
         </button>
@@ -636,6 +659,7 @@ function CategorySection() {
             {flat.map((c) => {
               const node = findNode(categoriesQuery.data ?? [], c.id);
               const blocked = node ? descendantIds(node) : new Set<number>();
+              const manage = canManage(node);
               return (
                 <tr key={c.id}>
                   <td style={{ paddingLeft: `${0.5 + c.depth * 1.2}rem` }}>
@@ -647,27 +671,44 @@ function CategorySection() {
                         autoFocus
                       />
                     ) : (
-                      c.name
+                      <>
+                        {node?.isPrivate && (
+                          <span title={t('category.private')} style={{ marginRight: '0.35rem' }}>
+                            🔒
+                          </span>
+                        )}
+                        {c.name}
+                      </>
                     )}
                   </td>
                   <td>{node?.linkCount ?? 0}</td>
                   <td>
-                    <select
-                      value={node?.parentId ?? ''}
-                      onChange={(e) => moveTo(c.id, e.target.value === '' ? '' : Number(e.target.value))}
-                    >
-                      <option value="">{t('common.topLevel')}</option>
-                      {flat
-                        .filter((o) => o.id !== c.id && !blocked.has(o.id))
-                        .map((o) => (
-                          <option key={o.id} value={o.id}>
-                            {o.path}
-                          </option>
-                        ))}
-                    </select>
+                    {manage ? (
+                      <select
+                        value={node?.parentId ?? ''}
+                        onChange={(e) => moveTo(c.id, e.target.value === '' ? '' : Number(e.target.value))}
+                      >
+                        <option value="">{t('common.topLevel')}</option>
+                        {flat
+                          .filter((o) => {
+                            if (o.id === c.id || blocked.has(o.id)) return false;
+                            if (isAdmin) return true;
+                            // Editors may only move a private category under their own private ones.
+                            const on = findNode(categoriesQuery.data ?? [], o.id);
+                            return !!on && on.isPrivate && on.ownerId === user?.id;
+                          })
+                          .map((o) => (
+                            <option key={o.id} value={o.id}>
+                              {o.path}
+                            </option>
+                          ))}
+                      </select>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
                   </td>
                   <td className="cat-actions">
-                    {editingId === c.id ? (
+                    {!manage ? null : editingId === c.id ? (
                       <>
                         <button className="secondary" onClick={() => saveEdit(c.id)}>
                           {t('common.save')}

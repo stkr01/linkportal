@@ -200,6 +200,11 @@ export const sl: Record<TranslationKey, string> = {
   'settings.enterName': 'Vnesite ime.',
   'settings.deleteCategoryConfirm':
     'Izbrišem kategorijo »{{name}}«? Biti mora prazna (brez podkategorij ali povezav).',
+  'settings.categoryPrivate': 'Zasebno (vidite jo samo vi)',
+  'settings.privateInherited': 'Podeduje zasebnost od nadrejene',
+  'settings.categoryPrivateHint':
+    'Zasebna kategorija in njene povezave so vidne samo vam in skrbnikom. Podkategorije to podedujejo. Zasebnost je mogoče nastaviti samo ob ustvarjanju.',
+  'category.private': 'Zasebna kategorija',
 
   // Theme color labels
   'theme.primary': 'Primarna barva (gumbi, poudarki)',

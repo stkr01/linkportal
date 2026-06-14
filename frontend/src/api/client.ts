@@ -56,7 +56,7 @@ export async function getCategories(): Promise<CategoryNode[]> {
   return data;
 }
 
-export async function createCategory(input: { name: string; parentId: number | null }): Promise<void> {
+export async function createCategory(input: { name: string; parentId: number | null; isPrivate?: boolean }): Promise<void> {
   await api.post('/categories', input);
 }
 

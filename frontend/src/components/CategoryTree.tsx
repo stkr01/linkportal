@@ -31,6 +31,7 @@ function TreeNode({
   onSelect: (id: number) => void;
   depth: number;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const hasChildren = node.children.length > 0;
 
@@ -49,7 +50,10 @@ function TreeNode({
         >
           {hasChildren ? (open ? '▾' : '▸') : '•'}
         </span>
-        <span>{node.name}</span>
+        <span>
+          {node.isPrivate && <span title={t('category.private')}>🔒 </span>}
+          {node.name}
+        </span>
         <span className="count">{node.linkCount}</span>
       </div>
       {hasChildren && open && (

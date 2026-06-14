@@ -37,6 +37,8 @@ export interface CategoryNode {
   parentId: number | null;
   sortOrder: number;
   linkCount: number;
+  isPrivate: boolean;
+  ownerId: number | null;
   children: CategoryNode[];
 }
 
@@ -67,7 +69,7 @@ export interface LinkItem {
   alertActive: boolean;
   clickCount: number;
   categoryId: number;
-  category: { id: number; name: string; parentId: number | null };
+  category: { id: number; name: string; parentId: number | null; isPrivate?: boolean };
   tags: Tag[];
   dateAdded: string;
   dateModified: string;

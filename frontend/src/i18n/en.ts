@@ -198,6 +198,11 @@ export const en = {
   'settings.enterName': 'Enter a name.',
   'settings.deleteCategoryConfirm':
     'Delete the category "{{name}}"? It must be empty (no subcategories or links).',
+  'settings.categoryPrivate': 'Private (only you can see it)',
+  'settings.privateInherited': 'Inherits privacy from parent',
+  'settings.categoryPrivateHint':
+    'A private category and its links are visible only to you and admins. Subcategories inherit it. Privacy can only be set when creating.',
+  'category.private': 'Private category',
 
   // Theme color labels
   'theme.primary': 'Primary color (buttons, accents)',

@@ -200,6 +200,11 @@ export const et: Record<TranslationKey, string> = {
   'settings.enterName': 'Sisesta nimi.',
   'settings.deleteCategoryConfirm':
     'Kas kustutada kategooria "{{name}}"? See peab olema tühi (alamkategooriaid ega linke pole).',
+  'settings.categoryPrivate': 'Privaatne (näete ainult teie)',
+  'settings.privateInherited': 'Pärib privaatsuse ülemkategoorialt',
+  'settings.categoryPrivateHint':
+    'Privaatne kategooria ja selle lingid on nähtavad ainult teile ja administraatoritele. Alamkategooriad pärivad selle. Privaatsust saab määrata ainult loomisel.',
+  'category.private': 'Privaatne kategooria',
 
   // Theme color labels
   'theme.primary': 'Põhivärv (nupud, aktsendid)',

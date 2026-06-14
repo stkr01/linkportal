@@ -200,6 +200,11 @@ export const pt: Record<TranslationKey, string> = {
   'settings.enterName': 'Introduza um nome.',
   'settings.deleteCategoryConfirm':
     'Eliminar a categoria «{{name}}»? Tem de estar vazia (sem subcategorias ou ligações).',
+  'settings.categoryPrivate': 'Privada (só você a vê)',
+  'settings.privateInherited': 'Herda a privacidade da categoria-mãe',
+  'settings.categoryPrivateHint':
+    'Uma categoria privada e as suas ligações são visíveis apenas para si e para administradores. As subcategorias herdam-na. A privacidade só pode ser definida ao criar.',
+  'category.private': 'Categoria privada',
 
   // Theme color labels
   'theme.primary': 'Cor primária (botões, destaques)',
