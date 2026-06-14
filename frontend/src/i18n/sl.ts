@@ -164,6 +164,8 @@ export const sl: Record<TranslationKey, string> = {
   'settings.recent': 'Nedavno dodano',
   'settings.recentHint': 'Izberite, koliko povezav prikaže pogled »Nedavno dodano«. Shranjeno v tem brskalniku.',
   'settings.recentCount': 'Število prikazanih povezav',
+  'settings.hideMonitoring': 'Skrij nadzor',
+  'settings.hideMonitoringHint': 'Skrije ves nadzor – pike stanja, okvire kartic, pogled Opozorila nadzora in preizkuse povezave. Shranjeno v tem brskalniku.',
   'settings.webApp': 'Naslov spletne aplikacije',
   'settings.webAppHint': 'Javni URL spletne aplikacije LinkPortal. Brskalniška razširitev ga uporablja za gumb »Odpri spletno aplikacijo«.',
   'settings.webAppSaved': 'Naslov spletne aplikacije shranjen.',

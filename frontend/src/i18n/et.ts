@@ -164,6 +164,8 @@ export const et: Record<TranslationKey, string> = {
   'settings.recent': 'Hiljuti lisatud',
   'settings.recentHint': 'Vali, mitu linki "Hiljuti lisatud" vaade näitab. Salvestatakse selles brauseris.',
   'settings.recentCount': 'Kuvatavate linkide arv',
+  'settings.hideMonitoring': 'Peida jälgimine',
+  'settings.hideMonitoringHint': 'Peida kogu jälgimine – olekutäpid, kaardiraamid, vaade Jälgimishoiatused ja ühenduse testid. Salvestatakse selles brauseris.',
   'settings.webApp': 'Veebirakenduse aadress',
   'settings.webAppHint': 'LinkPortali veebirakenduse avalik URL. Brauserilaiendus kasutab seda oma "Ava veebirakendus" nupu jaoks.',
   'settings.webAppSaved': 'Veebirakenduse aadress salvestatud.',

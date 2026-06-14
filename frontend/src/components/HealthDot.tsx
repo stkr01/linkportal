@@ -1,5 +1,6 @@
 import type { HealthStatus, LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import { useMonitoringPref } from '../prefs/monitoring';
 import { formatDate, formatDateTime } from '../utils/date';
 
 const DOT: Record<HealthStatus, string> = {
@@ -11,6 +12,10 @@ const DOT: Record<HealthStatus, string> = {
 // Liten statusindikator för en länks health-check (BLUEPRINT 14.9).
 export default function HealthDot({ link, onTest }: { link: LinkItem; onTest?: () => void }) {
   const { t } = useTranslation();
+  const { hideMonitoring } = useMonitoringPref();
+
+  // User turned off the monitoring display entirely: render nothing.
+  if (hideMonitoring) return null;
 
   // Monitoring disabled: always show a blue dot and never test (no click/test button).
   if (link.doNotMonitor) {

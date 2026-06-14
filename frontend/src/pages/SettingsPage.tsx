@@ -18,6 +18,7 @@ import { flattenCategories } from '../utils/categories';
 import { DEFAULT_THEME, THEME_KEYS, applyTheme, resolveTheme } from '../utils/theme';
 import { formatDateTime } from '../utils/date';
 import { useTranslation, LANGUAGES, type Lang } from '../i18n';
+import { useMonitoringPref } from '../prefs/monitoring';
 import type { TranslationKey } from '../i18n/en';
 
 // Maps each theme color to its translation key.
@@ -51,6 +52,8 @@ export default function SettingsPage() {
         <LanguageSection />
 
         <RecentSection />
+
+        <MonitoringSection />
 
         <ThemeSection key={user?.id} initial={user?.theme ?? null} onSave={setTheme} />
 
@@ -159,6 +162,31 @@ function RecentSection() {
         onChange={(e) => update(Number(e.target.value))}
         style={{ maxWidth: 240 }}
       />
+    </div>
+  );
+}
+
+/* ---------- Monitoring display (all users) ---------- */
+
+function MonitoringSection() {
+  const { t } = useTranslation();
+  const { hideMonitoring, setHideMonitoring } = useMonitoringPref();
+
+  return (
+    <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem' }}>
+      <h3 style={{ marginTop: 0 }}>{t('settings.hideMonitoring')}</h3>
+      <p className="muted" style={{ marginTop: 0 }}>
+        {t('settings.hideMonitoringHint')}
+      </p>
+      <label htmlFor="hide-monitoring" className="checkbox-row">
+        <input
+          id="hide-monitoring"
+          type="checkbox"
+          checked={hideMonitoring}
+          onChange={(e) => setHideMonitoring(e.target.checked)}
+        />
+        <span>{t('settings.hideMonitoring')}</span>
+      </label>
     </div>
   );
 }

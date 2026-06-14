@@ -164,6 +164,8 @@ export const es: Record<TranslationKey, string> = {
   'settings.recent': 'Añadidos recientemente',
   'settings.recentHint': 'Elige cuántos enlaces muestra la vista "Añadidos recientemente". Se guarda en este navegador.',
   'settings.recentCount': 'Número de enlaces a mostrar',
+  'settings.hideMonitoring': 'Ocultar monitorización',
+  'settings.hideMonitoringHint': 'Oculta toda la monitorización: puntos de estado, marcos de tarjeta, la vista de alertas y las pruebas de conexión. Se guarda en este navegador.',
   'settings.webApp': 'Dirección de la aplicación web',
   'settings.webAppHint': 'La URL pública de la aplicación web de LinkPortal. La extensión del navegador la usa para su botón "Abrir aplicación web".',
   'settings.webAppSaved': 'Dirección de la aplicación web guardada.',

@@ -1,5 +1,6 @@
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import { useMonitoringPref } from '../prefs/monitoring';
 import HealthDot from './HealthDot';
 import { formatDateTime } from '../utils/date';
 
@@ -30,6 +31,7 @@ export default function LinkList({
   highlightId,
 }: Props) {
   const { t } = useTranslation();
+  const { hideMonitoring } = useMonitoringPref();
   const copy = (url: string) => navigator.clipboard.writeText(url);
 
   return (
@@ -43,7 +45,7 @@ export default function LinkList({
             <th>{t('list.environment')}</th>
             <th>{t('list.manageSoftware')}</th>
             <th>{t('list.team')}</th>
-            <th>{t('list.lastUp')}</th>
+            {!hideMonitoring && <th>{t('list.lastUp')}</th>}
             <th className="col-clicks">{t('list.clicks')}</th>
             <th>{t('list.tags')}</th>
             <th className="col-actions">{t('list.actions')}</th>
@@ -84,16 +86,18 @@ export default function LinkList({
                 </td>
                 <td>{l.manageSoftware || '—'}</td>
                 <td>{l.owningTeam || '—'}</td>
-                <td
-                  className={l.healthStatus === 'DOWN' ? undefined : 'muted'}
-                  style={
-                    l.healthStatus === 'DOWN'
-                      ? { color: 'var(--danger)', fontWeight: 700 }
-                      : undefined
-                  }
-                >
-                  {l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}
-                </td>
+                {!hideMonitoring && (
+                  <td
+                    className={l.healthStatus === 'DOWN' ? undefined : 'muted'}
+                    style={
+                      l.healthStatus === 'DOWN'
+                        ? { color: 'var(--danger)', fontWeight: 700 }
+                        : undefined
+                    }
+                  >
+                    {l.lastUpAt ? formatDateTime(l.lastUpAt) : '—'}
+                  </td>
+                )}
                 <td className="col-clicks muted">{l.clickCount}</td>
                 <td>
                   {l.tags.length > 0 ? (

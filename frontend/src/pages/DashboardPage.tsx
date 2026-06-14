@@ -20,6 +20,7 @@ import {
 import type { Environment, LinkInput, LinkItem } from '../types';
 import { categoryPathMap } from '../utils/categories';
 import { useTranslation } from '../i18n';
+import { useMonitoringPref } from '../prefs/monitoring';
 import CategoryTree from '../components/CategoryTree';
 import LinkCard from '../components/LinkCard';
 import LinkList from '../components/LinkList';
@@ -52,6 +53,7 @@ function readRecentCount(): number {
 export default function DashboardPage() {
   const { user, logout, hasRole } = useAuth();
   const { t } = useTranslation();
+  const { hideMonitoring } = useMonitoringPref();
   const queryClient = useQueryClient();
 
   const params = useParams<{ id: string }>();
@@ -393,7 +395,7 @@ export default function DashboardPage() {
               onSelectFavorites={selectFavorites}
               alertsActive={alertsView}
               alertsCount={alerts.length}
-              onSelectAlerts={selectAlerts}
+              onSelectAlerts={hideMonitoring ? undefined : selectAlerts}
               recentActive={recentView}
               recentCount={recent.length}
               onSelectRecent={selectRecent}
@@ -487,7 +489,7 @@ export default function DashboardPage() {
                 {t('dashboard.newLink')}
               </button>
             )}
-            {canEdit && !favoritesView && !trashView && (
+            {canEdit && !favoritesView && !trashView && !hideMonitoring && (
               <button
                 type="button"
                 className="secondary"

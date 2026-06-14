@@ -164,6 +164,8 @@ export const no: Record<TranslationKey, string> = {
   'settings.recent': 'Nylig lagt til',
   'settings.recentHint': 'Velg hvor mange lenker visningen "Nylig lagt til" viser. Lagres i denne nettleseren.',
   'settings.recentCount': 'Antall lenker som vises',
+  'settings.hideMonitoring': 'Skjul overvåking',
+  'settings.hideMonitoringHint': 'Skjul all overvåking – statusprikker, kortrammer, visningen Overvåkingsvarsler og tilkoblingstester. Lagres i denne nettleseren.',
   'settings.webApp': 'Webapp-adresse',
   'settings.webAppHint': 'Den offentlige URL-en til LinkPortal-webappen. Nettleserutvidelsen bruker den til «Åpne webapp»-knappen.',
   'settings.webAppSaved': 'Webapp-adresse lagret.',

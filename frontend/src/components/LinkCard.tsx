@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { LinkItem } from '../types';
 import { useTranslation } from '../i18n';
+import { useMonitoringPref } from '../prefs/monitoring';
 import { formatDate, formatDateTime } from '../utils/date';
 import HealthDot from './HealthDot';
 
@@ -28,6 +29,7 @@ function faviconUrl(url: string): string | null {
 
 export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDelete, onToggleFavorite, onTest, onOpen, highlight }: Props) {
   const { t } = useTranslation();
+  const { hideMonitoring } = useMonitoringPref();
   const fav = faviconUrl(link.url);
   const lastEdited = formatDate(link.dateModified);
 
@@ -54,8 +56,11 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
     flash('link');
   };
 
-  // Monitoring status as a colored frame around the whole card.
-  const monClass = link.doNotMonitor
+  // Monitoring status as a colored frame around the whole card. Omitted entirely
+  // when the user has turned off the monitoring display.
+  const monClass = hideMonitoring
+    ? ''
+    : link.doNotMonitor
     ? 'mon-off'
     : link.healthStatus === 'UP'
     ? 'mon-up'
@@ -64,7 +69,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
     : 'mon-unknown';
 
   return (
-    <div className={`card link-card ${monClass}${highlight ? ' highlight' : ''}`} id={`link-${link.id}`}>
+    <div className={`card link-card${monClass ? ' ' + monClass : ''}${highlight ? ' highlight' : ''}`} id={`link-${link.id}`}>
       <div className="crumb">{path}</div>
       <div className="link-head">
         <a
@@ -118,7 +123,7 @@ export default function LinkCard({ link, path, canEdit, canDelete, onEdit, onDel
             <br />
           </>
         )}
-        {link.lastUpAt && (
+        {!hideMonitoring && link.lastUpAt && (
           <>
             ✅ {t('health.lastUpAt', { date: formatDateTime(link.lastUpAt) })}
             <br />
