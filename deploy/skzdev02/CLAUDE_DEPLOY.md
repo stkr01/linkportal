@@ -4,6 +4,10 @@
 > Följ den uppifrån och ned. Den fullständiga referensen finns i [README.md](./README.md) i samma
 > mapp — läs den vid behov, men stegen nedan är det du ska utföra.
 
+> **Är LinkPortal redan driftsatt här?** Då är det här en *uppdatering*, inte en nyinstallation —
+> hoppa direkt till [avsnitt 9 (Uppdatering / re-deploy)](#9-uppdatering--re-deploy). Avsnitt 4–6 är
+> engångsuppsättning och behöver normalt inte göras om.
+
 ---
 
 ## 0. Uppdrag
@@ -270,3 +274,80 @@ Se felsökningstabellen i [README.md](./README.md) avsnitt 7. Snabb sammanfattni
 
 När du är klar: sammanfatta för människan vad som gjordes, health-check-resultaten, tilläggets ID
 och vad som återstår på hennes bord (lösenordsbyte, nyckel-backup, klientpolicy).
+
+---
+
+## 9. Uppdatering / re-deploy
+
+Använd det här avsnittet när LinkPortal **redan är driftsatt** och du bara ska hämta ny kod. Det är
+idempotent och säkert att köra om. Hoppa över avsnitt 4 (engångsuppsättning) såvida inte en
+uppdatering uttryckligen kräver en ny env-variabel eller en ny migration (se 9.5).
+
+### 9.1 Hämta ny kod
+
+```bash
+sudo git -C /opt/linkportal pull --ff-only
+```
+
+Vägrar pull pga lokala ändringar i en **spårad** fil → `sudo git -C /opt/linkportal status`.
+Det enda kända säkra fallet är `deploy/skzdev02/ext-packager/package.json` (uppström har redan
+`crx3 ^2.0.0`): `sudo git -C /opt/linkportal checkout -- deploy/skzdev02/ext-packager/package.json`
+och pulla om. **Kasta inte** andra okända ändringar utan att titta — det kan vara pågående arbete.
+
+> Genererade/ignorerade filer (`backend/version.json`, `.env`, `*.db`, `frontend/dist`,
+> `ext-packager/build/`) ska **inte** dyka upp som spårade ändringar. Gör de det är något fel —
+> undersök istället för att tvinga.
+
+### 9.2 Bygg om
+
+```bash
+sudo -u linkportal APP_DIR=/opt/linkportal bash /opt/linkportal/deploy/deploy.sh
+```
+
+`deploy.sh` kör install → `prisma generate` → build → `prisma migrate deploy` → starta om tjänsten.
+Versionsnumret genereras **automatiskt** av `prebuild`-hooken (`scripts/gen-version.mjs`) under
+`npm run build` — inget eget steg behövs.
+
+- ⚠️ **Seeda inte.** `seed.ts` återställer admin-lösenordet. `deploy.sh` seedar inte — kör inte
+  `npm run seed` manuellt vid en uppdatering.
+- ⚠️ **Rör inte `.env`** om inte 9.5 säger annat.
+- `prisma migrate deploy` ska normalt säga *"No pending migrations"*. Listar den nya migrationer är
+  det väntat **endast** om uppdateringen innehöll en schemaändring.
+
+> **Känt skönhetsfel:** sista raden i `deploy.sh` gör en health-curl mot hårdkodad `:4000`. Här kör
+> backend på `:4010`, så den raden "failar" ofarligt. Strunta i den — verifiera med 9.3 istället.
+
+### 9.3 Verifiera versionen (kärnan i en uppdatering)
+
+```bash
+EXPECT=$(sudo git -C /opt/linkportal rev-parse --short HEAD)
+curl -fsS https://skzdev02.tail898daf.ts.net/api/version
+echo "förväntad commit: $EXPECT"
+```
+
+- `commit` i svaret ska vara lika med `$EXPECT`, och `display` ska se ut som `v1.0.0+<n>.<commit>`.
+- `"dirty": true` (eller `-dirty` i `display`) → servern har ocommittade **spårade** ändringar.
+  Undersök med `git status` innan du rapporterar klart; en ren deploy ska aldrig vara dirty.
+- Kör samma `/api/version` lokalt/på dev-maskinen på samma commit → strängarna ska vara identiska.
+
+Kör även de tre health-anropen från [avsnitt 5](#5-verifiering-gör-efter-steg-4) för att bekräfta
+att tjänsten kom upp efter omstarten.
+
+### 9.4 Tillägget (oftast inget att göra)
+
+Den självhostade CRX:en auto-uppdateras bara om `extension/manifest.json` har fått en **ny
+`version`**. Rena webb-/serveruppdateringar (som versionsfoten i popupen) kräver ingen ompaketering.
+Är `manifest.json`-versionen bumpad: kör om avsnitt 6 (`ext-packager` → kopiera `crx` + `updates.xml`
+till `extension-dist/`). Annars hoppa över.
+
+### 9.5 Om uppdateringen kräver mer
+
+- **Ny env-variabel:** lägg till den i `/opt/linkportal/backend/.env` (skriv inte över befintliga
+  värden) enligt det uppdaterade `backend/.env.production.example`, starta sedan om:
+  `sudo systemctl restart linkportal`.
+- **Ny migration:** `prisma migrate deploy` i 9.2 applicerar den automatiskt. Backa aldrig en
+  migration på prod-databasen utan att fråga människan; ta gärna en kopia av
+  `/opt/linkportal/data/linkportal.db` först.
+
+När du är klar: rapportera commit/version-strängen, health-check-resultaten och om tillägget
+byggdes om.
